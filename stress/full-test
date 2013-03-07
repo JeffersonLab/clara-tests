@@ -39,17 +39,18 @@ for n in $(seq 0 $NUM_NODES); do
     $TEST_DIR/deploy 1> $TEST_DIR/log/deploy 2>&1
     sleep 2
 
-    $TEST_DIR/run "$INFILE" "$OUTFILE" 6 1>> $TEST_DIR/log/run 2>&1
-    echo "" >> $TEST_DIR/log/run
+    RUN_LOG=$TEST_DIR/log/run
+    $TEST_DIR/run "$INFILE" "$OUTFILE" 6 1>> $RUN_LOG 2>&1
+    echo >> $RUN_LOG
     sleep 2
 
     for t in $(seq 1 $NUM_CORES); do
         echo "  Requesting $t threads"
         RESULT="$n;$t"
         for i in $(seq 1 3); do
-            $TEST_DIR/run "$INFILE" "$OUTFILE" $t 1>> $TEST_DIR/log/run 2>&1
+            $TEST_DIR/run "$INFILE" "$OUTFILE" $t 1>> $RUN_LOG 2>&1
             sleep 2
-            TIME=$(grep "Average event processing time" log/run | tail -n 1 | awk '{ print $6 }')
+            TIME=$(grep "Average event processing time" $RUN_LOG | tail -n 1 | awk '{ print $6 }')
             RESULT="$RESULT;$TIME"
         done
         echo $RESULT >> $TEST_DIR/$RESULTS_FILE
@@ -58,6 +59,6 @@ for n in $(seq 0 $NUM_NODES); do
 
     $TEST_DIR/quit
     mv $TEST_DIR/log $TEST_DIR/log-$n
-    echo "" >> $TEST_DIR/$RESULTS_FILE
+    echo >> $TEST_DIR/$RESULTS_FILE
     sleep 5
 done
