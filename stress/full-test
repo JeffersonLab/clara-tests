@@ -7,8 +7,11 @@
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+
+RESULTS_FILE=results.csv
+
 rm -rf $TEST_DIR/log-*
-rm -rf $TEST_DIR/results
+rm -rf $TEST_DIR/$RESULTS_FILE
 
 for n in $(seq 0 12); do
     echo "USING $n NODES..."
@@ -32,12 +35,12 @@ for n in $(seq 0 12); do
             TIME=$(grep "Average event processing time" log/run | tail -n 1 | awk '{ print $6 }')
             RESULT="$RESULT;$TIME"
         done
-        echo $RESULT >> $TEST_DIR/results.csv
+        echo $RESULT >> $TEST_DIR/$RESULTS_FILE
     done
     sleep 2
 
     $TEST_DIR/quit
     mv $TEST_DIR/log $TEST_DIR/log-$n
-    echo "" >> $TEST_DIR/results.csv
+    echo "" >> $TEST_DIR/$RESULTS_FILE
     sleep 5
 done
