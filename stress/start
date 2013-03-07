@@ -1,0 +1,105 @@
+#!/bin/bash
+
+PLATFORM_HOST=head
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SESSION=TEST
+
+source $TEST_DIR/lib/clara-wrapper
+
+
+function start_platform()
+{
+    echo $(hostname -i) > $TEST_DIR/platform
+    cat /dev/null > $TEST_DIR/nodes
+    screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
+    if [[ $RUN_PLATFORM -eq 0 ]]; then
+        echo "Starting platform..."
+        screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
+        sleep 2
+    fi
+}
+
+
+function start_dpe()
+{
+    screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe
+    sleep 0.25
+}
+
+
+function launch()
+{
+    cd $TEST_DIR
+    rm -rf $TEST_DIR/log
+    mkdir -p $TEST_DIR/log
+
+    start_platform
+
+    if [[ $NUMBER_OF_NODES -eq 0 ]]; then
+        echo localhost >> $TEST_DIR/nodes
+    else
+        local counter=$FIRST_NODE
+        local last=$(($FIRST_NODE+$NUMBER_OF_NODES))
+        while [[ $counter -lt $last ]]; do
+            case $counter in
+                [1-9])    node="physics0$counter"   ;;
+                1[0-6])   node="physics$counter"    ;;
+            esac
+            echo "Starting DPE on $node..."
+            echo $node >> $TEST_DIR/nodes
+            start_dpe $node
+            let counter=counter+1
+        done
+    fi
+
+    sleep 1
+    if [[ $KEEP_DETACHED -eq 1 ]]; then
+        screen -r -S $SESSION -p 0
+    fi
+}
+
+
+function usage()
+{
+    echo -e "Usage:"
+    echo -e "\t$0 [-e] [-s <first_node> ] <nodes>"
+}
+
+
+FIRST_NODE=1
+RUN_PLATFORM=0
+KEEP_DETACHED=1
+while getopts “heds:” OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 1 ;;
+        e)
+            RUN_PLATFORM=1 ;;
+        d)
+            KEEP_DETACHED=0 ;;
+        s)
+            FIRST_NODE=$OPTARG ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ ! $# -eq 1 ]]; then
+    usage
+    exit 1
+fi
+NUMBER_OF_NODES=$1
+
+if [[ $FIRST_NODE -lt 1 || $FIRST_NODE -gt 16 ]]; then
+    echo "Wrong node number: $FIRST_NODE"
+    exit;
+fi
+if [[ $NUMBER_OF_NODES -lt 0 || $NUMBER_OF_NODES -gt 16 ]]; then
+    echo "Wrong node number: $NUMBER_OF_NODES"
+    exit;
+fi
+
+launch

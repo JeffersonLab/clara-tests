@@ -1,0 +1,2 @@
+# <service_class_name> <container_name> <service_name>
+org.jlab.clas12.ec.services.ECReconstruction cont1 ECReconstruction

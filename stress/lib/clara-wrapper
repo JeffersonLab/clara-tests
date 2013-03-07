@@ -1,0 +1,29 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+CLARA_ENV=$TEST_DIR/lib/clara-env
+
+if [[ ! -f $CLARA_ENV ]]; then
+    echo "Please create a 'clara-env' file in the 'lib' directory."
+    echo "Use the 'lib/clara-env.sample' file as an example."
+    exit
+fi
+source $CLARA_ENV
+
+function runClara()
+{
+    java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
+}
+
+function deploy()
+{
+    echo "Deploy $3 to $1/$2"
+    runClara examples.orchestrator.DeployService $1 $2 $3
+}
+
+
+function link()
+{
+    echo "Link $1 => $2"
+    runClara examples.orchestrator.LinkServices $1 $2
+}

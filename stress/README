@@ -1,0 +1,88 @@
+Scripts to run an stress test of ClaRA
+======================================
+
+These scripts use GNU Screen to launch the ClaRA platform and the specified number
+of DPEs. When the screen session is terminated, all ClaRA processes will be
+automatically killed.
+
+
+Configuration
+-------------
+
+ -  Copy/set your ClaRA environment to the file `lib/clara-env`.
+    Use the file `lib/clara-env.sample` as a template.
+
+ -  Set your reconstruction chain in the file `services`. Each line should
+    have the form:
+
+        <service_class_name> <container_container> <service_name>
+
+    Use the file `services.sample` as a template. Put each service on a single
+    line. Services will be linked in the order they appear in the file.
+
+Usage
+-----
+
+ -  Execute the `start` script to launch the platform and the DPEs:
+
+        $ ./start <number_of_dpes>
+
+    An screen session will be created. Window 1 will show the platform running
+    and each of the next windows will show the running DPEs. The focus will be
+    in Window 0, to run the following scripts.
+
+    If the number of DPEs is set to 0 then no DPE will be started, and only
+    the platform will be used to run services.
+
+ -  Execute the `deploy` script to deploy and link the reconstruction services.
+
+        $ ./deploy
+
+    The standard reader and writer will be deployed in the platform.
+    The reconstruction chain will be deployed on each running DPE. If no DPEs
+    were started, then the chain will be deployed in the platform.
+
+    Once all the services in all nodes are deployed, the reader will be linked
+    to the first service of the reconstruction chain in each DPE. The last
+    service of the chains will be linked to the writer, and finally the writer
+    will be linked back to the reader.
+
+
+                 --> N1:S1 ---> N1:S2 ---> N1:S3 --
+                /                                  \
+        --> R -----> N2:S1 ---> N2:S2 ---> N2:S3 -----> W --
+        |       \                                  /       |
+        |        --> N3:S1 ---> N3:S2 ---> N3:S3 --        |
+        |                                                  |
+        \                                                 /
+         ------------------------<------------------------
+
+    Thus, the reader will not start a new event until a previous one was
+    reconstructed.
+
+ -  Execute the `run` script to launch the reconstruction.
+
+        $ ./run <input_file> <output_file> <number_of_cores>
+
+    This script will launch the `DefaultOrchestrator`, provided by ClaRA.
+    It will configure the reader to read events from the given <input_file>
+    and the writer to save the reconstructed events to <output_file>.
+
+    The <number_of_cores> parameter specifies how many parallel threads should
+    be used on each node to run the reconstruction chain, i.e., how many
+    events will be reconstructed in parallel on each node.
+
+    The orchestrator will print the average processing time of the
+    reconstructed events. It is updated each 1000 events, i.e, the third
+    message will print the average time of the 3000 reconstructed events so
+    far, etc.
+
+ -  Once the reconstruction is done, execute the `quit` script to terminate the
+    screen session, kill all ClaRA processes and remove temporary files.
+
+        $ ./quit
+
+    Alternatively, ClaRA processes can be killed one by one by moving to each
+    window in the screen session and hitting `C-c`.
+
+    Don't keep ClaRA running after finishing the reconstruction.

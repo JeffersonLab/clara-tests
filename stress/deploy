@@ -1,0 +1,56 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+source $TEST_DIR/lib/clara-wrapper
+
+SERVICES_FILE=$TEST_DIR/services
+PLATFORM_FILE=$TEST_DIR/platform
+NODES_FILE=$TEST_DIR/nodes
+
+if [[ ! -f $SERVICES_FILE ]]; then
+    echo "Please create a 'services' file with the list of services to be deployed."
+    echo "Use the 'services.sample' file as an example."
+    exit 1
+fi
+
+if [[ ! -f $PLATFORM_FILE ]]; then
+    echo "Run start first. Could not find file with platform IP."
+    exit 1
+fi
+
+if [[ ! -f $NODES_FILE ]]; then
+    echo "Run start first. Could not find file with nodes list."
+    exit 1
+fi
+
+PLATFORM_HOST=$(cat $TEST_DIR/platform)
+CONTAINER=cont
+
+echo "DEPLOYING STANDARD I/O SERVICES..."
+echo
+READER_CLASS=std.services.convertors.EvioToEvioReader
+READER_ENGINE=$PLATFORM_HOST/$CONTAINER/EvioToEvioReader
+
+WRITER_CLASS=std.services.convertors.EvioToEvioWriter
+WRITER_ENGINE=$PLATFORM_HOST/$CONTAINER/EvioToEvioWriter
+
+deploy $PLATFORM_HOST $CONTAINER $READER_CLASS
+deploy $PLATFORM_HOST $CONTAINER $WRITER_CLASS
+
+sleep 1
+link $WRITER_ENGINE $READER_ENGINE
+echo
+
+while read NODE
+do
+    echo
+    echo "DEPLOYING CHAIN IN $NODE..."
+    echo
+    if [[ $NODE == "localhost" ]]; then
+        $TEST_DIR/lib/deploy-chain $READER_ENGINE $WRITER_ENGINE
+    else
+        ssh -n $NODE $TEST_DIR/lib/deploy-chain $READER_ENGINE $WRITER_ENGINE
+    fi
+    echo "========================================================================"
+done < $NODES_FILE

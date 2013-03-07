@@ -1,0 +1,8 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+PLATFORM_HOST=head
+
+source $TEST_DIR/lib/clara-wrapper
+
+$CLARA_HOME/bin/clara-dpe -host $PLATFORM_HOST | tee $TEST_DIR/log/$HOSTNAME.log

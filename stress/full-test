@@ -1,0 +1,38 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+rm -rf $TEST_DIR/log-*
+rm -rf $TEST_DIR/results
+
+for n in $(seq 0 12); do
+    echo "USING $n NODES..."
+
+    $TEST_DIR/start -d $n
+    sleep 5
+
+    $TEST_DIR/deploy 1> $TEST_DIR/log/deploy 2>&1
+    sleep 2
+
+    $TEST_DIR/run ~/input-evio4.ev ~/out.ev 6 1>> $TEST_DIR/log/run 2>&1
+    echo "" >> $TEST_DIR/log/run
+    sleep 2
+
+    for t in $(seq 1 12); do
+        echo "  Requesting $t threads"
+        RESULT="$n;$t"
+        for i in $(seq 1 3); do
+            $TEST_DIR/run ~/input-evio4.ev ~/out.ev $t 1>> $TEST_DIR/log/run 2>&1
+            sleep 2
+            TIME=$(grep "Average event processing time" log/run | tail -n 1 | awk '{ print $6 }')
+            RESULT="$RESULT;$TIME"
+        done
+        echo $RESULT >> $TEST_DIR/results
+    done
+    sleep 2
+
+    $TEST_DIR/quit
+    mv $TEST_DIR/log $TEST_DIR/log-$n
+    echo "" >> $TEST_DIR/results
+    sleep 5
+done
