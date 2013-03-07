@@ -22,12 +22,15 @@ if [[ ! -f "$INFILE" ]]; then
     exit 1
 fi
 
+NUM_NODES=12
+NUM_CORES=12
+
 RESULTS_FILE=results.csv
 
 rm -rf $TEST_DIR/log-*
 rm -rf $TEST_DIR/$RESULTS_FILE
 
-for n in $(seq 0 12); do
+for n in $(seq 0 $NUM_NODES); do
     echo "USING $n NODES..."
 
     $TEST_DIR/start -d $n
@@ -40,7 +43,7 @@ for n in $(seq 0 12); do
     echo "" >> $TEST_DIR/log/run
     sleep 2
 
-    for t in $(seq 1 12); do
+    for t in $(seq 1 $NUM_CORES); do
         echo "  Requesting $t threads"
         RESULT="$n;$t"
         for i in $(seq 1 3); do
