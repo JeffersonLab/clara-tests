@@ -27,12 +27,12 @@ for n in $(seq 0 12); do
             TIME=$(grep "Average event processing time" log/run | tail -n 1 | awk '{ print $6 }')
             RESULT="$RESULT;$TIME"
         done
-        echo $RESULT >> $TEST_DIR/results
+        echo $RESULT >> $TEST_DIR/results.csv
     done
     sleep 2
 
     $TEST_DIR/quit
     mv $TEST_DIR/log $TEST_DIR/log-$n
-    echo "" >> $TEST_DIR/results
+    echo "" >> $TEST_DIR/results.csv
     sleep 5
 done
