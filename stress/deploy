@@ -5,17 +5,11 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $TEST_DIR/lib/clara-wrapper
 
 SERVICES_FILE=$TEST_DIR/services
-PLATFORM_FILE=$TEST_DIR/platform
 NODES_FILE=$TEST_DIR/nodes
 
 if [[ ! -f $SERVICES_FILE ]]; then
     echo "Please create a 'services' file with the list of services to be deployed."
     echo "Use the 'services.sample' file as an example."
-    exit 1
-fi
-
-if [[ ! -f $PLATFORM_FILE ]]; then
-    echo "Run start first. Could not find file with platform IP."
     exit 1
 fi
 

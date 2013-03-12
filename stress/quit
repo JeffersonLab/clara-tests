@@ -3,7 +3,6 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SESSION=TEST
 
-rm -f $TEST_DIR/platform
 rm -f $TEST_DIR/nodes
 
 screen -S $SESSION -X quit
