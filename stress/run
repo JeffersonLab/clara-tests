@@ -71,7 +71,7 @@ fi
 if [[ $PLATFORM_HOST == "head" ]]; then
     MAX_CORES=12
 else
-    MAX_CORES=0
+    MAX_CORES=32
 fi
 if [[ $CORES -lt 1 || $CORES -gt $MAX_CORES ]]; then
     echo "Wrong number of cores: $CORES"
