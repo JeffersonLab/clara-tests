@@ -100,16 +100,16 @@ NUMBER_OF_NODES=$1
 
 if [[ $PLATFORM_HOST == "head" ]]; then
     MAX_NODES=12
+    if [[ $FIRST_NODE -lt 1 || $FIRST_NODE -gt $MAX_NODES ]]; then
+        echo "Wrong node number: $FIRST_NODE"
+        exit 1;
+    fi
 else
     MAX_NODES=0
 fi
 if [[ $NUMBER_OF_NODES -lt 0 || $NUMBER_OF_NODES -gt $MAX_NODES ]]; then
     echo "Wrong node number: $NUMBER_OF_NODES"
-    exit;
-fi
-if [[ $FIRST_NODE -lt 1 || $FIRST_NODE -gt $MAX_NODES ]]; then
-    echo "Wrong node number: $FIRST_NODE"
-    exit;
+    exit 1;
 fi
 
 # Remove any existing screen session first
