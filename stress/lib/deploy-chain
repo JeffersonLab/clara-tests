@@ -11,7 +11,7 @@ if [[ ! -f $SERVICES_FILE ]]; then
     exit
 fi
 
-DPE_HOST=$(hostname -i)
+DPE_HOST=($(hostname -i))
 
 tmp_services=$(/bin/mktemp)
 grep -v '^\s*#' $SERVICES_FILE > $tmp_services
@@ -20,7 +20,7 @@ while IFS=$' ' read -r -a myService
 do
     SERVICE_CLASS=${myService[0]}
     CONTAINER=${myService[1]}
-    deploy $DPE_HOST $CONTAINER $SERVICE_CLASS
+    deploy ${DPE_HOST[0]} $CONTAINER $SERVICE_CLASS
 done < $tmp_services
 
 rm $tmp_services

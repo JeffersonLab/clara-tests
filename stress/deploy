@@ -128,13 +128,13 @@ for i in "${!IO_NODES[@]}"; do
     WRITER_CLASS=std.services.convertors.EvioToEvioWriter
 
     if [[ $IO_NODE == $PLATFORM_HOST ]]; then
-        IO_NODE_IP=$(hostname -i)
+        IO_NODE_IP=($(hostname -i))
     else
-        IO_NODE_IP=$(ssh $IO_NODE hostname -i)
+        IO_NODE_IP=($(ssh $IO_NODE hostname -i))
     fi
 
-    deploy $IO_NODE_IP $IO_CONT $READER_CLASS
-    deploy $IO_NODE_IP $IO_CONT $WRITER_CLASS
+    deploy ${IO_NODE_IP[0]} $IO_CONT $READER_CLASS
+    deploy ${IO_NODE_IP[0]} $IO_CONT $WRITER_CLASS
 
     echo
 done
@@ -164,13 +164,13 @@ for i in "${!IO_NODES[@]}"; do
     IO_CONT=${IO_CONTAINERS[$i]}
 
     if [[ $IO_NODE == $PLATFORM_HOST ]]; then
-        IO_NODE_IP=$(hostname -i)
+        IO_NODE_IP=($(hostname -i))
     else
-        IO_NODE_IP=$(ssh $IO_NODE hostname -i)
+        IO_NODE_IP=($(ssh $IO_NODE hostname -i))
     fi
 
-    READER_ENGINE=$IO_NODE_IP/$IO_CONT/EvioToEvioReader
-    WRITER_ENGINE=$IO_NODE_IP/$IO_CONT/EvioToEvioWriter
+    READER_ENGINE=${IO_NODE_IP[0]}/$IO_CONT/EvioToEvioReader
+    WRITER_ENGINE=${IO_NODE_IP[0]}/$IO_CONT/EvioToEvioWriter
 
     sleep 1
     for NODE in "${CHAIN_NODES[@]}"; do

@@ -11,7 +11,7 @@ if [[ ! -f $SERVICES_FILE ]]; then
     exit
 fi
 
-DPE_HOST=$(hostname -i)
+DPE_HOST=($(hostname -i))
 
 READER_ENGINE=$1
 WRITER_ENGINE=$2
@@ -23,7 +23,7 @@ grep -v '^\s*#' $SERVICES_FILE > $tmp_services
 
 while IFS=$' ' read -r -a myService
 do
-    SERVICE_ENGINE=$DPE_HOST/${myService[1]}/${myService[2]}
+    SERVICE_ENGINE=${DPE_HOST[0]}/${myService[1]}/${myService[2]}
     link $PREVIOUS_ENGINE $SERVICE_ENGINE
     PREVIOUS_ENGINE=$SERVICE_ENGINE
     echo
