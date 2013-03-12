@@ -112,4 +112,8 @@ if [[ $FIRST_NODE -lt 1 || $FIRST_NODE -gt $MAX_NODES ]]; then
     exit;
 fi
 
+# Remove any existing screen session first
+$TEST_DIR/quit
+
+# Start the platform and the DPEs
 launch
