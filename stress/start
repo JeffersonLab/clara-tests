@@ -36,7 +36,7 @@ function launch()
     start_platform
 
     if [[ $NUMBER_OF_NODES -eq 0 ]]; then
-        echo head >> $TEST_DIR/nodes
+        echo $PLATFORM_HOST >> $TEST_DIR/nodes
     else
         local counter=$FIRST_NODE
         local last=$(($FIRST_NODE+$NUMBER_OF_NODES))

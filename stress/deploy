@@ -62,7 +62,7 @@ if [[ ${#DPE_NODES[@]} == 0 ]]; then
     echo "Maybe something went wrong when the DPEs were started."
     exit 1
 elif [[ ${#DPE_NODES[@]} == 1 ]]; then
-    if [[ ${DPE_NODES[0]} == "head" ]]; then
+    if [[ ${DPE_NODES[0]} == $PLATFORM_HOST ]]; then
         ONLY_PLATFORM=0
         echo "Running everything in platform node"
     fi
