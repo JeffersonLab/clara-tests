@@ -8,6 +8,13 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 
+PLATFORM_HOST=$(hostname -s)
+
+if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
+    echo "This scripts should run in head (UofR cluster) or claradm"
+    exit 1
+fi
+
 if [[ ! $# -eq 2 ]]; then
     echo -e "Usage:"
     echo -e "\tfull-test <input_file> <output_file>"
@@ -22,8 +29,13 @@ if [[ ! -f "$INFILE" ]]; then
     exit 1
 fi
 
-NUM_NODES=12
-NUM_CORES=12
+if [[ $PLATFORM_HOST == "head" ]]; then
+    NUM_NODES=12
+    NUM_CORES=12
+else
+    NUM_NODES=0
+    NUM_CORES=32
+fi
 
 RESULTS_FILE=results.csv
 

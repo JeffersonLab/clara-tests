@@ -21,6 +21,14 @@ function usage()
 }
 
 
+PLATFORM_HOST=$(hostname -s)
+
+if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
+    echo "This scripts should run in head (UofR cluster) or claradm"
+    exit 1
+fi
+
+
 while getopts “h” OPTION
 do
     case $OPTION in
@@ -36,7 +44,6 @@ if [[ $# -lt 3  || $# -gt 4 ]]; then
     usage
     exit 1
 fi
-
 
 NODES_LIST=""
 NODES_FILE=$TEST_DIR/nodes
@@ -61,7 +68,12 @@ if [[ ! -f "$INFILE" ]]; then
     exit 1
 fi
 
-if [[ $CORES -lt 1 || $CORES -gt 12 ]]; then
+if [[ $PLATFORM_HOST == "head" ]]; then
+    MAX_CORES=12
+else
+    MAX_CORES=0
+fi
+if [[ $CORES -lt 1 || $CORES -gt $MAX_CORES ]]; then
     echo "Wrong number of cores: $CORES"
     exit 1
 fi

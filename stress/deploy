@@ -21,7 +21,12 @@ function contains()
 ##############################################################################
 # Check the plaftorm
 ##############################################################################
-PLATFORM_HOST=head
+PLATFORM_HOST=$(hostname -s)
+
+if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
+    echo "This scripts should run in head (UofR cluster) or claradm"
+    exit 1
+fi
 
 ##############################################################################
 # Check the existance of configuration files
