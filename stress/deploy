@@ -1,15 +1,38 @@
 #!/bin/bash
 
+
+##############################################################################
+# Helper functions
+##############################################################################
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $TEST_DIR/lib/clara-wrapper
 
+
+function contains()
+{
+    local e
+    for e in "${@:2}"; do
+        [[ "$e" == "$1" ]] && return 0;
+    done
+    return 1
+}
+
+##############################################################################
+# Check the plaftorm
+##############################################################################
+PLATFORM_HOST=head
+
+##############################################################################
+# Check the existance of configuration files
+##############################################################################
+IO_SERVICES_FILE=$TEST_DIR/io-services
 SERVICES_FILE=$TEST_DIR/services
 NODES_FILE=$TEST_DIR/nodes
 
 if [[ ! -f $SERVICES_FILE ]]; then
     echo "Please create a 'services' file with the list of services to be deployed."
-    echo "Use the 'services.sample' file as an example."
+    echo "Use the 'services.sample' file as a template"
     exit 1
 fi
 
@@ -18,33 +41,149 @@ if [[ ! -f $NODES_FILE ]]; then
     exit 1
 fi
 
-PLATFORM_HOST=$(cat $TEST_DIR/platform)
-CONTAINER=cont
-
-echo "DEPLOYING STANDARD I/O SERVICES..."
-echo
-READER_CLASS=std.services.convertors.EvioToEvioReader
-READER_ENGINE=$PLATFORM_HOST/$CONTAINER/EvioToEvioReader
-
-WRITER_CLASS=std.services.convertors.EvioToEvioWriter
-WRITER_ENGINE=$PLATFORM_HOST/$CONTAINER/EvioToEvioWriter
-
-deploy $PLATFORM_HOST $CONTAINER $READER_CLASS
-deploy $PLATFORM_HOST $CONTAINER $WRITER_CLASS
-
-sleep 1
-link $WRITER_ENGINE $READER_ENGINE
-echo
-
+##############################################################################
+# Get the list of all running DPEs
+##############################################################################
+DPE_NODES=()
 while read NODE
 do
+    if contains $NODE "${DPE_NODES[@]}"; then
+        echo "Node $NODE duplicated in your 'nodes' file."
+        echo "Maybe something went wrong when the DPEs were started."
+        exit 1
+    fi
+
+    DPE_NODES+=($NODE)
+done < $NODES_FILE
+
+ONLY_PLATFORM=1
+if [[ ${#DPE_NODES[@]} == 0 ]]; then
+    echo "Empty 'nodes' file."
+    echo "Maybe something went wrong when the DPEs were started."
+    exit 1
+elif [[ ${#DPE_NODES[@]} == 1 ]]; then
+    if [[ ${DPE_NODES[0]} == "head" ]]; then
+        ONLY_PLATFORM=0
+        echo "Running everything in platform node"
+    fi
+fi
+
+##############################################################################
+# Get the list of DPEs that will run I/O services
+##############################################################################
+IO_NODES=()
+IO_CONTAINERS=()
+if [[ -f $IO_SERVICES_FILE ]]; then
+    while IFS=$' ' read -r -a IO_SERVICES
+    do
+        IO_NODE=${IO_SERVICES[0]}
+        IO_CONT=${IO_SERVICES[1]}
+
+        if ! contains $IO_NODE "${DPE_NODES[@]}" && [[ $IO_NODE != $PLATFORM_HOST ]]; then
+            echo "I/O node $IO_NODE not in 'nodes' file."
+            echo "Maybe something went wrong when the DPEs were started."
+            exit 1
+        fi
+
+        if contains $IO_NODE "${IO_NODES[@]}"; then
+            echo "Node $IO_NODE duplicated in your 'io-services' file."
+            echo "Deploy only one pair of I/O services on a node."
+            exit 1
+        fi
+
+        IO_NODES+=($IO_NODE)
+        IO_CONTAINERS+=($IO_CONT)
+    done < $IO_SERVICES_FILE
+else
+    IO_NODES+=($PLATFORM_HOST)
+    IO_CONTAINERS+=("default")
+fi
+
+##############################################################################
+# Get the list of DPEs that will run a reconstruction chain
+##############################################################################
+CHAIN_NODES=()
+for node in "${DPE_NODES[@]}"; do
+    if ! contains $node "${IO_NODES[@]}" || [[ $ONLY_PLATFORM == 0 ]]; then
+        CHAIN_NODES+=($node)
+    fi
+done
+
+if [[ ${#CHAIN_NODES[@]} == 0 ]]; then
+    echo "No nodes to deploy chains."
+    echo "Maybe something went wrong when the DPEs were started."
+    exit 1
+fi
+
+##############################################################################
+# Deploy I/O services on specified DPEs
+##############################################################################
+for i in "${!IO_NODES[@]}"; do
+    IO_NODE=${IO_NODES[$i]}
+    IO_CONT=${IO_CONTAINERS[$i]}
+    echo "DEPLOYING STANDARD I/O SERVICES IN $IO_NODE..."
+    echo
+
+    READER_CLASS=std.services.convertors.EvioToEvioReader
+    WRITER_CLASS=std.services.convertors.EvioToEvioWriter
+
+    if [[ $IO_NODE == $PLATFORM_HOST ]]; then
+        IO_NODE_IP=$(hostname -i)
+    else
+        IO_NODE_IP=$(ssh $IO_NODE hostname -i)
+    fi
+
+    deploy $IO_NODE_IP $IO_CONT $READER_CLASS
+    deploy $IO_NODE_IP $IO_CONT $WRITER_CLASS
+
+    echo
+done
+
+sleep 1
+
+##############################################################################
+# Deploy reconstruction chain on each available DPEs
+##############################################################################
+for NODE in "${CHAIN_NODES[@]}"; do
     echo
     echo "DEPLOYING CHAIN IN $NODE..."
     echo
-    if [[ $NODE == "localhost" ]]; then
-        $TEST_DIR/lib/deploy-chain $READER_ENGINE $WRITER_ENGINE
+    if [[ $NODE == $PLATFORM_HOST ]]; then
+        $TEST_DIR/lib/deploy-chain
     else
-        ssh -n $NODE $TEST_DIR/lib/deploy-chain $READER_ENGINE $WRITER_ENGINE
+        ssh -n $NODE $TEST_DIR/lib/deploy-chain
     fi
     echo "========================================================================"
-done < $NODES_FILE
+done
+
+##############################################################################
+# Link I/O services with all reconstruction chains
+##############################################################################
+for i in "${!IO_NODES[@]}"; do
+    IO_NODE=${IO_NODES[$i]}
+    IO_CONT=${IO_CONTAINERS[$i]}
+
+    if [[ $IO_NODE == $PLATFORM_HOST ]]; then
+        IO_NODE_IP=$(hostname -i)
+    else
+        IO_NODE_IP=$(ssh $IO_NODE hostname -i)
+    fi
+
+    READER_ENGINE=$IO_NODE_IP/$IO_CONT/EvioToEvioReader
+    WRITER_ENGINE=$IO_NODE_IP/$IO_CONT/EvioToEvioWriter
+
+    sleep 1
+    for NODE in "${CHAIN_NODES[@]}"; do
+        echo
+        echo "LINKING CHAIN IN $NODE..."
+        echo
+        if [[ $NODE == $PLATFORM_HOST ]]; then
+            $TEST_DIR/lib/link-chain $READER_ENGINE $WRITER_ENGINE
+        else
+            ssh -n $NODE $TEST_DIR/lib/link-chain $READER_ENGINE $WRITER_ENGINE
+        fi
+        echo "========================================================================"
+    done
+
+    link $WRITER_ENGINE $READER_ENGINE
+done

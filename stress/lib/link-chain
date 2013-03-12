@@ -13,14 +13,22 @@ fi
 
 DPE_HOST=$(hostname -i)
 
+READER_ENGINE=$1
+WRITER_ENGINE=$2
+
+PREVIOUS_ENGINE=$READER_ENGINE
+
 tmp_services=$(/bin/mktemp)
 grep -v '^\s*#' $SERVICES_FILE > $tmp_services
 
 while IFS=$' ' read -r -a myService
 do
-    SERVICE_CLASS=${myService[0]}
-    CONTAINER=${myService[1]}
-    deploy $DPE_HOST $CONTAINER $SERVICE_CLASS
+    SERVICE_ENGINE=$DPE_HOST/${myService[1]}/${myService[2]}
+    link $PREVIOUS_ENGINE $SERVICE_ENGINE
+    PREVIOUS_ENGINE=$SERVICE_ENGINE
+    echo
 done < $tmp_services
 
 rm $tmp_services
+
+link $PREVIOUS_ENGINE $WRITER_ENGINE
