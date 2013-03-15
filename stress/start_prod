@@ -1,0 +1,76 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SESSION=TEST
+
+source $TEST_DIR/lib/clara-wrapper
+
+
+PLATFORM_HOST=$(hostname -s)
+
+if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
+    echo "This scripts should run in head (UofR cluster) or claradm"
+    exit 1
+fi
+
+
+function start_platform()
+{
+    cat /dev/null > $TEST_DIR/nodes
+    screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
+    screen -S $SESSION -X screen 1
+    sleep 1
+    if [[ $RUN_PLATFORM -eq 0 ]]; then
+        echo "Starting platform..."
+        screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
+    fi
+}
+
+
+function start_dpe()
+{
+    screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe
+}
+
+
+function usage()
+{
+    echo -e "Usage:"
+    echo -e "\t$0 [ <dpe> ]"
+}
+
+
+RUN_PLATFORM=0
+KEEP_DETACHED=1
+while getopts “heds:” OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 1 ;;
+        e)
+            RUN_PLATFORM=1 ;;
+        d)
+            KEEP_DETACHED=0 ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ $# -eq 0 ]]; then
+    $TEST_DIR/quit
+    cd $TEST_DIR
+    rm -rf $TEST_DIR/log
+    mkdir -p $TEST_DIR/log
+    start_platform
+    sleep 1
+    if [[ $KEEP_DETACHED -eq 1 ]]; then
+        screen -r -S $SESSION -p 0
+    fi
+elif [[ $# -eq 1 ]]; then
+    echo "Starting DPE on $1..."
+    start_dpe $1
+else
+    usage
+    exit 1
+fi
