@@ -11,7 +11,7 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLATFORM_HOST=$(hostname -s)
 
 if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
-    echo "This scripts should run in head (UofR cluster) or claradm"
+    echo "These scripts should run in head (UofR cluster) or claradm"
     exit 1
 fi
 
