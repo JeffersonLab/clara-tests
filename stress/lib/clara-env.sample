@@ -1,4 +1,0 @@
-#!/bin/bash
-
-export CLARA_HOME=$HOME/hep/clara
-export CLARA_SERVICES=$HOME/hep/services

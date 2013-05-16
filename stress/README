@@ -9,9 +9,6 @@ automatically killed.
 Configuration
 -------------
 
- -  Copy/set your ClaRA environment to the file `lib/clara-env`.
-    Use the file `lib/clara-env.sample` as a template.
-
  -  Set your reconstruction chain in the file `services.yaml`. Each service should
     be described with the following format:
 

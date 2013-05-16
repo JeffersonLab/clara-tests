@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function runClara()
+{
+    java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
+}
+
+
 function get_platform_host()
 {
     PLATFORM_HOST=$(hostname -s)

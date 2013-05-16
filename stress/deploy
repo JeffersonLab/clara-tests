@@ -6,7 +6,6 @@
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source $TEST_DIR/lib/clara-wrapper
 source $TEST_DIR/lib/common-utils
 
 ##############################################################################
