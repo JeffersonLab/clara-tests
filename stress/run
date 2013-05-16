@@ -99,7 +99,7 @@ fi
 ##############################################################################
 
 counter=0
-parser=std.orchestrators.ProductionConfigParser
+parser=std.orchestrators.ReconstructionConfigParser
 while read NODE
 do
     NODES_LIST="$NODES_LIST $NODE "
