@@ -33,7 +33,7 @@ while getopts “h” OPTION
 do
     case $OPTION in
         h)
-            usage; exit 1 ;;
+            usage; exit 0 ;;
         ?)
             echo; usage; exit 1 ;;
     esac

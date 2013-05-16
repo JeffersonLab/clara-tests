@@ -76,7 +76,7 @@ while getopts “hdfs:” OPTION
 do
     case $OPTION in
         h)
-            usage; exit 1 ;;
+            usage; exit 0 ;;
         d)
             KEEP_DETACHED=0 ;;
         s)
