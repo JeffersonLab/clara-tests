@@ -28,7 +28,7 @@ get_platform_host
 # Check the services
 ##############################################################################
 
-SERVICES_FILE=$TEST_DIR/services
+SERVICES_FILE=$TEST_DIR/services.yaml
 
 if [[ ! -f $SERVICES_FILE ]]; then
     echo "Please create a 'services' file with the list of services to be deployed."
