@@ -98,8 +98,15 @@ mkdir -p $TEST_DIR/log
 
 start_platform
 
+cat << EOF > $TEST_DIR/log/nodes.yaml
+---
+input-output:
+  - name: $PLATFORM_HOST
+reconstruction:
+EOF
+
 if [[ $NUMBER_OF_NODES -eq 0 ]]; then
-    echo $PLATFORM_HOST >> $TEST_DIR/nodes
+    echo "  - name: $PLATFORM_HOST" >> $TEST_DIR/log/nodes.yaml
 else
     counter=$FIRST_NODE
     last=$(($FIRST_NODE+$NUMBER_OF_NODES))
@@ -109,7 +116,7 @@ else
             1[0-6])   node="physics$counter"    ;;
         esac
         echo "Starting DPE on $node..."
-        echo $node >> $TEST_DIR/nodes
+        echo "  - name: $node" >> $TEST_DIR/log/nodes.yaml
         start_dpe $node
         let counter=counter+1
     done
