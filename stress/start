@@ -16,14 +16,14 @@ function start_platform()
     cat /dev/null > $TEST_DIR/nodes
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     echo "Starting platform..."
-    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
+    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
     sleep 2
 }
 
 
 function start_dpe()
 {
-    screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe
+    screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe $CLARA_SERVICES
     sleep 0.25
 }
 
