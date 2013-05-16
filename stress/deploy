@@ -33,7 +33,7 @@ if [[ ! -f $NODES_FILE ]]; then
 fi
 
 ##############################################################################
-# Get the list of all running DPEs
+# Deploy and link all I/O and reconstruction services
 ##############################################################################
 
 DEPLOYER=std.orchestrators.DefaultDeploy

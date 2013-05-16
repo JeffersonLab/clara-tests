@@ -110,7 +110,7 @@ do
 done < <(runClara $parser parse-nodes reconstruction $NODES_FILE)
 
 ##############################################################################
-# Launch the orchestrator
+# Launch DefaultOrchestrator
 ##############################################################################
 
 orchestrator "$INFILE" "$OUTFILE" "$CORES" "$NODES_LIST"

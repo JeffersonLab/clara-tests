@@ -75,7 +75,7 @@ if [[ ! -f "$INFILE" ]]; then
 fi
 
 ##############################################################################
-# Launch the orchestrator
+# Launch ProductionOrchestrator
 ##############################################################################
 
 orchestrator "$INFILE" "$OUTFILE" "$SERVICES_FILE"
