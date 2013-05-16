@@ -29,7 +29,7 @@ get_platform_host
 ##############################################################################
 
 NODES_LIST=""
-NODES_FILE=$TEST_DIR/nodes
+NODES_FILE=$TEST_DIR/log/nodes.yaml
 
 if [[ ! -f $NODES_FILE ]]; then
     echo "Run 'start' first. Could not find file with nodes list."
@@ -100,6 +100,7 @@ fi
 ##############################################################################
 
 counter=0
+parser=std.orchestrators.ProductionConfigParser
 while read NODE
 do
     NODES_LIST="$NODES_LIST $NODE "
@@ -107,7 +108,7 @@ do
     if [[ $counter -eq $NODES ]]; then
         break
     fi
-done < $NODES_FILE
+done < <(runClara $parser parse-nodes reconstruction $NODES_FILE)
 
 ##############################################################################
 # Launch the orchestrator
