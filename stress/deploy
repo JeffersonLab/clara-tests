@@ -7,26 +7,13 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $TEST_DIR/lib/clara-wrapper
-
-
-function contains()
-{
-    local e
-    for e in "${@:2}"; do
-        [[ "$e" == "$1" ]] && return 0;
-    done
-    return 1
-}
+source $TEST_DIR/lib/common-utils
 
 ##############################################################################
 # Check the plaftorm
 ##############################################################################
-PLATFORM_HOST=$(hostname -s)
 
-if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
-    echo "These scripts should run in head (UofR cluster) or claradm"
-    exit 1
-fi
+get_platform_host
 
 ##############################################################################
 # Check the existance of configuration files

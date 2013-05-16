@@ -3,6 +3,9 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $TEST_DIR/lib/clara-wrapper
+source $TEST_DIR/lib/common-utils
+
+get_platform_host
 
 
 function orchestrator()
@@ -19,14 +22,6 @@ function usage()
     echo "Usage:"
     echo -e "\t$0 <input_file> <output_file> <num_cores> [ <num_nodes> ]"
 }
-
-
-PLATFORM_HOST=$(hostname -s)
-
-if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
-    echo "These scripts should run in head (UofR cluster) or claradm"
-    exit 1
-fi
 
 
 while getopts “h” OPTION
