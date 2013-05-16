@@ -15,6 +15,7 @@ function runClara()
     java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
 }
 
+
 function deploy()
 {
     echo "Deploy $3 to $1/$2"

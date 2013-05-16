@@ -1,11 +1,13 @@
 #!/bin/bash
 
+##############################################################################
+# Helper functions
+##############################################################################
+
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $TEST_DIR/lib/clara-wrapper
 source $TEST_DIR/lib/common-utils
-
-get_platform_host
 
 
 function orchestrator()
@@ -16,6 +18,27 @@ function orchestrator()
     runClara std.orchestrators.ProductionOrchestrator $3 $1 $2
 }
 
+##############################################################################
+# Check the plaftorm
+##############################################################################
+
+get_platform_host
+
+##############################################################################
+# Check the services
+##############################################################################
+
+SERVICES_FILE=$TEST_DIR/services
+
+if [[ ! -f $SERVICES_FILE ]]; then
+    echo "Please create a 'services' file with the list of services to be deployed."
+    echo "Use the 'services.sample' file as a template"
+    exit 1
+fi
+
+##############################################################################
+# Options
+##############################################################################
 
 function usage()
 {
@@ -40,13 +63,9 @@ if [[ ! $# -eq 2 ]]; then
     exit 1
 fi
 
-SERVICES_FILE=$TEST_DIR/services
-
-if [[ ! -f $SERVICES_FILE ]]; then
-    echo "Please create a 'services' file with the list of services to be deployed."
-    echo "Use the 'services.sample' file as a template"
-    exit 1
-fi
+##############################################################################
+# Check arguments
+##############################################################################
 
 INFILE="$1"
 OUTFILE="$2"
@@ -55,5 +74,9 @@ if [[ ! -f "$INFILE" ]]; then
     echo "Input file doesn't exist."
     exit 1
 fi
+
+##############################################################################
+# Launch the orchestrator
+##############################################################################
 
 orchestrator "$INFILE" "$OUTFILE" "$SERVICES_FILE"

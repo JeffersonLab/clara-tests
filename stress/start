@@ -1,12 +1,14 @@
 #!/bin/bash
 
+##############################################################################
+# Helper functions
+##############################################################################
+
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SESSION=TEST
 
 source $TEST_DIR/lib/clara-wrapper
 source $TEST_DIR/lib/common-utils
-
-get_platform_host
 
 
 function start_platform()
@@ -25,38 +27,15 @@ function start_dpe()
     sleep 0.25
 }
 
+##############################################################################
+# Check the plaftorm
+##############################################################################
 
-function launch()
-{
-    cd $TEST_DIR
-    rm -rf $TEST_DIR/log
-    mkdir -p $TEST_DIR/log
+get_platform_host
 
-    start_platform
-
-    if [[ $NUMBER_OF_NODES -eq 0 ]]; then
-        echo $PLATFORM_HOST >> $TEST_DIR/nodes
-    else
-        local counter=$FIRST_NODE
-        local last=$(($FIRST_NODE+$NUMBER_OF_NODES))
-        while [[ $counter -lt $last ]]; do
-            case $counter in
-                [1-9])    node="physics0$counter"   ;;
-                1[0-6])   node="physics$counter"    ;;
-            esac
-            echo "Starting DPE on $node..."
-            echo $node >> $TEST_DIR/nodes
-            start_dpe $node
-            let counter=counter+1
-        done
-    fi
-
-    sleep 1
-    if [[ $KEEP_DETACHED -eq 1 ]]; then
-        screen -r -S $SESSION -p 0
-    fi
-}
-
+##############################################################################
+# Options
+##############################################################################
 
 function usage()
 {
@@ -86,8 +65,12 @@ if [[ ! $# -eq 1 ]]; then
     usage
     exit 1
 fi
-NUMBER_OF_NODES=$1
 
+##############################################################################
+# Check the nodes
+##############################################################################
+
+NUMBER_OF_NODES=$1
 if [[ $PLATFORM_HOST == "head" ]]; then
     MAX_NODES=12
     if [[ $FIRST_NODE -lt 1 || $FIRST_NODE -gt $MAX_NODES ]]; then
@@ -102,8 +85,37 @@ if [[ $NUMBER_OF_NODES -lt 0 || $NUMBER_OF_NODES -gt $MAX_NODES ]]; then
     exit 1;
 fi
 
+##############################################################################
+# Start the platform and the DPEs
+##############################################################################
+
 # Remove any existing screen session first
 $TEST_DIR/quit
 
-# Start the platform and the DPEs
-launch
+cd $TEST_DIR
+rm -rf $TEST_DIR/log
+mkdir -p $TEST_DIR/log
+
+start_platform
+
+if [[ $NUMBER_OF_NODES -eq 0 ]]; then
+    echo $PLATFORM_HOST >> $TEST_DIR/nodes
+else
+    counter=$FIRST_NODE
+    last=$(($FIRST_NODE+$NUMBER_OF_NODES))
+    while [[ $counter -lt $last ]]; do
+        case $counter in
+            [1-9])    node="physics0$counter"   ;;
+            1[0-6])   node="physics$counter"    ;;
+        esac
+        echo "Starting DPE on $node..."
+        echo $node >> $TEST_DIR/nodes
+        start_dpe $node
+        let counter=counter+1
+    done
+fi
+
+sleep 1
+if [[ $KEEP_DETACHED -eq 1 ]]; then
+    screen -r -S $SESSION -p 0
+fi
