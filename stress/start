@@ -18,11 +18,9 @@ function start_platform()
 {
     cat /dev/null > $TEST_DIR/nodes
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
-    if [[ $RUN_PLATFORM -eq 0 ]]; then
-        echo "Starting platform..."
-        screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
-        sleep 2
-    fi
+    echo "Starting platform..."
+    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
+    sleep 2
 }
 
 
@@ -68,20 +66,17 @@ function launch()
 function usage()
 {
     echo -e "Usage:"
-    echo -e "\t$0 [-e] [-s <first_node> ] <nodes>"
+    echo -e "\t$0 [-s <first_node> ] <nodes>"
 }
 
 
 FIRST_NODE=1
-RUN_PLATFORM=0
 KEEP_DETACHED=1
-while getopts “heds:” OPTION
+while getopts “hdfs:” OPTION
 do
     case $OPTION in
         h)
             usage; exit 1 ;;
-        e)
-            RUN_PLATFORM=1 ;;
         d)
             KEEP_DETACHED=0 ;;
         s)

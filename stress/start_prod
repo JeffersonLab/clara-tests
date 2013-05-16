@@ -20,10 +20,8 @@ function start_platform()
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     screen -S $SESSION -X screen 1
     sleep 1
-    if [[ $RUN_PLATFORM -eq 0 ]]; then
-        echo "Starting platform..."
-        screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
-    fi
+    echo "Starting platform..."
+    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform
 }
 
 
@@ -40,15 +38,12 @@ function usage()
 }
 
 
-RUN_PLATFORM=0
 KEEP_DETACHED=1
 while getopts “heds:” OPTION
 do
     case $OPTION in
         h)
             usage; exit 1 ;;
-        e)
-            RUN_PLATFORM=1 ;;
         d)
             KEEP_DETACHED=0 ;;
         ?)
