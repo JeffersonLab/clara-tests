@@ -8,15 +8,6 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source $TEST_DIR/lib/common-utils
 
-
-function orchestrator()
-{
-    rm -f $2
-    sleep 1
-
-    runClara std.orchestrators.ProductionOrchestrator $3 $1 $2
-}
-
 ##############################################################################
 # Check the plaftorm
 ##############################################################################
@@ -63,19 +54,14 @@ if [[ ! $# -eq 2 ]]; then
 fi
 
 ##############################################################################
-# Check arguments
+# Arguments
 ##############################################################################
 
 INFILE="$1"
 OUTFILE="$2"
 
-if [[ ! -f "$INFILE" ]]; then
-    echo "Input file doesn't exist."
-    exit 1
-fi
-
 ##############################################################################
 # Launch ProductionOrchestrator
 ##############################################################################
 
-orchestrator "$INFILE" "$OUTFILE" "$SERVICES_FILE"
+${CLARA_SERVICES}/bin/production-orchestrator "$SERVICES_FILE" "$INFILE" "$OUTFILE"

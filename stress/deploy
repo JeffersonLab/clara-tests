@@ -36,5 +36,4 @@ fi
 # Deploy and link all I/O and reconstruction services
 ##############################################################################
 
-DEPLOYER=std.orchestrators.DefaultDeploy
-runClara $DEPLOYER $NODES_FILE $SERVICES_FILE
+${CLARA_SERVICES}/bin/default-orchestrator setup-chain $NODES_FILE $SERVICES_FILE
