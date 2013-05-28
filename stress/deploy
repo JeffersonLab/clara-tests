@@ -1,21 +1,40 @@
 #!/bin/bash
 
 ##############################################################################
-# Check the existance of configuration files
+# Get the list of nodes
 ##############################################################################
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICES_FILE=$TEST_DIR/services.yaml
 NODES_FILE=$TEST_DIR/log/nodes.yaml
-
-if [[ ! -f $SERVICES_FILE ]]; then
-    echo "Please create a 'services.yaml' file with the list of services to be deployed."
-    echo "Use the 'services.yaml.sample' file as a template"
+if [[ ! -f $NODES_FILE ]]; then
+    echo "Run start first. Could not find file with description of nodes."
     exit 1
 fi
 
-if [[ ! -f $NODES_FILE ]]; then
-    echo "Run start first. Could not find file with nodes config."
+##############################################################################
+# Options
+##############################################################################
+
+function usage()
+{
+    echo "Usage:"
+    echo -e "\t$0 <services_file>"
+}
+
+
+while getopts “h” OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 0 ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ ! $# -eq 1 ]]; then
+    usage
     exit 1
 fi
 
@@ -23,4 +42,4 @@ fi
 # Deploy and link all I/O and reconstruction services
 ##############################################################################
 
-${CLARA_SERVICES}/bin/default-orchestrator setup-chain $NODES_FILE $SERVICES_FILE
+${CLARA_SERVICES}/bin/default-orchestrator setup-chain $NODES_FILE "$1"

@@ -3,7 +3,7 @@
 # Run a full stress test with all the combinations of nodes and cores.
 #
 # Usage:
-#       full-test <input_file> <out_file>
+#       full-test <services_file> <input_file> <out_file>
 
 ##############################################################################
 # Working directory
@@ -26,17 +26,23 @@ fi
 # Check the arguments
 ##############################################################################
 
-if [[ ! $# -eq 2 ]]; then
+if [[ ! $# -eq 3 ]]; then
     echo -e "Usage:"
-    echo -e "\tfull-test <input_file> <output_file>"
+    echo -e "\tfull-test <services_file> <input_file> <output_file>"
     exit 1
 fi
 
-INFILE="$1"
-OUTFILE="$2"
+SERVICES="$1"
+INFILE="$2"
+OUTFILE="$3"
+
+if [[ ! -f "$SERVICES" ]]; then
+    echo "Services file doesn't exist."
+    exit 1
+fi
 
 if [[ ! -f "$INFILE" ]]; then
-    echo "Input files doesn't exist."
+    echo "Input file doesn't exist."
     exit 1
 fi
 
@@ -67,7 +73,7 @@ for n in $(seq 0 $NUM_NODES); do
     $TEST_DIR/start -d $n
     sleep 5
 
-    $TEST_DIR/deploy 1> $TEST_DIR/log/deploy 2>&1
+    $TEST_DIR/deploy "$SERVICES" 1> $TEST_DIR/log/deploy 2>&1
     sleep 2
 
     RUN_LOG=$TEST_DIR/log/run

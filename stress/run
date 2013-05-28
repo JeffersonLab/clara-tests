@@ -9,15 +9,15 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $TEST_DIR/lib/common-utils
 
 ##############################################################################
-# Check the nodes
+# Get the list of nodes
 ##############################################################################
 
 NODES_LIST=""
 NODES_FILE=$TEST_DIR/log/nodes.yaml
 
 if [[ ! -f $NODES_FILE ]]; then
-    echo "Run 'start' first. Could not find file with nodes list."
-    exit
+    echo "Run start first. Could not find file with description of nodes."
+    exit 1
 fi
 
 ##############################################################################
