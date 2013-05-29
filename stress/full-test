@@ -99,3 +99,27 @@ for n in $(seq 0 $NUM_NODES); do
     echo >> $TEST_DIR/$RESULTS_FILE
     sleep 5
 done
+
+##############################################################################
+# Send a mail with the results
+##############################################################################
+
+if [[ -f $TEST_DIR/mail ]]; then
+    MAILTO=$(cat $TEST_DIR/mail)
+else
+    MAILTO=${USERNAME}@jlab.org
+fi
+
+BODY=$(mktemp)
+echo "The CLARA stress test in $HOSTNAME has finished." >> $BODY
+echo >> $BODY
+echo "You can find the results in the attached file." >> $BODY
+
+SUBJECT="CLARA test finished"
+
+if [[ $PLATFORM_HOST == "head" ]]; then
+    cat $BODY | mutt  -s "$SUBJECT" -a $TEST_DIR/$RESULTS_FILE $MAILTO
+else
+    cat $BODY | mailx -s "$SUBJECT" -a $TEST_DIR/$RESULTS_FILE $MAILTO
+fi
+rm $BODY
