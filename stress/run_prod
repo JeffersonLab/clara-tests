@@ -11,9 +11,11 @@ function usage()
 }
 
 
-while getopts “h” OPTION
+while getopts “hl:” OPTION
 do
     case $OPTION in
+        l)
+            LOOPS=$OPTARG ;;
         h)
             usage; exit 0 ;;
         ?)
@@ -27,8 +29,12 @@ if [[ ! $# -eq 3 ]]; then
     exit 1
 fi
 
+if [[ -z $LOOPS ]]; then
+    LOOPS=10
+fi
+
 ##############################################################################
 # Launch ProductionOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/production-orchestrator "$@"
+${CLARA_SERVICES}/bin/production-orchestrator -l $LOOPS "$@"
