@@ -12,7 +12,6 @@ source $TEST_DIR/lib/common-utils
 
 function start_platform()
 {
-    cat /dev/null > $TEST_DIR/nodes
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     screen -S $SESSION -X screen 1
     sleep 1
@@ -44,7 +43,7 @@ function usage()
 
 
 KEEP_DETACHED=1
-while getopts “heds:” OPTION
+while getopts “hd:” OPTION
 do
     case $OPTION in
         h)

@@ -12,18 +12,15 @@ source $TEST_DIR/lib/common-utils
 
 function start_platform()
 {
-    cat /dev/null > $TEST_DIR/nodes
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     echo "Starting platform..."
     screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
-    sleep 2
 }
 
 
 function start_dpe()
 {
     screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES
-    sleep 0.25
 }
 
 ##############################################################################
@@ -45,7 +42,7 @@ function usage()
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts “hdfs:” OPTION
+while getopts “hds:” OPTION
 do
     case $OPTION in
         h)
@@ -96,6 +93,7 @@ rm -rf $TEST_DIR/log
 mkdir -p $TEST_DIR/log
 
 start_platform
+sleep 2
 
 cat << EOF > $TEST_DIR/log/nodes.yaml
 ---
@@ -117,6 +115,7 @@ else
         echo "Starting DPE on $node..."
         echo "  - name: $node" >> $TEST_DIR/log/nodes.yaml
         start_dpe $node
+        sleep 0.25
         let counter=counter+1
     done
 fi
