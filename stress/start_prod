@@ -22,7 +22,10 @@ function start_platform()
 
 function start_dpe()
 {
-    screen -S $SESSION -X screen -t $1 ssh -t $1 $TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES
+    screen -S $SESSION -X screen -t $1
+    sleep .01
+    screen -S $SESSION -X other
+    screen -S $SESSION -p $1 -X stuff "ssh -t $1 $TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES"
 }
 
 ##############################################################################
