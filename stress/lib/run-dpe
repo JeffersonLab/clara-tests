@@ -6,4 +6,4 @@ PLATFORM_HOST=$1
 CLARA_SERVICES=$2
 export CLARA_SERVICES
 
-$CLARA_SERVICES/bin/clara-dpe -host $PLATFORM_HOST | tee $TEST_DIR/log/$HOSTNAME.log
+$CLARA_SERVICES/bin/clara-dpe -host $PLATFORM_HOST 2>&1 | tee $TEST_DIR/log/$HOSTNAME.log
