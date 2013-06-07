@@ -11,9 +11,11 @@ function usage()
 }
 
 
-while getopts “h” OPTION
+while getopts “hl:” OPTION
 do
     case $OPTION in
+        l)
+            LOOPS=$OPTARG ;;
         h)
             usage; exit 0 ;;
         ?)
@@ -31,4 +33,4 @@ fi
 # Launch FarmOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/farm-orchestrator "$@"
+${CLARA_SERVICES}/bin/farm-orchestrator -l $LOOPS "$@"
