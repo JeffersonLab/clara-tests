@@ -1,0 +1,34 @@
+#!/bin/bash
+
+##############################################################################
+# Options
+##############################################################################
+
+function usage()
+{
+    echo "Usage:"
+    echo -e "\t$0 <services> <input_files> <input_dir> <output_dir>"
+}
+
+
+while getopts “h” OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 0 ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ ! $# -eq 4 ]]; then
+    usage
+    exit 1
+fi
+
+##############################################################################
+# Launch FarmOrchestrator
+##############################################################################
+
+${CLARA_SERVICES}/bin/farm-orchestrator "$@"
