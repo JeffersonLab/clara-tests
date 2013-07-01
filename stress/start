@@ -42,7 +42,7 @@ function usage()
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts “hds:” OPTION
+while getopts "hds:" OPTION
 do
     case $OPTION in
         h)

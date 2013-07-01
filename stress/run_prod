@@ -11,7 +11,7 @@ function usage()
 }
 
 
-while getopts “hl:” OPTION
+while getopts "hl:" OPTION
 do
     case $OPTION in
         l)

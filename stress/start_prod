@@ -46,7 +46,7 @@ function usage()
 
 
 KEEP_DETACHED=1
-while getopts “hd” OPTION
+while getopts "hd" OPTION
 do
     case $OPTION in
         h)
