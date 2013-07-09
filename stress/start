@@ -72,9 +72,13 @@ fi
 
 case $PLATFORM_HOST in
     "head")
-        NODES_FILE=$TEST_DIR/nodes/quark.list ;;
+        NODES_FILE=$TEST_DIR/nodes/quark.list
+        ;;
     "claradm")
-        NODES_FILE=$TEST_DIR/nodes/claradm ;;
+        echo "Running on claradm. Only the platform node can be used."
+        NODES_FILE=
+        NUMBER_OF_NODES=0
+        ;;
 esac
 
 if [[ $NUMBER_OF_NODES -gt 0 && -z $NODES_FILE ]]; then
