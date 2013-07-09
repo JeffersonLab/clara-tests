@@ -9,13 +9,6 @@ function runClara()
 function get_platform_host()
 {
     PLATFORM_HOST=$(hostname -s)
-    if [[ $CLARA_TEST_CHECK_HOST -eq 1 ]]; then
-        return
-    fi
-    if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
-        echo "These scripts should run in head (UofR cluster) or claradm"
-        exit 1
-    fi
 }
 
 
