@@ -14,6 +14,7 @@ function start_platform()
 {
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     echo "Starting platform..."
+    sleep 0.3
     screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
 }
 
