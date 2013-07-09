@@ -36,13 +36,13 @@ get_platform_host
 function usage()
 {
     echo -e "Usage:"
-    echo -e "\t$0 [ -n <nodes_file> ] [ -s <first_node> ] <num_nodes>"
+    echo -e "\t$0 [ -f <nodes_file> ] [ -s <first_node> ] <num_nodes>"
 }
 
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts "hds:n:" OPTION
+while getopts "hds:f:" OPTION
 do
     case $OPTION in
         h)
@@ -51,7 +51,7 @@ do
             KEEP_DETACHED=0 ;;
         s)
             FIRST_NODE=$OPTARG ;;
-        n)
+        f)
             NODES_FILE=$OPTARG ;;
         ?)
             echo; usage; exit 1 ;;
