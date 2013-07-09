@@ -36,13 +36,13 @@ get_platform_host
 function usage()
 {
     echo -e "Usage:"
-    echo -e "\t$0 [-s <first_node> ] <nodes>"
+    echo -e "\t$0 [ -n <nodes_file> ] [ -s <first_node> ] <num_nodes>"
 }
 
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts "hds:" OPTION
+while getopts "hds:n:" OPTION
 do
     case $OPTION in
         h)
@@ -51,6 +51,8 @@ do
             KEEP_DETACHED=0 ;;
         s)
             FIRST_NODE=$OPTARG ;;
+        n)
+            NODES_FILE=$OPTARG ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -63,6 +65,27 @@ if [[ ! $# -eq 1 ]]; then
 fi
 
 NUMBER_OF_NODES=$1
+if [[ $NUMBER_OF_NODES -lt 0 ]]; then
+    echo "Wrong number of nodes: $NUMBER_OF_NODES"
+    exit 1
+fi
+
+case $PLATFORM_HOST in
+    "head")
+        NODES_FILE=$TEST_DIR/nodes/quark.list ;;
+    "claradm")
+        NODES_FILE=$TEST_DIR/nodes/claradm ;;
+esac
+
+if [[ $NUMBER_OF_NODES -gt 0 && -z $NODES_FILE ]]; then
+    echo "A file with the list of available nodes is required."
+    echo "See nodes/quark.list as an example."
+    echo
+    usage
+    exit 1
+fi
+
+echo "NODES_FILE=$NODES_FILE"
 
 ##############################################################################
 # Start the platform and the DPEs
@@ -88,19 +111,21 @@ EOF
 if [[ $NUMBER_OF_NODES -eq 0 ]]; then
     echo "  - name: $PLATFORM_HOST" >> $TEST_DIR/log/nodes.yaml
 else
-    counter=$FIRST_NODE
-    last=$(($FIRST_NODE+$NUMBER_OF_NODES))
-    while [[ $counter -lt $last ]]; do
-        case $counter in
-            [1-9])    node="physics0$counter"   ;;
-            1[0-6])   node="physics$counter"    ;;
-        esac
-        echo "Starting DPE on $node..."
-        echo "  - name: $node" >> $TEST_DIR/log/nodes.yaml
-        start_dpe $node
-        sleep 0.25
+    counter=0
+    last=$(($FIRST_NODE+$NUMBER_OF_NODES-1))
+    while read NODE
+    do
         let counter=counter+1
-    done
+        if [[ $counter -ge $FIRST_NODE ]]; then
+            echo "Starting DPE on $NODE"
+            echo "  - name: $NODE" >> $TEST_DIR/log/nodes.yaml
+            start_dpe $NODE
+            sleep 0.25
+        fi
+        if [[ $counter -eq $last ]]; then
+            break
+        fi
+    done < $NODES_FILE
 fi
 
 sleep 1
