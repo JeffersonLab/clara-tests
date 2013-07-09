@@ -1,5 +1,12 @@
 #!/bin/bash
 
+function check_screen()
+{
+    command -v screen >/dev/null 2>&1 ||
+        { echo "GNU Screen it's not installed. Aborting."; exit 1; }
+}
+
+
 function runClara()
 {
     java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
