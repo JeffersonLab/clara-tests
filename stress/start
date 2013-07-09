@@ -43,7 +43,8 @@ function usage()
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts "hds:f:" OPTION
+DRY_RUN=1
+while getopts "hds:f:n" OPTION
 do
     case $OPTION in
         h)
@@ -54,6 +55,8 @@ do
             FIRST_NODE=$OPTARG ;;
         f)
             NODES_FILE=$OPTARG ;;
+        n)
+            DRY_RUN=0 ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -103,8 +106,10 @@ cd $TEST_DIR
 rm -rf $TEST_DIR/log
 mkdir -p $TEST_DIR/log
 
-start_platform
-sleep 2
+if [[ $DRY_RUN -eq 1 ]]; then
+    start_platform
+    sleep 2
+fi
 
 cat << EOF > $TEST_DIR/log/nodes.yaml
 ---
@@ -124,13 +129,19 @@ else
         if [[ $counter -ge $FIRST_NODE ]]; then
             echo "Starting DPE on $NODE"
             echo "  - name: $NODE" >> $TEST_DIR/log/nodes.yaml
-            start_dpe $NODE
-            sleep 0.25
+            if [[ $DRY_RUN -eq 1 ]]; then
+                start_dpe $NODE
+                sleep 0.25
+            fi
         fi
         if [[ $counter -eq $last ]]; then
             break
         fi
     done < $NODES_FILE
+fi
+
+if [[ $DRY_RUN -eq 0 ]]; then
+    exit 0
 fi
 
 sleep 1
