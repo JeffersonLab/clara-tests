@@ -3,4 +3,6 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SESSION=TEST
 
-screen -S $SESSION -X quit
+if screen -ls | grep -q $SESSION; then
+    screen -S $SESSION -X quit
+fi
