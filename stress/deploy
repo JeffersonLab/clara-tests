@@ -42,4 +42,5 @@ fi
 # Deploy and link all I/O and reconstruction services
 ##############################################################################
 
-${CLARA_SERVICES}/bin/default-orchestrator setup-chain $NODES_FILE "$1"
+${CLARA_SERVICES}/bin/default-orchestrator setup-chain $NODES_FILE "$1" 2>&1 |
+    tee $TEST_DIR/log/deploy.log

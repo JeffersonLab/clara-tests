@@ -93,4 +93,5 @@ done < <(runClara $parser parse-nodes reconstruction $NODES_FILE)
 # Launch DefaultOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/default-orchestrator run "$INFILE" "$OUTFILE" $CORES $NODES_LIST
+${CLARA_SERVICES}/bin/default-orchestrator run "$INFILE" "$OUTFILE" $CORES $NODES_LIST 2>&1 |
+    tee $TEST_DIR/log/run.log
