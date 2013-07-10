@@ -86,15 +86,19 @@ case $PLATFORM_HOST in
         ;;
 esac
 
-if [[ $NUMBER_OF_NODES -gt 0 && -z $NODES_FILE ]]; then
-    echo "A file with the list of available nodes is required."
-    echo "See nodes/quark.list as an example."
-    echo
-    usage
-    exit 1
+if [[ $NUMBER_OF_NODES -gt 0 ]]; then
+    if [[ -z $NODES_FILE ]]; then
+        echo "A file with the list of available nodes is required."
+        echo "See nodes/quark.list as an example."
+        echo
+        usage
+        exit 1
+    fi
+    echo "NODES_FILE=$NODES_FILE"
+else
+    echo "Running everything on platform node. No extra DPEs will be deployed."
 fi
 
-echo "NODES_FILE=$NODES_FILE"
 
 ##############################################################################
 # Start the platform and the DPEs
