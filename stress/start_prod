@@ -15,7 +15,6 @@ function start_platform()
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
     screen -S $SESSION -X screen 1
     sleep 1
-    echo "Starting platform..."
     screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
 }
 
@@ -72,6 +71,7 @@ if [[ $# -eq 0 ]]; then
     cd $TEST_DIR
     rm -rf $TEST_DIR/log
     mkdir -p $TEST_DIR/log
+    echo "Starting platform on local node $PLATFORM_HOST"
     if [[ $DRY_RUN -eq 1 ]]; then
         start_platform
         sleep 1
@@ -82,7 +82,7 @@ if [[ $# -eq 0 ]]; then
         screen -r -S $SESSION -p 0
     fi
 elif [[ $# -eq 1 ]]; then
-    echo "Starting DPE on $1..."
+    echo "Starting DPE on $1 (with platform in $PLATFORM_HOST)..."
     if [[ $DRY_RUN -eq 1 ]]; then
         start_dpe $1
     fi

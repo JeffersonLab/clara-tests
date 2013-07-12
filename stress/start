@@ -13,7 +13,6 @@ source $TEST_DIR/lib/common-utils
 function start_platform()
 {
     screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
-    echo "Starting platform..."
     sleep 0.3
     screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
 }
@@ -98,6 +97,7 @@ if [[ $NUMBER_OF_NODES -gt 0 ]]; then
 else
     echo "Running everything on platform node. No extra DPEs will be deployed."
 fi
+echo "---"
 
 
 ##############################################################################
@@ -111,6 +111,7 @@ cd $TEST_DIR
 rm -rf $TEST_DIR/log
 mkdir -p $TEST_DIR/log
 
+echo "Starting platform on local node $PLATFORM_HOST"
 if [[ $DRY_RUN -eq 1 ]]; then
     start_platform
     sleep 2
