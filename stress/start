@@ -44,7 +44,7 @@ function usage()
 FIRST_NODE=1
 KEEP_DETACHED=1
 DRY_RUN=1
-while getopts "hds:f:n" OPTION
+while getopts "hds:f:p:n" OPTION
 do
     case $OPTION in
         h)
@@ -55,6 +55,8 @@ do
             FIRST_NODE=$OPTARG ;;
         f)
             NODES_FILE=$OPTARG ;;
+        p)
+            PLATFORM_HOST=$OPTARG ;;
         n)
             DRY_RUN=0 ;;
         ?)

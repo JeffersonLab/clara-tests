@@ -45,15 +45,18 @@ function usage()
 }
 
 
+USER_PLATFORM_HOST=
 KEEP_DETACHED=1
 DRY_RUN=1
-while getopts "hdn" OPTION
+while getopts "hdp:n" OPTION
 do
     case $OPTION in
         h)
             usage; exit 0 ;;
         d)
             KEEP_DETACHED=0 ;;
+        p)
+            USER_PLATFORM_HOST=$OPTARG ;;
         n)
             DRY_RUN=0 ;;
         ?)
@@ -71,6 +74,10 @@ if [[ $# -eq 0 ]]; then
     cd $TEST_DIR
     rm -rf $TEST_DIR/log
     mkdir -p $TEST_DIR/log
+    if [[ ! -z $USER_PLATFORM_HOST ]]; then
+        PLATFORM_HOST=$USER_PLATFORM_HOST
+        echo $PLATFORM_HOST > $TEST_DIR/log/platform
+    fi
     echo "Starting platform on local node $PLATFORM_HOST"
     if [[ $DRY_RUN -eq 1 ]]; then
         start_platform
@@ -82,6 +89,9 @@ if [[ $# -eq 0 ]]; then
         screen -r -S $SESSION -p 0
     fi
 elif [[ $# -eq 1 ]]; then
+    if [[ -f $TEST_DIR/log/platform ]]; then
+        PLATFORM_HOST=$(cat $TEST_DIR/platform)
+    fi
     echo "Starting DPE on $1 (with platform in $PLATFORM_HOST)..."
     if [[ $DRY_RUN -eq 1 ]]; then
         start_dpe $1
