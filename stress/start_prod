@@ -47,13 +47,16 @@ function usage()
 
 
 KEEP_DETACHED=1
-while getopts "hd" OPTION
+DRY_RUN=1
+while getopts "hdn" OPTION
 do
     case $OPTION in
         h)
             usage; exit 0 ;;
         d)
             KEEP_DETACHED=0 ;;
+        n)
+            DRY_RUN=0 ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -69,14 +72,20 @@ if [[ $# -eq 0 ]]; then
     cd $TEST_DIR
     rm -rf $TEST_DIR/log
     mkdir -p $TEST_DIR/log
-    start_platform
-    sleep 1
+    if [[ $DRY_RUN -eq 1 ]]; then
+        start_platform
+        sleep 1
+    else
+        exit 0
+    fi
     if [[ $KEEP_DETACHED -eq 1 ]]; then
         screen -r -S $SESSION -p 0
     fi
 elif [[ $# -eq 1 ]]; then
     echo "Starting DPE on $1..."
-    start_dpe $1
+    if [[ $DRY_RUN -eq 1 ]]; then
+        start_dpe $1
+    fi
 else
     usage
     exit 1
