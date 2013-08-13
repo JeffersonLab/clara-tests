@@ -90,7 +90,7 @@ if [[ $# -eq 0 ]]; then
     fi
 elif [[ $# -eq 1 ]]; then
     if [[ -f $TEST_DIR/log/platform ]]; then
-        PLATFORM_HOST=$(cat $TEST_DIR/platform)
+        PLATFORM_HOST=$(cat $TEST_DIR/log/platform)
     fi
     echo "Starting DPE on $1 (with platform in $PLATFORM_HOST)..."
     if [[ $DRY_RUN -eq 1 ]]; then
