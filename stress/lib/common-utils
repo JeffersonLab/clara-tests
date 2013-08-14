@@ -15,7 +15,12 @@ function runClara()
 
 function get_platform_host()
 {
-    PLATFORM_HOST=$(hostname -s)
+    if [[ -f $CLARA_SERVICES/setup.xml ]]; then
+        parser=std.orchestrators.ReconstructionConfigParser
+        PLATFORM_HOST=$(runClara $parser platform-host)
+    else
+        PLATFORM_HOST=$(hostname -s)
+    fi
 }
 
 

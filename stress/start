@@ -55,8 +55,6 @@ do
             FIRST_NODE=$OPTARG ;;
         f)
             NODES_FILE=$OPTARG ;;
-        p)
-            PLATFORM_HOST=$OPTARG ;;
         n)
             DRY_RUN=0 ;;
         ?)
