@@ -78,6 +78,9 @@ case $(hostname -s) in
     "head")
         NODES_FILE=$TEST_DIR/nodes/quark.list
         ;;
+    "hadlab")
+        NODES_FILE=$TEST_DIR/nodes/csu.list
+        ;;
     "claradm")
         echo "Running on claradm. Only the platform node can be used."
         NODES_FILE=
