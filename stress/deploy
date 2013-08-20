@@ -1,11 +1,13 @@
 #!/bin/bash
 
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 ##############################################################################
-# Get the list of nodes
+# Check the list of nodes
 ##############################################################################
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NODES_FILE=$TEST_DIR/log/nodes.yaml
+
 if [[ ! -f $NODES_FILE ]]; then
     echo "Run start first. Could not find file with description of nodes."
     exit 1
@@ -28,7 +30,7 @@ do
         h)
             usage; exit 0 ;;
         ?)
-            echo; usage; exit 1 ;;
+            usage; exit 1 ;;
     esac
 done
 

@@ -1,18 +1,17 @@
 #!/bin/bash
 
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 ##############################################################################
 # Helper functions
 ##############################################################################
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 source $TEST_DIR/lib/common-utils
 
 ##############################################################################
-# Get the list of nodes
+# Check the list of nodes
 ##############################################################################
 
-NODES_LIST=""
 NODES_FILE=$TEST_DIR/log/nodes.yaml
 
 if [[ ! -f $NODES_FILE ]]; then
@@ -59,27 +58,14 @@ if [[ $# -eq 4 ]]; then
     NODES=$4
 fi
 
-if [[ $PLATFORM_HOST == "head" ]]; then
-    MAX_CORES=12
-else
-    MAX_CORES=32
-fi
-if [[ $CORES -lt 1 || $CORES -gt $MAX_CORES ]]; then
-    echo "Wrong number of cores: $CORES"
-    exit 1
-fi
-
-if [[ $NODES -lt 0 || $NODES -gt $(wc -l $NODES_FILE | cut -d' ' -f 1) ]]; then
-    echo "Wrong number of nodes: $NODES"
-    exit 1
-fi
-
 ##############################################################################
 # Generate the list of DPEs
 ##############################################################################
 
 counter=0
 parser=std.orchestrators.ReconstructionConfigParser
+NODES_LIST=""
+
 while read NODE
 do
     NODES_LIST="$NODES_LIST $NODE "
@@ -88,6 +74,11 @@ do
         break
     fi
 done < <(runClara $parser parse-nodes reconstruction $NODES_FILE)
+
+if [[ $counter -lt $NODES ]]; then
+    echo "Wrong number of nodes: $NODES"
+    exit 1
+fi
 
 ##############################################################################
 # Launch DefaultOrchestrator
