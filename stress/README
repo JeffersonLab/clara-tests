@@ -39,10 +39,10 @@ Usage
     If the number of DPEs is set to 0 then no DPE will be started, and only
     the platform will be used to run services.
 
- -  Execute the `deploy` script with the services.yaml file as argument
+ -  Execute the `setup-chain` script with the services.yaml file as argument
     to deploy and link the reconstruction services.
 
-        $ ./deploy <services.yaml>
+        $ ./setup-chain <services.yaml>
 
     The standard reader and writer will be deployed in the platform.
     The reconstruction chain will be deployed on each running DPE. If no DPEs

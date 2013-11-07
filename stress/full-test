@@ -73,7 +73,7 @@ for n in $(seq 0 $NUM_NODES); do
     $TEST_DIR/start -d $n
     sleep 5
 
-    $TEST_DIR/deploy "$SERVICES" 1> $TEST_DIR/log/deploy 2>&1
+    $TEST_DIR/setup-chain "$SERVICES" 1> $TEST_DIR/log/setup-chain 2>&1
     sleep 2
 
     RUN_LOG=$TEST_DIR/log/run
