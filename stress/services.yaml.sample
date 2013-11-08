@@ -1,13 +1,9 @@
 ---
-# Uncomment the line below to set a new container name for all services
-# container: default
 services:
   - class: org.jlab.clas12.ec.services.ECReconstruction
     name: ECReconstruction
   - class: examples.service.BigFactorialService
     name: BigFactorialService
-    # Uncomment to override the container name for this single service
-    # container: container_1
   - class: org.clas12.services.tracking.SeedFinder
     name: SeedFinder
   # - class: org.sot.services.driftChamber.ClusterFinderService
