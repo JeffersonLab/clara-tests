@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Run a stress test with all the combinations of cores.
+#
+# Usage:
+#       cores-test <services_file> <input_file> <out_file>
+
+##############################################################################
+# Check the arguments
+##############################################################################
+
+if [[ ! $# -eq 3 ]]; then
+    echo -e "Usage:"
+    echo -e "\tcores-test <services_file> <input_file> <output_file>"
+    exit 1
+fi
+
+SERVICES="$1"
+INFILE="$2"
+OUTFILE="$3"
+
+if [[ ! -f "$SERVICES" ]]; then
+    echo "Services file doesn't exist."
+    exit 1
+fi
+
+if [[ ! -f "$INFILE" ]]; then
+    echo "Input file doesn't exist."
+    exit 1
+fi
+
+##############################################################################
+# Check the nodes
+##############################################################################
+
+NUM_CORES=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
+
+##############################################################################
+# Run the test
+##############################################################################
+
+RESULTS_FILE=results.csv
+RUN_LOG=run.log
+ORCHESTRATOR="${CLARA_SERVICES}/bin/default-orchestrator"
+
+rm -f $RESULTS_FILE
+rm -f $RUN_LOG
+
+for t in $(seq 1 $NUM_CORES); do
+    echo "  Requesting $t threads"
+    RESULT="$t"
+    for i in $(seq 1 3); do
+        "$ORCHESTRATOR" run "$INFILE" "$OUTFILE" $t 1>> $RUN_LOG 2>&1
+        sleep 2
+        TIME=$(grep "Average event processing time" $RUN_LOG | tail -n 1 | awk '{ print $6 }')
+        RESULT="$RESULT;$TIME"
+    done
+    echo $RESULT >> $RESULTS_FILE
+done
+sleep 2
+
+echo >> $RESULTS_FILE
