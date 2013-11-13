@@ -9,20 +9,14 @@
 # Check the arguments
 ##############################################################################
 
-if [[ ! $# -eq 3 ]]; then
+if [[ ! $# -eq 2 ]]; then
     echo -e "Usage:"
-    echo -e "\tcores-test <services_file> <input_file> <output_file>"
+    echo -e "\tcores-test <input_file> <output_file>"
     exit 1
 fi
 
-SERVICES="$1"
-INFILE="$2"
-OUTFILE="$3"
-
-if [[ ! -f "$SERVICES" ]]; then
-    echo "Services file doesn't exist."
-    exit 1
-fi
+INFILE="$1"
+OUTFILE="$2"
 
 if [[ ! -f "$INFILE" ]]; then
     echo "Input file doesn't exist."
