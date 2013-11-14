@@ -9,19 +9,17 @@
 # Check the arguments
 ##############################################################################
 
-if [[ ! $# -eq 2 ]]; then
+if [[ ! $# -eq 5 ]]; then
     echo -e "Usage:"
-    echo -e "\tcores-test <input_file> <output_file>"
+    echo -e "\tcores-test <services_file> <input_file> <output_file> <core_number> <result_file_name> <run_log_file_name>"
     exit 1
 fi
 
 INFILE="$1"
 OUTFILE="$2"
-
-if [[ ! -f "$INFILE" ]]; then
-    echo "Input file doesn't exist."
-    exit 1
-fi
+NUM_CORES="$3"
+RESULTS_FILE="$4"
+RUN_LOG="$5"
 
 ##############################################################################
 # Run the test
