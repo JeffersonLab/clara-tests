@@ -9,11 +9,11 @@ import os
 from optparse import OptionParser
 
 parser = OptionParser(usage="usage: %prog [options] <results.csv>")
-parser.add_option("-q",
+parser.add_option("-s",
                   action="store_true",
-                  dest="quiet",
+                  dest="show",
                   default=False,
-                  help="do not show the plot")
+                  help="show the plot")
 parser.add_option("-n",
                   action="store_true",
                   dest="no_fig",
@@ -88,5 +88,5 @@ plt.text(0.6, 0.3, text, transform=plt.gca().transAxes)
 if not options.no_fig:
     plt.savefig(output_fig)
 
-if not options.quiet:
+if options.show:
     plt.show()
