@@ -28,7 +28,7 @@ parser.add_option("-t",
 options, args = parser.parse_args()
 
 if len(args) != 1:
-    parser.error("missing results file")
+    parser.error("bad number of arguments")
 
 results_file = args[0]
 
@@ -92,6 +92,8 @@ plt.text(0.6, 0.3, text, transform=plt.gca().transAxes)
 
 if not options.no_fig:
     plt.savefig(output_fig)
+    print
+    print "Plot saved to", output_fig
 
 if options.show:
     plt.show()
