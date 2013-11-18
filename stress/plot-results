@@ -28,10 +28,14 @@ if len(args) != 1:
     parser.error("missing results file")
 
 results_file = args[0]
+
+base_name = os.path.basename(results_file)
+name = os.path.splitext(base_name)[0]
+
 if options.title:
-    name = options.title
+    title = options.title
 else:
-    name = os.path.splitext(results_file)[0]
+    title = name
 
 cores = []
 rates = []
@@ -60,7 +64,7 @@ polynomial = np.poly1d(pl)
 plt.plot(cores, rates, 'ro')
 plt.plot(cores, polynomial(cores))
 
-plt.title(name)
+plt.title(title)
 plt.legend(["Data", "Fitted"], loc=0, borderaxespad=3.0)
 plt.xlabel("Cores")
 plt.ylabel("Event rate (kHz)")
