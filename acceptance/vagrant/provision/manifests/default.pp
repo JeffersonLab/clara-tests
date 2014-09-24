@@ -25,3 +25,4 @@ class network {
 
 include devtools
 include network
+include dotfiles

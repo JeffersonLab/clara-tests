@@ -1,0 +1,7 @@
+# Older zhs
+emulate sh
+. ~/.profile
+emulate zsh
+
+# Newer Zsh (Ubuntu 11.04 not working)
+#emulate sh -c '~/.profile'
