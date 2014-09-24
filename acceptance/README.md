@@ -5,6 +5,7 @@
 
 ## Start nodes
 
-Run:
+To start the cluster of nodes, run the following:
 
-    vagrant up
+    $ cd vagrant/
+    $ vagrant up
