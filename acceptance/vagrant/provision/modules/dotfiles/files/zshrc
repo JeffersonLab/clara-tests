@@ -57,3 +57,11 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 alias ll='ls -l'
+
+
+# Clara
+if [ -z "$CLARA_ENV" ]; then
+    export CLARA_SERVICES=$HOME/clara/services
+    export PATH=$PATH:$HOME/clara/services/bin
+    export CLARA_ENV=true
+fi
