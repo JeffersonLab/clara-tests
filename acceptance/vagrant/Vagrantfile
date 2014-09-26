@@ -48,6 +48,19 @@ Vagrant.configure("2") do |config|
         puppet.manifest_file = "default.pp"
         puppet.module_path = "provision/modules"
       end
+
+      ["java", "cpp", "python", "webapp"].each do |clara_version|
+        if clara_conf.key?(clara_version)
+          version_conf = clara_conf[clara_version]
+          if version_conf.key?("provision")
+            script = "cd #{base_dir}/src/#{version_conf["path"]}"
+            version_conf["provision"].each do |command|
+              script += "\n#{command}"
+            end
+            node_config.vm.provision "shell", inline: script
+          end
+        end
+      end
     end
   end
 end
