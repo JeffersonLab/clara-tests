@@ -1,1 +1,3 @@
 .vagrant/
+/acceptance/services
+/acceptance/log
