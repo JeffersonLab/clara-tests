@@ -1,20 +1,3 @@
-class devtools {
-    Package {
-        ensure => installed,
-    }
-
-    package { [
-        "openjdk-7-jdk",
-        "ant",
-    ]:
-    }
-
-    package { [
-        "bundler",
-    ]:
-    }
-}
-
 # Fix "localhost" IP in Java
 class network {
     $private_ip = $hostname ? {
@@ -28,6 +11,7 @@ class network {
     }
 }
 
-include devtools
 include network
+include clara
+include tools
 include dotfiles
