@@ -1,6 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby ts=2 sw=2 :
 
+clara_nodes = { :platform => "10.11.1.100",
+                :dpe1 => "10.11.1.101",
+                :dpe2 => "10.11.1.102",
+              }
+
+
 Vagrant.require_version ">= 1.4"
 
 Vagrant.configure("2") do |config|
@@ -9,18 +15,17 @@ Vagrant.configure("2") do |config|
     config.cache.scope = :box
   end
 
-  clara_nodes = { :platform => "10.11.1.100",
-                  :dpe1 => "10.11.1.101",
-                  :dpe2 => "10.11.1.102",
-                }
-
   clara_nodes.each do | node_name, node_ip |
     config.vm.define node_name do | node_config |
+
       node_config.vm.box = "ubuntu/trusty64"
       node_config.vm.hostname = node_name.to_s
       node_config.vm.network :private_network, ip: node_ip
+
+      base_dir = "/home/vagrant/clara"
+      node_config.vm.synced_folder ENV['CLARA_SERVICES'], "#{base_dir}/services", create: true
+
       # node_config.vm.provision :shell, :inline => "sudo apt-get update"
-      node_config.vm.synced_folder ENV['CLARA_SERVICES'], "/home/vagrant/clas12/services"
       node_config.vm.provision :puppet do | puppet |
         puppet.manifests_path = "provision/manifests"
         puppet.manifest_file = "default.pp"
