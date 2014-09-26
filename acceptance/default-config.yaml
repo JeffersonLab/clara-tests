@@ -9,3 +9,5 @@ clara:
     path: clara-python
   webapp:
     path: clara-webapp
+    provision:
+      - bundle install
