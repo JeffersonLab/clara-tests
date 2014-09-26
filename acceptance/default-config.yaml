@@ -1,0 +1,11 @@
+---
+clara:
+  srcdir: ../..
+  java:
+    path: clara-java
+  cpp:
+    path: clara-cpp
+  python:
+    path: clara-python
+  webapp:
+    path: clara-webapp

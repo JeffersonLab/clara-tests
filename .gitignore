@@ -1,3 +1,4 @@
 .vagrant/
+/acceptance/custom-config.yaml
 /acceptance/services
 /acceptance/log
