@@ -8,6 +8,11 @@ class devtools {
         "ant",
     ]:
     }
+
+    package { [
+        "bundler",
+    ]:
+    }
 }
 
 # Fix "localhost" IP in Java
