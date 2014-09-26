@@ -1,0 +1,4 @@
+*.java diff=java
+*.cpp diff=cpp
+*.cxx diff=cpp
+*.tex diff=tex

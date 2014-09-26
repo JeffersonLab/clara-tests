@@ -1,0 +1,30 @@
+[core]
+    autocrlf = false
+    excludesfile = ~/.config/git/ignore
+    attributesfile = ~/.config/git/attributes
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+    interactive = auto
+    ui = auto
+[color "status"]
+    untracked = blue
+    changed = red
+[alias]
+    st = status -sb
+    ci = commit
+    br = branch
+    co = checkout
+    di = diff
+    ds = diff --staged
+    dh = diff HEAD
+    ll = log --oneline --decorate
+    ri = rebase --interactive
+[color "diff"]
+    meta = magenta
+[diff]
+    mnemonicprefix = true
+[svn]
+    rmdir = true
+	pushmergeinfo = true
