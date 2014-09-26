@@ -12,6 +12,7 @@ class network {
 }
 
 include network
+include locales
 include clara
 include tools
 include dotfiles
