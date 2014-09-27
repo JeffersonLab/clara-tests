@@ -9,4 +9,10 @@ class tools {
         "subversion",
     ]:
     }
+
+    package { [
+        "screen",
+        "tmux",
+    ]:
+    }
 }
