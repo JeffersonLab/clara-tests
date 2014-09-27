@@ -1,4 +1,6 @@
 class clara {
     include clara::java
-    include clara::webapp
+    if $hostname =~ /^platform/ {
+        include clara::webapp
+    }
 }

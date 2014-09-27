@@ -58,7 +58,9 @@ Vagrant.configure("2") do |config|
             version_conf["provision"].each do | command |
               script += "\n#{command}"
             end
-            node_config.vm.provision "shell", inline: script, privileged: false
+            if clara_version != "webapp" or node_name.to_s == "platform"
+              node_config.vm.provision "shell", inline: script, privileged: false
+            end
           end
         end
       end
