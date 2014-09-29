@@ -11,3 +11,4 @@ clara:
     path: clara-webapp
     provision:
       - bundle install
+      - rake db:migrate
