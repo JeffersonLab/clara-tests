@@ -53,7 +53,8 @@ Vagrant.configure("2") do |config|
       ["java", "cpp", "python", "webapp"].each do | clara_version |
         if clara_conf.key?(clara_version)
           version_conf = clara_conf[clara_version]
-          if version_conf.key?("provision")
+          version_srcdir = clara_src + "/" + version_conf["path"]
+          if version_conf.key?("provision") && File.directory?(version_srcdir)
             script = "cd #{base_dir}/src/#{version_conf["path"]}"
             version_conf["provision"].each do | command |
               script += "\n#{command}"
