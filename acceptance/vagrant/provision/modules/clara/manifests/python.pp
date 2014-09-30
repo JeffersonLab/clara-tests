@@ -5,6 +5,7 @@ class clara::python {
 
     package { [
         "python-zmq",
+        "python-protobuf",
     ]:
     }
 }
