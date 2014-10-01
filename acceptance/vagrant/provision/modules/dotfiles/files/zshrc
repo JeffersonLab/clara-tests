@@ -1,21 +1,11 @@
-# Set up the prompt
+# ~/.zshrc: executed by zsh for non-login shells.
 
-autoload -Uz promptinit
-promptinit
-prompt adam1
+#############################################################################
+# CONFIGURATIONS                {{{1
+#############################################################################
 
-setopt histignorealldups sharehistory
-
-# Use emacs keybindings even if our EDITOR is set to vi
-bindkey -e
-
-# Better history navigation
-bindkey "" history-search-backward
-bindkey "" history-search-forward
-bindkey "[A" history-search-backward
-bindkey "[B" history-search-forward
-
-# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+# keep history file between sessions
+DIRSTACKSIZE=15
 HISTSIZE=1000
 SAVEHIST=1000
 HISTFILE=~/.zsh_history
@@ -23,30 +13,133 @@ HISTFILE=~/.zsh_history
 # time command output as bash output
 TIMEFMT=$'\nreal\t%E\nuser\t%U\nsys\t%S'
 
-# Use modern completion system
-autoload -Uz compinit
-compinit
+# Make the behavior of M-b and M-f to jump over each word separated by a '/'
+# (more like bash)
+WORDCHARS=''
 
-zstyle ':completion:*' auto-description 'specify: %d'
-zstyle ':completion:*' completer _expand _complete _correct _approximate
-zstyle ':completion:*' format 'Completing %d'
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' menu select=2
-zstyle ':completion:*' special-dirs true
-eval "$(dircolors -b)"
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-zstyle ':completion:*' menu select=long
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle ':completion:*' use-compctl false
-zstyle ':completion:*' verbose true
 
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
 
-# color ouput
+bindkey "" history-search-backward
+bindkey "" history-search-forward
+bindkey "[A" history-search-backward
+bindkey "[B" history-search-forward
+
+
+#############################################################################
+# OPTIONS                       {{{1
+#############################################################################
+
+# Changing directories
+unsetopt AUTO_CD
+  setopt AUTO_PUSHD
+  setopt PUSHD_IGNORE_DUPS
+  setopt PUSHD_MINUS
+  setopt PUSHD_TO_HOME
+  setopt PUSHD_SILENT
+
+# Completion
+  setopt ALWAYS_TO_END
+  setopt AUTO_LIST
+  setopt AUTO_MENU
+  setopt AUTO_PARAM_SLASH
+  setopt COMPLETE_IN_WORD
+  setopt LIST_AMBIGUOUS
+  setopt LIST_PACKED
+unsetopt LIST_ROWS_FIRST
+  setopt LIST_TYPES
+unsetopt MENU_COMPLETE
+
+# Expansion and globbing
+unsetopt EXTENDED_GLOB
+  setopt GLOB_COMPLETE
+  setopt MARK_DIRS
+unsetopt NOMATCH
+unsetopt CASE_GLOB
+  setopt NUMERIC_GLOB_SORT
+
+# History
+  setopt APPEND_HISTORY
+  setopt BANG_HIST
+unsetopt EXTENDED_HISTORY
+  setopt HIST_EXPIRE_DUPS_FIRST
+  setopt HIST_FIND_NO_DUPS
+  setopt HIST_IGNORE_ALL_DUPS
+  setopt HIST_IGNORE_DUPS
+  setopt HIST_IGNORE_SPACE
+unsetopt HIST_NO_FUNCTIONS
+  setopt HIST_NO_STORE
+  setopt HIST_REDUCE_BLANKS
+  setopt HIST_SAVE_NO_DUPS
+unsetopt HIST_VERIFY
+  setopt INC_APPEND_HISTORY
+  setopt SHARE_HISTORY
+
+# Input/Output
+unsetopt CLOBBER
+unsetopt CORRECT
+unsetopt CORRECT_ALL
+unsetopt FLOW_CONTROL
+  setopt HASH_CMDS
+  setopt INTERACTIVE_COMMENTS
+  setopt PRINT_EIGHT_BIT
+  setopt RM_STAR_SILENT
+unsetopt RM_STAR_WAIT
+  setopt SHORT_LOOPS
+
+# Job control
+  setopt AUTO_RESUME
+unsetopt BG_NICE
+  setopt CHECK_JOBS
+unsetopt HUP
+  setopt LONG_LIST_JOBS
+  setopt NOTIFY
+
+# Prompting
+  setopt PROMPT_SUBST
+
+# Zle
+unsetopt BEEP
+
+
+#############################################################################
+# FUNCTIONS                     {{{1
+#############################################################################
+
+function screen ()
+{
+    export SCREEN_PREV_TERM=$TERM
+    export SCREEN_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+    /usr/bin/screen "$@"
+    unset SCREEN_LD_LIBRARY_PATH SCREEN_PREV_TERM
+}
+
+
+function see_file()
+{
+    if [[ $# -eq 1 ]]; then
+        if [[ ! -r "$1" ]]; then
+            echo "Could not open file $1"
+            return 1
+        fi
+        local nl=`wc -l "$1" | cut -d' ' -f1`
+        if [[ $nl -gt $(( LINES - 2 )) ]]; then
+            less -R "$1"
+        else
+            cat "$1"
+        fi
+    else
+        echo "Usage: see_file <file>"
+        return 1
+    fi
+}
+
+
+#############################################################################
+# ALIASES                       {{{1
+#############################################################################
+
 alias ls='ls --color=auto -v -h'
 alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
@@ -55,12 +148,140 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-alias ll='ls -l'
+# files
+alias see='see_file'
+
+# aptitude aliases
+alias update="sudo aptitude update"
+alias upgrade="sudo aptitude safe-upgrade"
+alias install="sudo aptitude install"
+alias purge="sudo aptitude purge"
+alias show="sudo aptitude show"
+alias search="sudo aptitude search"
+
+# system aliases
+alias sudo='sudo '
+alias svim='sudo vim'
 
 
-# Clara
-if [ -z "$CLARA_ENV" ]; then
-    export CLARA_SERVICES=$HOME/clara/services
-    export PATH=$PATH:$HOME/clara/services/bin
-    export CLARA_ENV=true
+#############################################################################
+# COMPLETION                    {{{1
+#############################################################################
+
+autoload -Uz compinit
+compinit
+
+_force_rehash() {
+    (( CURRENT == 1 )) && rehash
+    return 1    # Because we did not really complete anything
+}
+
+zstyle ':completion:*' completer _oldlist _expand _force_rehash _complete _match
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' use-compctl false
+
+zstyle ':completion:*:kill:*' menu yes select
+zstyle ':completion:*:kill:*' force-list always
+
+zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,time,command'
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+
+
+#############################################################################
+# SETUP                         {{{1
+#############################################################################
+
+# restore $LD_LIBRARY_PATH when screen is used
+if [[ ! -z $SCREEN_LD_LIBRARY_PATH ]]; then
+    export LD_LIBRARY_PATH=$SCREEN_LD_LIBRARY_PATH
 fi
+
+# less colors for man pages
+export LESS_TERMCAP_mb=$'\e[01;34m'       # begin blinking
+export LESS_TERMCAP_md=$'\e[01;34m'       # begin bold
+export LESS_TERMCAP_me=$'\e[0m'           # end mode
+export LESS_TERMCAP_us=$'\e[01;31m'       # begin underline
+export LESS_TERMCAP_ue=$'\e[0m'           # end underline
+
+
+#############################################################################
+# PROMPT                        {{{1
+#############################################################################
+
+# Use colors
+autoload -U colors zsh/terminfo
+colors
+
+# list of colors
+for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+    eval PR_$color='%{$fg[${(L)color}]%}'
+done
+
+PR_NONE="%{$reset_color%}"
+
+autoload -Uz vcs_info
+
+zstyle ':vcs_info:*' stagedstr "${PR_GREEN}▪"
+zstyle ':vcs_info:*' unstagedstr "${PR_RED}▪"
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' enable git svn
+
+precmd ()
+{
+    # VCS information in prompt
+    if git status --porcelain 2> /dev/null | grep -q '^??'; then
+        zstyle ':vcs_info:*' formats \
+            "${PR_YELLOW}(%b%c%u${PR_BLUE}▪${PR_YELLOW}) "
+        zstyle ':vcs_info:*' actionformats \
+            "${PR_YELLOW}(%b%c%u${PR_BLUE}▪${PR_NONE}|${PR_YELLOW}%a) "
+    else
+        zstyle ':vcs_info:*' formats \
+            "${PR_YELLOW}(%b%c%u${PR_YELLOW}) "
+        zstyle ':vcs_info:*' actionformats \
+            "${PR_YELLOW}(%b%c%u${PR_NONE}|${PR_YELLOW}%a) "
+    fi
+    vcs_info
+}
+
+
+prompt ()
+{
+    local pc_b=${PR_WHITE}
+    local pc_n=${PR_CYAN}
+    local pc_j=${PR_GREEN}
+
+    if [[ $UID == 0 ]]; then
+        pc_b=${PR_WHITE}
+        pc_n=${PR_CYAN}
+        pc_j=${PR_GREEN}
+    fi
+
+    USER_HOST=${pc_b}[${pc_n}%n${pc_b}@${pc_n}%m${PR_WHITE}]
+    BG_JOBS=%(1j.${pc_j}[%j].)
+
+    if ps aux | grep $PPID | grep -q vim; then
+        USER_HOST=${pc_b}[${pc_n}VIM_SHELL${pc_b}]
+    fi
+
+    local return_code="%(?..%{$fg[magenta]%}ϯ%? %{$reset_color%})"
+    PROMPT='╭─ ${USER_HOST}${BG_JOBS} ${PR_RED}%40<...<%~%<<${PR_NONE}
+╰──── ${vcs_info_msg_0_}${PR_NONE}'"${return_code}%# "
+}
+
+prompt
+
+
+#}}}
+#############################################################################
+
+# vim: foldmethod=marker
