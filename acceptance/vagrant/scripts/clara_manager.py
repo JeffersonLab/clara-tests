@@ -1,7 +1,9 @@
+import atexit
 import os
 import socket
 import subprocess
 import sys
+import time
 
 clara = {
     'services': '/home/vagrant/clara/services',
@@ -14,6 +16,13 @@ clara = {
 }
 
 host_ip = socket.gethostbyname(socket.gethostname())
+
+
+def stop_all(manager):
+    for run in manager.instances.values():
+        run.proc.terminate()
+        for log in run.logs:
+            log.close()
 
 
 class ClaraProcess():
@@ -74,4 +83,9 @@ class ClaraManager():
 
 if __name__ == "__main__":
     manager = ClaraManager(clara)
+    atexit.register(stop_all, manager)
+
     manager.start_clara(sys.argv[1], sys.argv[2])
+
+    while True:
+        time.sleep(1)
