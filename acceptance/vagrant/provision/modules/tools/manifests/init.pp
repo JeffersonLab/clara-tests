@@ -18,6 +18,8 @@ class tools {
 
     package { [
         "colordiff",
+        "cdargs",
+        "ranger",
     ]:
     }
 }

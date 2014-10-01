@@ -167,7 +167,9 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
+
 # files
+alias rr='ranger'
 alias diff='color_diff'
 alias see='see_file'
 
@@ -220,6 +222,11 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 #############################################################################
 # SETUP                         {{{1
 #############################################################################
+
+# alias and functions for using cdargs
+if [[ -e /usr/local/Cellar/cdargs/1.35/contrib/cdargs-bash.sh ]]; then
+    . /usr/local/Cellar/cdargs/1.35/contrib/cdargs-bash.sh
+fi
 
 # restore $LD_LIBRARY_PATH when screen is used
 if [[ ! -z $SCREEN_LD_LIBRARY_PATH ]]; then
