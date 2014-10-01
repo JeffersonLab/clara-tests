@@ -4,7 +4,8 @@ class tools {
     }
 
     package { [
-        "git-all",
+        "git",
+        "git-svn",
         "tig",
         "subversion",
     ]:
