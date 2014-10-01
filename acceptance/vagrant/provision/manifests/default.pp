@@ -15,6 +15,13 @@ class common {
         owner => "vagrant",
         group => "vagrant",
     }
+
+    package { [
+        "python-mock",
+    ]:
+        ensure => latest,
+    }
+
 }
 
 include common
