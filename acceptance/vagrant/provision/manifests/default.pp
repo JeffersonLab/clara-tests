@@ -9,6 +9,12 @@ class common {
     host {
         $hostname: ip => $private_ip
     }
+
+    file { "/home/vagrant/clara":
+        ensure => "directory",
+        owner => "vagrant",
+        group => "vagrant",
+    }
 }
 
 include common

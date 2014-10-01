@@ -1,6 +1,8 @@
 class dotfiles::terminal {
     File {
         ensure => present,
+        owner => "vagrant",
+        group => "vagrant",
     }
 
     file { "/home/vagrant/.tmux.conf":

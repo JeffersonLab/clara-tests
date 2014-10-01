@@ -1,6 +1,8 @@
 class dotfiles::git {
     File {
         ensure => present,
+        owner  => "vagrant",
+        group  => "vagrant",
     }
 
     file { "/home/vagrant/.config":
