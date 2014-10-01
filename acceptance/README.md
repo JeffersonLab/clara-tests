@@ -1,3 +1,7 @@
+# Clara Acceptance Tests
+
+Test Clara messaging using a local mini cloud of virtual machines.
+
 ## Dependencies
 
 - Install [Virtualbox](https://www.virtualbox.org/)
@@ -32,3 +36,7 @@ To start the cluster of nodes, run the following:
 
     $ cd vagrant/
     $ vagrant up
+
+## Run Tests
+
+TODO.
