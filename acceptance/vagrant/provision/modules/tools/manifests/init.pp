@@ -15,4 +15,9 @@ class tools {
         "tmux",
     ]:
     }
+
+    package { [
+        "colordiff",
+    ]:
+    }
 }

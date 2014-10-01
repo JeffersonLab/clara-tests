@@ -10,4 +10,8 @@ class dotfiles::terminal {
     file { "/home/vagrant/.screenrc":
         source => "puppet:///modules/dotfiles/screenrc",
     }
+
+    file { "/home/vagrant/.colordiffrc":
+        source => "puppet:///modules/dotfiles/colordiffrc",
+    }
 }
