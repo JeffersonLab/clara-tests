@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import time
+import zmq
 
 clara = {
     'services': '/home/vagrant/clara/services',
@@ -16,6 +17,7 @@ clara = {
 }
 
 host_ip = socket.gethostbyname(socket.gethostname())
+port = "7788"
 
 
 def stop_all(manager):
@@ -37,6 +39,14 @@ class ClaraManager():
         self.instances = {}
         self.orchestrators = []
         self.logs = []
+
+    def run(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        socket.bind("tcp://*:%s" % port)
+        time.sleep(0.1)
+        while True:
+            msg = socket.recv()
 
     def start_clara(self, clara_lang, clara_instance):
 
@@ -85,7 +95,7 @@ if __name__ == "__main__":
     manager = ClaraManager(clara)
     atexit.register(stop_all, manager)
 
-    manager.start_clara(sys.argv[1], sys.argv[2])
-
-    while True:
-        time.sleep(1)
+    try:
+        manager.run()
+    except KeyboardInterrupt:
+        pass

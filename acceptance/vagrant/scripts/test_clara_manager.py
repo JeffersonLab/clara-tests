@@ -1,6 +1,7 @@
 import unittest
 import mock
 import os
+import zmq
 
 from clara_manager import ClaraManager
 from clara_manager import host_ip
@@ -72,6 +73,23 @@ class testClaraManager(unittest.TestCase):
 
             self.assertEquals(clara_run.proc, 'ok')
             self.assertSequenceEqual(clara_run.logs, [out_log, err_log])
+
+    @mock.patch('zmq.Socket')
+    @mock.patch('zmq.Context')
+    def test_zmq_server_is_up(self, mock_ctx, mock_sck):
+        manager = ClaraManager(clara)
+
+        ctx = mock_ctx.return_value
+        sck = mock_sck.return_value
+
+        ctx.socket.return_value = sck
+        sck.recv.side_effect = NotImplementedError
+
+        with self.assertRaises(NotImplementedError):
+            manager.run()
+
+        ctx.socket.assert_called_once_with(zmq.REP)
+        sck.bind.assert_called_once_with("tcp://*:7788")
 
 
 if __name__ == '__main__':
