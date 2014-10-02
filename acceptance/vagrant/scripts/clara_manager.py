@@ -51,6 +51,24 @@ class ClaraManager():
         while True:
             msg = socket.recv()
 
+    def dispatch_request(self, msg):
+        try:
+            if not msg:
+                return ['ERROR', 'Empty request']
+            req = msg.split('/')
+            if len(req) != 4:
+                return ['ERROR', 'Bad request: %s' % msg]
+            _, lang, instance, action = req
+            if action == 'start':
+                self.start_clara(lang, instance)
+                return ['SUCCESS', '']
+            else:
+                return ['ERROR', 'Unsupported action: %s' % action]
+        except ClaraManagerError as e:
+            return ['ERROR', str(e)]
+        except Exception as e:
+            return ['ERROR', "Unexpected exception: " + str(e)]
+
     def start_clara(self, clara_lang, clara_instance):
         if clara_lang not in self.clara:
             raise ClaraManagerError('Bad language: %s' % clara_lang)

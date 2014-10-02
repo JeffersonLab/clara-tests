@@ -94,6 +94,63 @@ class testClaraManager(unittest.TestCase):
         ctx.socket.assert_called_once_with(zmq.REP)
         sck.bind.assert_called_once_with("tcp://*:7788")
 
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_empty_request(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = ''
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'Empty request'])
+
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_bad_request(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python'
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'Bad request: clara/python'])
+
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_bad_action(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/dpe/run'
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'Unsupported action: run'])
+
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_start_request(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/dpe/start'
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['SUCCESS', ''])
+
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_request_start_raises(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/monitor/start'
+        mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'Bad instance: monitor'])
+
+    @mock.patch('clara_manager.ClaraManager.start_clara')
+    def test_dispatch_request_start_unexpected_problem(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/monitor/start'
+        mock_sc.side_effect = OSError('Popen error')
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR',
+                                       'Unexpected exception: Popen error'])
+
 
 if __name__ == '__main__':
     unittest.main()
