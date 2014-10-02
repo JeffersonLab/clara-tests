@@ -259,6 +259,17 @@ class testClaraManager(unittest.TestCase):
         mock_sc.assert_called_once_with('python', 'dpe')
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
+    @mock.patch('clara_manager.stop_all')
+    def test_dispatch_stop_all_request(self, mock_sa):
+        manager = ClaraManager(clara)
+        msg = 'clara:stop:all:all'
+
+        res = manager.dispatch_request(msg)
+
+        mock_sa.assert_called_once_with(manager)
+        self.assertSequenceEqual(res, ['SUCCESS', ''])
+        self.assertTrue(not manager.instances)
+
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_request_start_raises(self, mock_sc):
         manager = ClaraManager(clara)

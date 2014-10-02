@@ -99,7 +99,10 @@ class ClaraManager():
             if action == 'start':
                 self.start_clara(lang, instance)
             elif action == 'stop':
-                self.stop_clara(lang, instance)
+                if lang == 'all' or instance == 'all':
+                    stop_all(self)
+                else:
+                    self.stop_clara(lang, instance)
             else:
                 return ['ERROR', 'Unsupported action: %s' % action]
 
