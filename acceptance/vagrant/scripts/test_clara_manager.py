@@ -5,6 +5,9 @@ import zmq
 
 from clara_manager import ClaraManager
 from clara_manager import ClaraManagerError
+from clara_manager import ClaraProcess
+from clara_manager import stop_process
+from clara_manager import stop_all
 from clara_manager import host_ip
 from clara_manager import __name__ as cm
 
@@ -89,6 +92,31 @@ class testClaraManager(unittest.TestCase):
 
             self.assertEquals(clara_run.proc, 'ok')
             self.assertSequenceEqual(clara_run.logs, [out_log, err_log])
+
+    def test_stop_process(self):
+        out_log = mock.Mock()
+        err_log = mock.Mock()
+        proc = mock.Mock()
+        run = ClaraProcess(proc, [out_log, err_log])
+
+        stop_process(run)
+
+        proc.terminate.assert_called_once_with()
+        out_log.close.assert_called_once_with()
+        err_log.close.assert_called_once_with()
+
+    @mock.patch('clara_manager.stop_process')
+    def test_stop_all(self, mock_sp):
+        manager = ClaraManager(clara)
+        manager.instances = {'p/d': 'p1', 'p/p': 'p2', 'j/d': 'p3'}
+
+        stop_all(manager)
+
+        mock_sp.assert_any_call('p1')
+        mock_sp.assert_any_call('p2')
+        mock_sp.assert_any_call('p3')
+        self.assertEqual(mock_sp.call_count, 3)
+        self.assertTrue(not manager.instances)
 
     @mock.patch('zmq.Socket')
     @mock.patch('zmq.Context')

@@ -21,11 +21,16 @@ host_ip = socket.gethostbyname(socket.gethostname())
 port = "7788"
 
 
+def stop_process(run):
+    run.proc.terminate()
+    for log in run.logs:
+        log.close()
+
+
 def stop_all(manager):
     for run in manager.instances.values():
-        run.proc.terminate()
-        for log in run.logs:
-            log.close()
+        stop_process(run)
+    manager.instances.clear()
 
 
 class ClaraProcess():
