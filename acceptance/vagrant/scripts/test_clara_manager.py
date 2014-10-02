@@ -79,7 +79,8 @@ class testClaraManager(unittest.TestCase):
 
     @mock.patch('zmq.Socket')
     @mock.patch('zmq.Context')
-    def test_zmq_server_is_up(self, mock_ctx, mock_sck):
+    @mock.patch('time.sleep')
+    def test_zmq_server_is_up(self, mock_t, mock_ctx, mock_sck):
         manager = ClaraManager(clara)
 
         ctx = mock_ctx.return_value
@@ -97,7 +98,8 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.dispatch_request')
     @mock.patch('zmq.Socket')
     @mock.patch('zmq.Context')
-    def test_zmq_server_reply(self, mock_ctx, mock_sck, mock_dr):
+    @mock.patch('time.sleep')
+    def test_zmq_server_reply(self, mock_t, mock_ctx, mock_sck, mock_dr):
         manager = ClaraManager(clara)
         msg = 'clara/python/dpe/start'
         res = ["SUCCESS", ""]
