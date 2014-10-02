@@ -18,6 +18,7 @@ class common {
 
     package { [
         "python-mock",
+        "python-daemon",
     ]:
         ensure => latest,
     }
