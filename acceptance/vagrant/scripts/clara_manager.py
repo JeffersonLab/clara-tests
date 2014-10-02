@@ -70,17 +70,21 @@ class ClaraManager():
         try:
             if not msg:
                 return ['ERROR', 'Empty request']
-            req = msg.split('/')
+            req = msg.split(':')
+
             if len(req) != 4:
-                return ['ERROR', 'Bad request: %s' % msg]
-            _, lang, instance, action = req
+                return ['ERROR', 'Bad request: "%s"' % msg]
+
+            _, action, lang, instance = req
             if action == 'start':
                 self.start_clara(lang, instance)
             elif action == 'stop':
                 self.stop_clara(lang, instance)
             else:
                 return ['ERROR', 'Unsupported action: %s' % action]
+
             return ['SUCCESS', '']
+
         except ClaraManagerError as e:
             return ['ERROR', str(e)]
         except Exception as e:

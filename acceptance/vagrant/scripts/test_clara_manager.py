@@ -182,7 +182,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('time.sleep')
     def test_zmq_server_reply(self, mock_t, mock_ctx, mock_sck, mock_dr):
         manager = ClaraManager(clara)
-        msg = 'clara/python/dpe/start'
+        msg = 'clara:start:python:dpe'
         res = ["SUCCESS", ""]
 
         sck = mock_sck.return_value
@@ -209,24 +209,24 @@ class testClaraManager(unittest.TestCase):
 
     def test_dispatch_bad_request(self):
         manager = ClaraManager(clara)
-        msg = 'clara/python'
+        msg = 'clara:start'
 
         res = manager.dispatch_request(msg)
 
-        self.assertSequenceEqual(res, ['ERROR', 'Bad request: clara/python'])
+        self.assertSequenceEqual(res, ['ERROR', 'Bad request: "clara:start"'])
 
     def test_dispatch_bad_action(self):
         manager = ClaraManager(clara)
-        msg = 'clara/python/dpe/run'
+        msg = 'clara:launch:python:dpe'
 
         res = manager.dispatch_request(msg)
 
-        self.assertSequenceEqual(res, ['ERROR', 'Unsupported action: run'])
+        self.assertSequenceEqual(res, ['ERROR', 'Unsupported action: launch'])
 
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_start_request(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/dpe/start'
+        msg = 'clara:start:python:dpe'
 
         res = manager.dispatch_request(msg)
 
@@ -236,7 +236,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.stop_clara')
     def test_dispatch_stop_request(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/dpe/stop'
+        msg = 'clara:stop:python:dpe'
 
         res = manager.dispatch_request(msg)
 
@@ -246,7 +246,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_request_start_raises(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/monitor/start'
+        msg = 'clara:start:python:monitor'
         mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
 
         res = manager.dispatch_request(msg)
@@ -256,7 +256,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_request_start_unexpected_problem(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/dpe/start'
+        msg = 'clara:start:python:dpe'
         mock_sc.side_effect = OSError('Popen error')
 
         res = manager.dispatch_request(msg)
@@ -267,7 +267,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.stop_clara')
     def test_dispatch_request_stop_raises(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/monitor/stop'
+        msg = 'clara:stop:python:monitor'
         mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
 
         res = manager.dispatch_request(msg)
