@@ -5,8 +5,6 @@ import subprocess
 import time
 import zmq
 
-from daemon import runner
-
 clara = {
     'services': '/home/vagrant/clara/services',
     'logs': '/home/vagrant/clara/log',
@@ -69,12 +67,6 @@ class ClaraManager():
         self.instances = {}
         self.orchestrators = []
         self.logs = []
-
-        self.stdin_path = '/dev/null'
-        self.stdout_path = '/dev/tty'
-        self.stderr_path = '/dev/tty'
-        self.pidfile_path = '/home/vagrant/clara/manager.pid'
-        self.pidfile_timeout = 5
 
     def run(self):
         context = zmq.Context()
@@ -173,8 +165,7 @@ if __name__ == "__main__":
     manager = ClaraManager(clara)
     atexit.register(stop_all, manager)
 
-    daemon_runner = runner.DaemonRunner(manager)
-    daemon_runner.daemon_context.working_directory = '/home/vagrant/clara'
-    daemon_runner.daemon_context.uid = 1000
-    daemon_runner.daemon_context.gid = 1000
-    daemon_runner.do_action()
+    try:
+        manager.run()
+    except KeyboardInterrupt:
+        pass
