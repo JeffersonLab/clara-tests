@@ -93,6 +93,46 @@ class testClaraManager(unittest.TestCase):
             self.assertEquals(clara_run.proc, 'ok')
             self.assertSequenceEqual(clara_run.logs, [out_log, err_log])
 
+    def test_stop_clara_bad_instance(self):
+        manager = ClaraManager(clara)
+
+        with self.assertRaises(ClaraManagerError) as e:
+            manager.stop_clara('python', 'monitor')
+        msg = 'Bad instance: monitor'
+        self.assertEquals(str(e.exception), msg)
+
+    def test_stop_clara_bad_lang(self):
+        manager = ClaraManager(clara)
+
+        with self.assertRaises(ClaraManagerError) as e:
+            manager.stop_clara('erlang', 'python')
+        msg = 'Bad language: erlang'
+        self.assertEquals(str(e.exception), msg)
+
+    def test_stop_clara_not_running(self):
+        manager = ClaraManager(clara)
+
+        with self.assertRaises(ClaraManagerError) as e:
+            manager.stop_clara('python', 'dpe')
+        msg = 'python/dpe is not running!'
+        self.assertEquals(str(e.exception), msg)
+
+    @mock.patch('clara_manager.stop_process')
+    def test_stop_clara(self, mock_stop):
+        run1 = ClaraProcess("1", None)
+        run2 = ClaraProcess("2", None)
+        run3 = ClaraProcess("3", None)
+        manager = ClaraManager(clara)
+        manager.instances = {
+            'python/dpe': run1, 'python/platform': run2, 'java/dpe': run3
+        }
+        result = {'python/platform': run2, 'java/dpe': run3}
+
+        manager.stop_clara('python', 'dpe')
+
+        mock_stop.assert_called_once_with(run1)
+        self.assertDictEqual(manager.instances, result)
+
     def test_stop_process(self):
         out_log = mock.Mock()
         err_log = mock.Mock()

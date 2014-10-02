@@ -111,6 +111,20 @@ class ClaraManager():
 
         self.instances[key] = ClaraProcess(clara_proc, [clara_out, clara_err])
 
+    def stop_clara(self, clara_lang, clara_instance):
+        if clara_lang not in self.clara:
+            raise ClaraManagerError('Bad language: %s' % clara_lang)
+
+        if clara_instance != 'platform' and clara_instance != 'dpe':
+            raise ClaraManagerError('Bad instance: %s' % clara_instance)
+
+        key = '%s/%s' % (clara_lang, clara_instance)
+        if key not in self.instances:
+            raise ClaraManagerError('%s is not running!' % key)
+
+        run = self.instances.pop(key)
+        stop_process(run)
+
     def _get_clara_logfile(self, clara_type, clara_instance, log_ext):
         name = '%s-%s-%s.%s' % (host_ip, clara_type, clara_instance, log_ext)
         return open(os.path.join(self.clara['logs'], name), "w+")
