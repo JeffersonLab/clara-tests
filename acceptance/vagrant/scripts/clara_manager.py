@@ -21,10 +21,30 @@ host_ip = socket.gethostbyname(socket.gethostname())
 port = "7788"
 
 
+def finished_process(proc, limit=25):
+    counter = 0
+    while proc.poll() is None:
+        counter += 1
+        if counter > limit:
+            return False
+        time.sleep(0.2)
+    return True
+
+
 def stop_process(run):
+    killed = False
+
     run.proc.terminate()
+    if not finished_process(run.proc):
+        run.proc.kill()
+        run.proc.wait()
+        killed = True
+
     for log in run.logs:
         log.close()
+
+    if killed:
+        raise OSError("Process has been killed")
 
 
 def stop_all(manager):

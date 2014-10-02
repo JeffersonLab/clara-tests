@@ -139,11 +139,27 @@ class testClaraManager(unittest.TestCase):
         proc = mock.Mock()
         run = ClaraProcess(proc, [out_log, err_log])
 
+        proc.poll.return_value = 0
         stop_process(run)
 
         proc.terminate.assert_called_once_with()
+        self.assertTrue(not proc.kill.called)
+
         out_log.close.assert_called_once_with()
         err_log.close.assert_called_once_with()
+
+    @mock.patch('time.sleep')
+    def test_stop_process_with_kill(self, mock_t):
+        proc = mock.Mock()
+        run = ClaraProcess(proc, [])
+
+        proc.poll.return_value = None
+
+        with self.assertRaises(OSError):
+            stop_process(run)
+
+        proc.kill.assert_called_once_with()
+        proc.wait.assert_called_once_with()
 
     @mock.patch('clara_manager.stop_process')
     def test_stop_all(self, mock_sp):
