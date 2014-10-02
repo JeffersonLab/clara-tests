@@ -20,15 +20,28 @@ clara = {
 
 class testClaraManager(unittest.TestCase):
 
-    def test_start_clara_wrong_instance(self):
+    def test_start_clara_bad_instance(self):
         manager = ClaraManager(clara)
-        with self.assertRaises(ClaraManagerError):
-            manager.start_clara('java', 'monitor')
+        with self.assertRaises(ClaraManagerError) as e:
+            manager.start_clara('python', 'monitor')
+        msg = 'Bad instance: monitor'
+        self.assertEquals(str(e.exception), msg)
 
-    def test_start_clara_wrong_type(self):
+    def test_start_clara_bad_lang(self):
         manager = ClaraManager(clara)
-        with self.assertRaises(ClaraManagerError):
+        with self.assertRaises(ClaraManagerError) as e:
             manager.start_clara('erlang', 'dpe')
+        msg = 'Bad language: erlang'
+        self.assertEquals(str(e.exception), msg)
+
+    def test_start_clara_is_running(self):
+        manager = ClaraManager(clara)
+        manager.instances = {'python/dpe': None}
+
+        with self.assertRaises(ClaraManagerError) as e:
+            manager.start_clara('python', 'dpe')
+        msg = 'python/dpe already running!'
+        self.assertEquals(str(e.exception), msg)
 
     def test_start_clara_python_platform(self):
         wd = '/clara/python'
