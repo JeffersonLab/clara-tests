@@ -76,9 +76,11 @@ class ClaraManager():
             _, lang, instance, action = req
             if action == 'start':
                 self.start_clara(lang, instance)
-                return ['SUCCESS', '']
+            elif action == 'stop':
+                self.stop_clara(lang, instance)
             else:
                 return ['ERROR', 'Unsupported action: %s' % action]
+            return ['SUCCESS', '']
         except ClaraManagerError as e:
             return ['ERROR', str(e)]
         except Exception as e:

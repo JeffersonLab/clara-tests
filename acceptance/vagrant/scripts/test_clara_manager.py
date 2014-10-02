@@ -233,6 +233,16 @@ class testClaraManager(unittest.TestCase):
         mock_sc.assert_called_once_with('python', 'dpe')
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
+    @mock.patch('clara_manager.ClaraManager.stop_clara')
+    def test_dispatch_stop_request(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/dpe/stop'
+
+        res = manager.dispatch_request(msg)
+
+        mock_sc.assert_called_once_with('python', 'dpe')
+        self.assertSequenceEqual(res, ['SUCCESS', ''])
+
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_request_start_raises(self, mock_sc):
         manager = ClaraManager(clara)
@@ -254,6 +264,15 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['ERROR',
                                        'Unexpected exception: Popen error'])
 
+    @mock.patch('clara_manager.ClaraManager.stop_clara')
+    def test_dispatch_request_stop_raises(self, mock_sc):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/monitor/stop'
+        mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'Bad instance: monitor'])
 
 if __name__ == '__main__':
     unittest.main()
