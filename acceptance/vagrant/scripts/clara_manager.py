@@ -50,6 +50,8 @@ class ClaraManager():
         time.sleep(0.1)
         while True:
             msg = socket.recv()
+            res = self.dispatch_request(msg)
+            socket.send_multipart(res)
 
     def dispatch_request(self, msg):
         try:

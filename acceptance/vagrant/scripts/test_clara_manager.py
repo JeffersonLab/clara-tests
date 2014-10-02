@@ -94,6 +94,28 @@ class testClaraManager(unittest.TestCase):
         ctx.socket.assert_called_once_with(zmq.REP)
         sck.bind.assert_called_once_with("tcp://*:7788")
 
+    @mock.patch('clara_manager.ClaraManager.dispatch_request')
+    @mock.patch('zmq.Socket')
+    @mock.patch('zmq.Context')
+    def test_zmq_server_reply(self, mock_ctx, mock_sck, mock_dr):
+        manager = ClaraManager(clara)
+        msg = 'clara/python/dpe/start'
+        res = ["SUCCESS", ""]
+
+        sck = mock_sck.return_value
+        mock_ctx.return_value.socket.return_value = sck
+
+        sck.recv.return_value = msg
+        mock_dr.return_value = res
+        sck.send_multipart.side_effect = NotImplementedError
+
+        with self.assertRaises(NotImplementedError):
+            manager.run()
+
+        sck.recv.assert_called_once_with()
+        mock_dr.assert_called_once_with(msg)
+        sck.send_multipart.assert_called_once_with(res)
+
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_empty_request(self, mock_sc):
         manager = ClaraManager(clara)
