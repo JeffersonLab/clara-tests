@@ -33,6 +33,10 @@ class ClaraProcess():
         self.logs = logs
 
 
+class ClaraManagerError(Exception):
+    pass
+
+
 class ClaraManager():
     def __init__(self, clara):
         self.clara = clara
@@ -49,16 +53,15 @@ class ClaraManager():
             msg = socket.recv()
 
     def start_clara(self, clara_lang, clara_instance):
-
         if clara_lang not in self.clara:
-            return False
+            raise ClaraManagerError('Bad language: %s' % clara_lang)
 
         if clara_instance != 'platform' and clara_instance != 'dpe':
-            return False
+            raise ClaraManagerError('Bad instance: %s' % clara_instance)
 
         key = '%s/%s' % (clara_lang, clara_instance)
         if key in self.instances:
-            return False
+            raise ClaraManagerError('%s already running!' % key)
 
         clara_conf = self.clara[clara_lang]
 

@@ -4,6 +4,7 @@ import os
 import zmq
 
 from clara_manager import ClaraManager
+from clara_manager import ClaraManagerError
 from clara_manager import host_ip
 from clara_manager import __name__ as cm
 
@@ -21,11 +22,13 @@ class testClaraManager(unittest.TestCase):
 
     def test_start_clara_wrong_instance(self):
         manager = ClaraManager(clara)
-        self.assertFalse(manager.start_clara('java', 'monitor'))
+        with self.assertRaises(ClaraManagerError):
+            manager.start_clara('java', 'monitor')
 
     def test_start_clara_wrong_type(self):
         manager = ClaraManager(clara)
-        self.assertFalse(manager.start_clara('erlang', 'dpe'))
+        with self.assertRaises(ClaraManagerError):
+            manager.start_clara('erlang', 'dpe')
 
     def test_start_clara_python_platform(self):
         wd = '/clara/python'
