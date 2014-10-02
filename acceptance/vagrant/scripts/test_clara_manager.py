@@ -131,8 +131,7 @@ class testClaraManager(unittest.TestCase):
         mock_dr.assert_called_once_with(msg)
         sck.send_multipart.assert_called_once_with(res)
 
-    @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_empty_request(self, mock_sc):
+    def test_dispatch_empty_request(self):
         manager = ClaraManager(clara)
         msg = ''
 
@@ -140,8 +139,7 @@ class testClaraManager(unittest.TestCase):
 
         self.assertSequenceEqual(res, ['ERROR', 'Empty request'])
 
-    @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_bad_request(self, mock_sc):
+    def test_dispatch_bad_request(self):
         manager = ClaraManager(clara)
         msg = 'clara/python'
 
@@ -149,8 +147,7 @@ class testClaraManager(unittest.TestCase):
 
         self.assertSequenceEqual(res, ['ERROR', 'Bad request: clara/python'])
 
-    @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_bad_action(self, mock_sc):
+    def test_dispatch_bad_action(self):
         manager = ClaraManager(clara)
         msg = 'clara/python/dpe/run'
 
@@ -165,6 +162,7 @@ class testClaraManager(unittest.TestCase):
 
         res = manager.dispatch_request(msg)
 
+        mock_sc.assert_called_once_with('python', 'dpe')
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
     @mock.patch('clara_manager.ClaraManager.start_clara')
@@ -180,7 +178,7 @@ class testClaraManager(unittest.TestCase):
     @mock.patch('clara_manager.ClaraManager.start_clara')
     def test_dispatch_request_start_unexpected_problem(self, mock_sc):
         manager = ClaraManager(clara)
-        msg = 'clara/python/monitor/start'
+        msg = 'clara/python/dpe/start'
         mock_sc.side_effect = OSError('Popen error')
 
         res = manager.dispatch_request(msg)
