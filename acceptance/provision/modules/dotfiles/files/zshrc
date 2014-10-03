@@ -25,6 +25,8 @@ bindkey "" history-search-backward
 bindkey "" history-search-forward
 bindkey "[A" history-search-backward
 bindkey "[B" history-search-forward
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
 
 
 #############################################################################
