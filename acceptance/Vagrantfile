@@ -4,17 +4,13 @@
 require 'yaml'
 require 'pathname'
 
-if File.exist?('../custom-config.yaml')
-  test_conf = YAML.load_file('../custom-config.yaml')
+if File.exist?('custom-config.yaml')
+  test_conf = YAML.load_file('custom-config.yaml')
 else
-  test_conf = YAML.load_file('../default-config.yaml')
+  test_conf = YAML.load_file('default-config.yaml')
 end
 clara_conf = test_conf["clara"]
-
 clara_src = clara_conf["srcdir"]
-if not (Pathname.new clara_src).absolute?
-  clara_src = "../" + clara_src
-end
 
 clara_nodes = { :platform => "10.11.1.100",
                 :dpe1 => "10.11.1.101",
@@ -38,8 +34,8 @@ Vagrant.configure("2") do |config|
       node_config.vm.network :private_network, ip: node_ip
 
       base_dir = "/home/vagrant/clara"
-      node_config.vm.synced_folder "../services", "#{base_dir}/services", create: true
-      node_config.vm.synced_folder "../log", "#{base_dir}/log", create: true
+      node_config.vm.synced_folder "services", "#{base_dir}/services", create: true
+      node_config.vm.synced_folder "log", "#{base_dir}/log", create: true
       node_config.vm.synced_folder clara_src, "#{base_dir}/src"
 
       # node_config.vm.provision :shell, :inline => "sudo apt-get update"

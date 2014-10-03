@@ -34,7 +34,6 @@ names of the directories for each project.
 
 To start the cluster of nodes, run the following:
 
-    $ cd vagrant/
     $ vagrant up
 
 ## Run Tests
