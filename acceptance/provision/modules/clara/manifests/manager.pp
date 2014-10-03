@@ -8,6 +8,7 @@ class clara::manager {
     service { "clara-manager":
         ensure => "running",
         enable => "true",
+        require => Package["python-zmq"],
     }
 
     file { "/etc/init/clara-manager.conf":
