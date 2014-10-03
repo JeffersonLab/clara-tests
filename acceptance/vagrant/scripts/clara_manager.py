@@ -49,7 +49,10 @@ def stop_process(run):
 
 def stop_all(manager):
     for run in manager.instances.values():
-        stop_process(run)
+        try:
+            stop_process(run)
+        except Exception:
+            pass
     manager.instances.clear()
 
 

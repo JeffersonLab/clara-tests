@@ -174,6 +174,21 @@ class testClaraManager(unittest.TestCase):
         self.assertEqual(mock_sp.call_count, 3)
         self.assertTrue(not manager.instances)
 
+    @mock.patch('clara_manager.stop_process')
+    def test_stop_all_with_kill(self, mock_sp):
+        manager = ClaraManager(clara)
+        manager.instances = {'p/d': 'p1', 'p/p': 'p2', 'j/d': 'p3'}
+
+        mock_sp.side_effect = OSError
+
+        stop_all(manager)
+
+        mock_sp.assert_any_call('p1')
+        mock_sp.assert_any_call('p2')
+        mock_sp.assert_any_call('p3')
+        self.assertEqual(mock_sp.call_count, 3)
+        self.assertTrue(not manager.instances)
+
     @mock.patch('zmq.Socket')
     @mock.patch('zmq.Context')
     @mock.patch('time.sleep')
