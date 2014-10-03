@@ -9,9 +9,9 @@ import zmq
 
 clara = {
     'services': '/home/vagrant/clara/services',
-    'logs': '/home/vagrant/clara/log',
+    'logs': '/home/vagrant/clara/services/log',
     'python': {
-        'fullpath': '/home/vagrant/clara/src/python',
+        'fullpath': '/home/vagrant/clara/dev/python',
         'platform': 'python -u core/system/Platform.py',
         'dpe': 'python -u core/system/Dpe.py',
     },

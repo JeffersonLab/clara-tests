@@ -10,10 +10,20 @@ class common {
         $hostname: ip => $private_ip
     }
 
-    file { "/home/vagrant/clara":
+    file { [
+        "/home/vagrant/clara",
+        "/vagrant/services",
+        "/vagrant/services/log",
+    ]:
         ensure => "directory",
         owner => "vagrant",
         group => "vagrant",
+    }
+
+    file { "/home/vagrant/clara/services":
+        ensure => "link",
+        target => "/vagrant/services",
+        force  => "true",
     }
 }
 

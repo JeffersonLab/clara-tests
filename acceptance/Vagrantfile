@@ -33,10 +33,8 @@ Vagrant.configure("2") do |config|
       node_config.vm.hostname = node_name.to_s
       node_config.vm.network :private_network, ip: node_ip
 
-      base_dir = "/home/vagrant/clara"
-      node_config.vm.synced_folder "services", "#{base_dir}/services", create: true
-      node_config.vm.synced_folder "log", "#{base_dir}/log", create: true
-      node_config.vm.synced_folder clara_src, "#{base_dir}/src"
+      dev_dir = "/home/vagrant/clara/dev"
+      node_config.vm.synced_folder clara_src, dev_dir
 
       # node_config.vm.provision :shell, :inline => "sudo apt-get update"
       node_config.vm.provision :puppet do | puppet |
@@ -51,7 +49,7 @@ Vagrant.configure("2") do |config|
           version_conf = clara_conf[clara_version]
           version_srcdir = clara_src + "/" + version_conf["path"]
           if version_conf.key?("provision") && File.directory?(version_srcdir)
-            script = "cd #{base_dir}/src/#{version_conf["path"]}"
+            script = "cd #{dev_dir}/#{version_conf["path"]}"
             version_conf["provision"].each do | command |
               script += "\n#{command}"
             end
