@@ -4,4 +4,5 @@ class clara {
     if $hostname =~ /^platform/ {
         include clara::webapp
     }
+    include clara::manager
 }
