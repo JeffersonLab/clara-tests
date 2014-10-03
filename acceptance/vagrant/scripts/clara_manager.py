@@ -1,7 +1,9 @@
 import atexit
 import os
+import signal
 import socket
 import subprocess
+import sys
 import time
 import zmq
 
@@ -163,9 +165,9 @@ class ClaraManager():
 
 if __name__ == "__main__":
     manager = ClaraManager(clara)
-    atexit.register(stop_all, manager)
 
-    try:
-        manager.run()
-    except KeyboardInterrupt:
-        pass
+    atexit.register(stop_all, manager)
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(sig, lambda num, frame: sys.exit(1))
+
+    manager.run()
