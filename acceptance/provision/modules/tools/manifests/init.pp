@@ -12,6 +12,8 @@ class tools {
     }
 
     package { [
+        "vim-nox",
+        "emacs24-nox",
         "screen",
         "tmux",
     ]:

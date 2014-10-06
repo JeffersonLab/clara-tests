@@ -1,0 +1,132 @@
+" ~/.vimrc: executed by Vim at startup
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Use Vim settings, rather than Vi settings (much better!).
+set nocompatible
+
+" Switch syntax highlighting on
+syntax on
+
+" Enable file type detection and do language-dependent indenting.
+filetype plugin indent on
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" OPTIONS                               {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+set history=500                             " How many lines of history
+set vb t_vb=                                " Disable beep
+set synmaxcol=128                           " Prevent lag with long lines
+
+set autoread                                " Read files if changed outside
+set nobackup                                " Do not use backups (Git FTW)
+set noswapfile                              " They're just annoying.
+set fileencoding=utf-8                      " Default file encoding
+set fileformats=unix,dos,mac                " Support all EOLs by default
+set fileformat=unix                         " Default end of line
+
+set mouse=a                                 " Use mouse in all modes
+set backspace=indent,eol,start              " Backspace works in Insert mode
+set whichwrap=b,s,<,>,[,]                   " Move cursor to other lines
+
+set hidden                                  " Change buffer whitout saving
+set switchbuf=useopen,usetab                " Change to buffer in open window
+
+set tabpagemax=15                           " Show 15 tabs
+set showmode                                " Always show the mode
+set showcmd                                 " Always show the command
+set ruler                                   " Show position of the cursor
+set laststatus=2                            " Always show statusline
+set shortmess=aI                            " Abbreviate status messages
+set rulerformat=%25(%LL\ \ \ %l,%c%V%=%P%)  " Ruler string
+
+set wildmenu                                " Better command-line completion
+set wildmode=longest,full                   " Completion options
+set wildignore=*.bak,*.o,*.os,*.so,*.gch,*.class,*~,*.py[co],*.rb[co]
+                                            " Ignore these files
+
+set tabstop=4                               " Four spaces for a tab
+set softtabstop=4                           " Four spaces for a tab
+set smarttab                                " Smart tabs at beginning of line
+set expandtab                               " Use spaces instead of tabs
+set shiftround                              " Indent to multiple of shiftwidth
+set shiftwidth=4                            " Default indent of four spaces
+
+set formatoptions=tq2                       " Set format options
+set autoindent                              " Indent new lines using previous
+set wrap                                    " Softwrap long lines
+set display+=lastline                       " If wrap set, display last line
+set number                                  " Show line numbers
+set virtualedit=block                       " Move freely in visual block
+set linebreak                               " Wrap at spaces characters
+set nojoinspaces                            " One space after sentences
+set splitright
+
+set incsearch                               " Search word while typing
+set ignorecase                              " Ignore case in search patterns
+set smartcase                               " But override if uppercase used
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" GLOBAL MAPPINGS                       {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Omnicompletion popup menu like IDE
+inoremap <expr>     <CR>          pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr>     <Down>        pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <expr>     <Up>          pumvisible() ? "\<C-p>" : "\<Up>"
+
+" Disable unwanted keys in normal mode
+nnoremap            <F1>          <nop>
+nnoremap            Q             <nop>
+
+" Write as sudo
+cnoremap            w!!           w !sudo tee % >/dev/null
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" AUTOCOMMANDS                          {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+augroup vimrc_autocommands
+autocmd!
+
+" Restore cursor position
+autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal! g`\"" |
+    \ endif
+
+" When switching buffers, preserve window view.
+if v:version >= 700
+  autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
+  autocmd BufEnter *
+    \ if exists('b:winview') && !&diff |
+    \   call winrestview(b:winview) | unlet! b:winview |
+    \ endif
+endif
+
+" Automatically close popup menu and preview window for omnicompletion
+autocmd CursorMovedI,InsertLeave *
+    \ if pumvisible() == 0 |
+    \   silent! pclose |
+    \ endif
+
+" Always put quickfix window in the bottom
+autocmd FileType qf wincmd J
+
+" If last windows is quickfix window, exit Vim
+autocmd BufEnter *
+    \ if &buftype=="quickfix" || &buftype=="nofile" |
+    \   if winbufnr(2) == -1 |
+    \     quit! |
+    \   endif |
+    \ endif
+
+augroup END
+
+"}}}
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" vim: foldmethod=marker
