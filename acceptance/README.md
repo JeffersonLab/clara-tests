@@ -12,6 +12,7 @@ Test Clara messaging using a local mini cloud of virtual machines.
 - Install [vagrant-cachier](https://github.com/fgrehm/vagrant-cachier) to
   cache the packages installed when the nodes are provisioned.
 
+
 ## Clara sources
 
 The different Clara sources should be in the same directory.
@@ -30,11 +31,33 @@ To use your own paths, copy the file `default-config.yaml` to
 `custom-config.yaml`, and you can change the common source directory and the
 names of the directories for each project.
 
+
 ## Start nodes
 
 To start the cluster of nodes, run the following:
 
     $ vagrant up
+
+Or to start a single node, pass the node name:
+
+    $ vagrant up platform
+
+The first time, the virtual machines will be created and provisioned with all
+the dependencies and files needed for development and testing (this may take
+several minutes).
+As the configuration evolves, you will need to re-provision the machines to
+keep them up to date:
+
+    $ vagrant provision
+
+To access the machines, do:
+
+    $ vagrant ssh <node>
+
+See the [Vagrant docs][vd] for advanced usage.
+
+[vd]: https://docs.vagrantup.com/v2/getting-started/index.html
+
 
 ## Run Tests
 
