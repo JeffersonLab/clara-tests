@@ -1,6 +1,6 @@
 ---
+srcdir: ../..
 clara:
-  srcdir: ../..
   java:
     path: clara-java
   cpp:
