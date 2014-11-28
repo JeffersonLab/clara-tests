@@ -13,19 +13,21 @@ Test Clara messaging using a local mini cloud of virtual machines.
   cache the packages installed when the nodes are provisioned.
 
 
-## Clara sources
+## xMsg and Clara sources
 
-The different Clara sources should be in the same directory.
+The different xMsg and Clara sources should be in the same directory.
 This directory will be mounted as a synced folder in every virtual machine.
 
 The default configuration sets this to `../..` (i.e. relative to this
-`acceptance` directory) and expects specific names for each Clara version:
+`acceptance` directory) and expects specific names for each xMsg and Clara
+version:
 
     $ pwd
     /home/user/dev/clara-tests/acceptance
 
     $ ls ../..
     clara-cpp  clara-java  clara-python  clara-tests  clara-webapp
+    xmsg-cpp   xmsg-java   xmsg-python
 
 To use your own paths, copy the file `default-config.yaml` to
 `custom-config.yaml`, and you can change the common source directory and the

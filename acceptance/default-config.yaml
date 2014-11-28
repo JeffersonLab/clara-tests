@@ -1,5 +1,12 @@
 ---
 srcdir: ../..
+xmsg:
+  java:
+    path: xmsg-java
+  cpp:
+    path: xmsg-cpp
+  python:
+    path: xmsg-python
 clara:
   java:
     path: clara-java
