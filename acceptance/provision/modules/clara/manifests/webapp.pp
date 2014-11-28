@@ -7,6 +7,7 @@ class clara::webapp {
         "curl",
         "gnupg",
         "libpq-dev",
+        "libsqlite3-dev",
         "nodejs",
     ]:
     }
