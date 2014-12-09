@@ -80,3 +80,39 @@ def get_all_tests(base_dir):
             tf = os.path.join(td, f)
             all_tests.append(tf)
     return all_tests
+
+
+class ClaraTest:
+
+    def __init__(self, client, data, item):
+        pass
+
+    def run(self):
+        pass
+
+
+class ClaraTestSuite:
+
+    def __init__(self, client, test_file):
+        pass
+
+    def run_tests(self):
+        pass
+
+
+class ClaraTestRunner():
+
+    def __init__(self):
+        pass
+
+    def start_client(self, nodes):
+        pass
+
+    def stop_client(self):
+        pass
+
+    def run_all_tests(self, test_files):
+        pass
+
+    def print_report(self):
+        pass
