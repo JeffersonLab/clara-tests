@@ -43,3 +43,14 @@ class ClaraDaemonClient():
         if status != 'SUCCESS':
             raise ClaraRequestError('Bad status: "%s"' % status)
         return text
+
+
+def get_base_dir():
+    cwd = os.getcwd()
+    base_cwd = os.path.basename(cwd)
+    if base_cwd == 'scripts':
+        return '..'
+    elif base_cwd == 'acceptance' or base_cwd == 'vagrant':
+        return '.'
+    else:
+        raise RuntimeError("Run from the 'acceptance (or vagrant)' directory")

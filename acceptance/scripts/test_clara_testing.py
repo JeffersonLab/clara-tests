@@ -5,6 +5,7 @@ import zmq
 from clara_testing import ClaraRequestError
 from clara_testing import ClaraDaemonClient
 
+from clara_testing import get_base_dir
 
 nodes = {
     'platform': '10.11.1.100',
@@ -107,6 +108,28 @@ class TestClaraDaemonClient(unittest.TestCase):
     def _test_request_response(self, recv_resp, err_msg):
         self.sck.recv_multipart.return_value = recv_resp
         self._assert_request_exception('dpe1', 'clara:start:java:dpe', err_msg)
+
+
+class TestUtils(unittest.TestCase):
+
+    @mock.patch('os.getcwd')
+    def test_get_base_dir(self, mock_cwd):
+        mock_cwd.return_value = '/home/user/dev/clara-test/acceptance/scripts'
+        self.assertEqual(get_base_dir(), '..')
+
+        mock_cwd.return_value = '/home/user/dev/clara-test/acceptance'
+        self.assertEqual(get_base_dir(), '.')
+
+        mock_cwd.return_value = '/vagrant/scripts'
+        self.assertEqual(get_base_dir(), '..')
+
+        mock_cwd.return_value = '/vagrant'
+        self.assertEqual(get_base_dir(), '.')
+
+    @mock.patch('os.getcwd')
+    def test_get_base_dir_raises_if_wrong_current_directory(self, mock_cwd):
+        mock_cwd.return_value = '/home/user/dev/'
+        self.assertRaisesRegexp(RuntimeError, 'Run from', get_base_dir)
 
 
 if __name__ == '__main__':
