@@ -70,3 +70,13 @@ def get_nodes(base_dir):
     if not nodes:
         raise RuntimeError('Bad config file: missing nodes')
     return nodes
+
+
+def get_all_tests(base_dir):
+    all_tests = []
+    td = os.path.join(base_dir, 'tests')
+    for f in os.listdir(td):
+        if f.endswith(".yaml"):
+            tf = os.path.join(td, f)
+            all_tests.append(tf)
+    return all_tests

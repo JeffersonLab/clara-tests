@@ -7,6 +7,7 @@ from clara_testing import ClaraDaemonClient
 
 from clara_testing import get_base_dir
 from clara_testing import get_nodes
+from clara_testing import get_all_tests
 
 nodes = {
     'platform': '10.11.1.100',
@@ -151,6 +152,13 @@ class TestUtils(unittest.TestCase):
 
         self.assertRaisesRegexp(RuntimeError, 'missing nodes',
                                 get_nodes, '.')
+
+    @mock.patch('os.listdir')
+    def test_get_all_tests(self, mock_ls):
+        mock_ls.return_value = ['01-run.yaml', '02-dpes.yaml', 'dummmy']
+
+        self.assertEqual(get_all_tests('.'),
+                         ['./tests/01-run.yaml', './tests/02-dpes.yaml'])
 
 
 if __name__ == '__main__':
