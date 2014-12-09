@@ -19,3 +19,7 @@ clara:
     provision:
       - bundle install
       - rake db:migrate
+nodes:
+  platform: '10.11.1.100'
+  dpe1: '10.11.1.101'
+  dpe2: '10.11.1.102'

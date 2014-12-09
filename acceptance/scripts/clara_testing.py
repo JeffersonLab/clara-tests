@@ -1,3 +1,4 @@
+import os
 import yaml
 import zmq
 
@@ -60,3 +61,12 @@ def get_base_dir():
 def read_yaml(yaml_file):
     with open(yaml_file) as f:
         return yaml.load(f)
+
+
+def get_nodes(base_dir):
+    config_file = os.path.join(base_dir, 'default-config.yaml')
+    data = read_yaml(config_file)
+    nodes = data.get('nodes')
+    if not nodes:
+        raise RuntimeError('Bad config file: missing nodes')
+    return nodes

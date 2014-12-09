@@ -6,6 +6,7 @@ from clara_testing import ClaraRequestError
 from clara_testing import ClaraDaemonClient
 
 from clara_testing import get_base_dir
+from clara_testing import get_nodes
 
 nodes = {
     'platform': '10.11.1.100',
@@ -130,6 +131,26 @@ class TestUtils(unittest.TestCase):
     def test_get_base_dir_raises_if_wrong_current_directory(self, mock_cwd):
         mock_cwd.return_value = '/home/user/dev/'
         self.assertRaisesRegexp(RuntimeError, 'Run from', get_base_dir)
+
+    @mock.patch('clara_testing.read_yaml')
+    def test_get_nodes(self, mock_ry):
+        mock_ry.return_value = {'nodes': nodes}
+
+        self.assertEqual(get_nodes('.'), nodes)
+
+    @mock.patch('clara_testing.read_yaml')
+    def test_get_nodes_uses_config_file(self, mock_ry):
+        mock_ry.return_value = {'nodes': nodes}
+        get_nodes('.')
+
+        mock_ry.assert_called_once_with('./default-config.yaml')
+
+    @mock.patch('clara_testing.read_yaml')
+    def test_get_nodes_raises_if_missing_nodes(self, mock_ry):
+        mock_ry.return_value = {}
+
+        self.assertRaisesRegexp(RuntimeError, 'missing nodes',
+                                get_nodes, '.')
 
 
 if __name__ == '__main__':
