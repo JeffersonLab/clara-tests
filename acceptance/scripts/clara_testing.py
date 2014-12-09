@@ -1,3 +1,4 @@
+import yaml
 import zmq
 
 port = "7788"
@@ -54,3 +55,8 @@ def get_base_dir():
         return '.'
     else:
         raise RuntimeError("Run from the 'acceptance (or vagrant)' directory")
+
+
+def read_yaml(yaml_file):
+    with open(yaml_file) as f:
+        return yaml.load(f)
