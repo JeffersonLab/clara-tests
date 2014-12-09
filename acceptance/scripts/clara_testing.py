@@ -102,17 +102,26 @@ class ClaraTestSuite:
 
 class ClaraTestRunner():
 
-    def __init__(self):
-        pass
+    def __init__(self, nodes, tests):
+        self._nodes = nodes
+        self._tests = tests
+        self._report = []
+        self._client = None
 
-    def start_client(self, nodes):
-        pass
+    def start_client(self):
+        ctx = zmq.Context()
+        self._client = ClaraDaemonClient(ctx, self._nodes)
 
     def stop_client(self):
         pass
 
-    def run_all_tests(self, test_files):
-        pass
+    def run_all_tests(self):
+        self._report = []
+        for test_file in self._tests:
+            test_suite = ClaraTestSuite(self._client, test_file)
+            status = test_suite.run_tests()
+            self._report.append(status)
+        return self._report
 
     def print_report(self):
         pass

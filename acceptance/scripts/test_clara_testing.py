@@ -4,6 +4,7 @@ import zmq
 
 from clara_testing import ClaraRequestError
 from clara_testing import ClaraDaemonClient
+from clara_testing import ClaraTestRunner
 
 from clara_testing import get_base_dir
 from clara_testing import get_nodes
@@ -110,6 +111,43 @@ class TestClaraDaemonClient(unittest.TestCase):
     def _test_request_response(self, recv_resp, err_msg):
         self.sck.recv_multipart.return_value = recv_resp
         self._assert_request_exception('dpe1', 'clara:start:java:dpe', err_msg)
+
+
+class TestClaraTestRunner(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_ctx = patch_on_setup(self, 'zmq.Context')
+        self.mock_cln = patch_on_setup(self, 'clara_testing.ClaraDaemonClient')
+
+        self.test_files = ['./t/01.yaml', './t/02.yaml', './t/05.yaml']
+        self.runner = ClaraTestRunner(nodes, self.test_files)
+
+    def test_start_client(self):
+        self.runner.start_client()
+
+        ctx = self.mock_ctx.return_value
+        self.mock_cln.assert_called_once_with(ctx, nodes)
+
+    @mock.patch('clara_testing.ClaraTestSuite')
+    def test_run_all_files(self, mock_cts):
+        def set_status(*args):
+            test_suites.append(args[1])
+            return mock.DEFAULT
+
+        test_suites = []
+        mock_cts.side_effect = set_status
+
+        self.runner.run_all_tests()
+
+        self.assertEqual(test_suites, self.test_files)
+
+    @mock.patch('clara_testing.ClaraTestSuite')
+    def test_report_all_tests(self, mock_cts):
+        mock_cts.return_value.run_tests.side_effect = self.test_files
+
+        result = self.runner.run_all_tests()
+
+        self.assertEqual(result, self.test_files)
 
 
 class TestUtils(unittest.TestCase):
