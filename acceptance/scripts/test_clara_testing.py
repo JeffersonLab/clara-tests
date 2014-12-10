@@ -4,6 +4,7 @@ import zmq
 
 from clara_testing import ClaraRequestError
 from clara_testing import ClaraDaemonClient
+from clara_testing import ClaraTestSuite
 from clara_testing import ClaraTestRunner
 
 from clara_testing import get_base_dir
@@ -111,6 +112,132 @@ class TestClaraDaemonClient(unittest.TestCase):
     def _test_request_response(self, recv_resp, err_msg):
         self.sck.recv_multipart.return_value = recv_resp
         self._assert_request_exception('dpe1', 'clara:start:java:dpe', err_msg)
+
+
+class TestClaraTestSuite(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_cd = patch_on_setup(self, 'clara_testing.ClaraDaemonClient')
+        self.mock_ry = patch_on_setup(self, 'clara_testing.read_yaml')
+        self.mock_ct = patch_on_setup(self, 'clara_testing.ClaraTest')
+
+    def _create_suite(self, data, test_file='./test.yaml'):
+        self.mock_ry.return_value = data
+        return ClaraTestSuite(self.mock_cd.return_value, test_file)
+
+    def test_read_data_from_file(self):
+        data = {'tests': ['1']}
+        name = './10_test_msg.yaml'
+
+        self._create_suite(data, name)
+
+        self.mock_ry.assert_called_once_with(name)
+
+    def test_run_all_tests_in_file_with_no_items(self):
+        data = {'tests': ['1', '2', '3']}
+        tests = [(t, 'java') for t in data['tests']]
+
+        self._assert_run_all_tests(data, tests)
+
+    def test_run_all_tests_in_file_for_each_item(self):
+        data = {'tests': ['1', '2', '3'], 'with': ['J', 'P']}
+        tests = [(t, i) for i in data['with'] for t in data['tests']]
+
+        self._assert_run_all_tests(data, tests)
+
+    def _assert_run_all_tests(self, test_data, exp_tests):
+        def set_status(*args):
+            act_tests.append((args[1], args[2]))
+            return mock.DEFAULT
+
+        act_tests = []
+        self.mock_ct.side_effect = set_status
+
+        self._create_suite(test_data).run_tests()
+
+        self.assertEqual(act_tests, exp_tests)
+        self.assertEqual(self.mock_ct.return_value.run.call_count,
+                         len(exp_tests))
+
+    def test_dont_run_remaining_tests_on_error(self):
+        data = {'tests': ['1', '2', '3']}
+        it = iter(data['tests'])
+
+        def raise_error(*args):
+            if next(it) == '2':
+                raise ClaraRequestError
+
+        run = self.mock_ct.return_value.run
+        run.side_effect = raise_error
+
+        self._create_suite(data).run_tests()
+
+        self.assertEqual(run.call_count, 2)
+
+    def test_use_filename_if_no_name(self):
+        data = {'tests': ['1']}
+
+        suite = self._create_suite(data, './01_my_name.yaml')
+
+        self.assertEqual(suite.run_tests()[1], '01_my_name')
+
+    def test_return_success_if_all_tests_passed(self):
+        data = {'name': 'NAME', 'tests': ['1']}
+
+        suite = self._create_suite(data)
+
+        self.assertEqual(suite.run_tests(), (True, 'NAME'))
+
+    def test_return_error_on_failed_test(self):
+        data = {'name': 'NAME', 'tests': ['1']}
+
+        test = self.mock_ct.return_value
+        test.run.side_effect = ClaraRequestError
+
+        suite = self._create_suite(data)
+
+        self.assertEqual(suite.run_tests(), (False, 'NAME'))
+
+    def test_return_error_if_no_tests(self):
+        data = {'name': 'NAME'}
+
+        suite = self._create_suite(data)
+
+        self.assertEqual(suite.run_tests(), (False, 'NAME'))
+
+    def test_return_error_if_empty_tests(self):
+        data = {'name': 'NAME', 'tests': []}
+
+        suite = self._create_suite(data)
+
+        self.assertEqual(suite.run_tests(), (False, 'NAME'))
+
+    def test_stop_all_clara_instances_on_success(self):
+        data = {'tests': ['1', '2', '3']}
+        client = self.mock_cd.return_value
+
+        self._create_suite(data).run_tests()
+
+        client.request_all.assert_called_once_with('clara:stop:all:all')
+
+    def test_stop_all_clara_instances_on_error(self):
+        data = {'tests': ['1', '2', '3']}
+        client = self.mock_cd.return_value
+        test = self.mock_ct.return_value
+
+        test.run.side_effect = ClaraRequestError
+
+        self._create_suite(data).run_tests()
+
+        client.request_all.assert_called_once_with('clara:stop:all:all')
+
+    def test_dont_send_stop_requests_if_no_tests(self):
+        data = {'name': 'NAME'}
+        client = self.mock_cd.return_value
+
+        self._create_suite(data).run_tests()
+
+        self.assertFalse(client.request_all.called)
 
 
 class TestClaraTestRunner(unittest.TestCase):

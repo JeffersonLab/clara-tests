@@ -94,10 +94,27 @@ class ClaraTest:
 class ClaraTestSuite:
 
     def __init__(self, client, test_file):
-        pass
+        data = read_yaml(test_file)
+        test_name = os.path.basename(test_file).replace('.yaml', '')
+
+        self._name = data.get("name", test_name)
+        self._tests = data.get("tests")
+        self._context = data.get("with", ['java'])
+        self._client = client
 
     def run_tests(self):
-        pass
+        if not self._tests:
+            return (False, self._name)
+        try:
+            for item in self._context:
+                for data in self._tests:
+                    test = ClaraTest(self._client, data, item)
+                    test.run()
+            return (True, self._name)
+        except ClaraRequestError as e:
+            return (False, self._name)
+        finally:
+            self._client.request_all('clara:stop:all:all')
 
 
 class ClaraTestRunner():
