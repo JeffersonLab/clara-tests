@@ -424,6 +424,15 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(ClaraRequestError, parse_action, 'start a platform')
         self.assertRaises(ClaraRequestError, parse_action, 'launch platform')
 
+    def test_parse_action_for_dpe(self):
+        self.assertEqual(parse_action('start {{item}} dpe on dpe1', 'python'),
+                         ('dpe1', 'clara:start:python:dpe'))
+
+        self.assertEqual(parse_action('stop java dpe on dpe1'),
+                         ('dpe1', 'clara:stop:java:dpe'))
+
+        self.assertRaises(ClaraRequestError, parse_action, 'start dpe on node')
+
 
 if __name__ == '__main__':
     unittest.main()

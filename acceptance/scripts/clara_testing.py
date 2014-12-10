@@ -100,6 +100,14 @@ def parse_action(action, item='java'):
             lang = 'java'
         return 'platform', create_msg(m.group(1), lang, 'platform')
 
+    m = re.search(r'%s\s+%s\s+dpe\s+on\s+(\w+)' % (act_re, lang_re), action)
+    if m:
+        return m.group(3), create_msg(m.group(1), m.group(2), 'dpe')
+
+    req_re = '(list\s+(dpes))'
+    m = re.search(r'request\s+(%s\s+)?%s(\s+on\s+(\w+))?' % (lang_re, req_re),
+                  action)
+
     raise ClaraRequestError('Malformed action: "%s"' % action)
 
 
