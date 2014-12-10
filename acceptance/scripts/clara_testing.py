@@ -1,4 +1,5 @@
 import os
+import re
 import yaml
 import zmq
 
@@ -83,7 +84,23 @@ def get_all_tests(base_dir):
 
 
 def parse_action(action, item='java'):
-    pass
+
+    def create_msg(action, lang, instance):
+        return ':'.join(['clara', action, lang, instance])
+
+    action = action.replace('{{item}}', item)
+    act_re = '(start|stop)'
+    lang_re = '(java|python|cpp)'
+
+    m = re.search(r'%s\s+(%s\s+)?platform' % (act_re, lang_re), action)
+    if m:
+        if m.group(3):
+            lang = m.group(3)
+        else:
+            lang = 'java'
+        return 'platform', create_msg(m.group(1), lang, 'platform')
+
+    raise ClaraRequestError('Malformed action: "%s"' % action)
 
 
 class ClaraTest:

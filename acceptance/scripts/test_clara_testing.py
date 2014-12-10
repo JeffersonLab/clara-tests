@@ -406,6 +406,24 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(get_all_tests('.'),
                          ['./tests/01-run.yaml', './tests/02-dpes.yaml'])
 
+    def test_parse_action_replace_item(self):
+        self.assertEqual(parse_action('start {{item}} platform', 'python'),
+                         ('platform', 'clara:start:python:platform'))
+
+        self.assertRaisesRegexp(ClaraRequestError,
+                                'Malformed action: "start cpp dpe"',
+                                parse_action, 'start {{item}} dpe', 'cpp')
+
+    def test_parse_action_for_platform(self):
+        self.assertEqual(parse_action('start platform'),
+                         ('platform', 'clara:start:java:platform'))
+
+        self.assertEqual(parse_action('stop  python platform', 'java'),
+                         ('platform', 'clara:stop:python:platform'))
+
+        self.assertRaises(ClaraRequestError, parse_action, 'start a platform')
+        self.assertRaises(ClaraRequestError, parse_action, 'launch platform')
+
 
 if __name__ == '__main__':
     unittest.main()
