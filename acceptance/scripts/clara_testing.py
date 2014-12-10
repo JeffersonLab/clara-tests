@@ -4,6 +4,9 @@ import yaml
 import zmq
 
 port = "7788"
+standard_requests = (
+    'list-dpes'
+)
 
 
 class ClaraRequestError(Exception):
@@ -107,6 +110,19 @@ def parse_action(action, item='java'):
     req_re = '(list\s+(dpes))'
     m = re.search(r'request\s+(%s\s+)?%s(\s+on\s+(\w+))?' % (lang_re, req_re),
                   action)
+    if m:
+        if m.group(2):
+            lang = m.group(2)
+        else:
+            lang = 'java'
+        request = '-'.join(m.group(3).split())
+        if request not in standard_requests:
+            raise ClaraRequestError('Request not supported: "%s"' % request)
+        if m.group(6):
+            node = m.group(6)
+        else:
+            node = 'platform'
+        return node, create_msg('request', lang, request)
 
     raise ClaraRequestError('Malformed action: "%s"' % action)
 

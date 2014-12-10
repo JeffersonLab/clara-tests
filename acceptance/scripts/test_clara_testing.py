@@ -433,6 +433,15 @@ class TestUtils(unittest.TestCase):
 
         self.assertRaises(ClaraRequestError, parse_action, 'start dpe on node')
 
+    def test_parse_action_for_standard_requests(self):
+        self.assertEqual(parse_action('request list dpes'),
+                         ('platform', 'clara:request:java:list-dpes'))
+
+        self.assertEqual(parse_action('request python  list  dpes on dpe2'),
+                         ('dpe2', 'clara:request:python:list-dpes'))
+
+        self.assertRaises(ClaraRequestError, parse_action, 'request all dpes')
+
 
 if __name__ == '__main__':
     unittest.main()
