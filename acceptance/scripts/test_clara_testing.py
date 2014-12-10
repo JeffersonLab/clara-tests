@@ -4,12 +4,14 @@ import zmq
 
 from clara_testing import ClaraRequestError
 from clara_testing import ClaraDaemonClient
+from clara_testing import ClaraTest
 from clara_testing import ClaraTestSuite
 from clara_testing import ClaraTestRunner
 
 from clara_testing import get_base_dir
 from clara_testing import get_nodes
 from clara_testing import get_all_tests
+from clara_testing import parse_action
 
 nodes = {
     'platform': '10.11.1.100',
@@ -112,6 +114,85 @@ class TestClaraDaemonClient(unittest.TestCase):
     def _test_request_response(self, recv_resp, err_msg):
         self.sck.recv_multipart.return_value = recv_resp
         self._assert_request_exception('dpe1', 'clara:start:java:dpe', err_msg)
+
+
+class TestClaraTest(unittest.TestCase):
+    def setUp(self):
+        mock_cd = patch_on_setup(self, 'clara_testing.ClaraDaemonClient')
+        mock_pa = patch_on_setup(self, 'clara_testing.parse_action')
+
+        self.client = mock_cd.return_value
+        self.parser = mock_pa
+
+        self.actions = ['1', '2', '3']
+        self.result = ['R']
+        self.data = {'actions': self.actions, 'result': self.result}
+        self.item = 'J'
+
+        self.client.request.return_value = self.result
+        self.parser.return_value = (None, None)
+
+    def test_parse_all_actions(self):
+        calls = [mock.call(a, self.item) for a in self.data['actions']]
+
+        ClaraTest(self.client, self.data, self.item).run()
+
+        self.parser.assert_has_calls(calls)
+        self.assertEqual(self.parser.call_count, len(calls))
+
+    def test_request_all_actions(self):
+        parsed = [('node', a) for a in self.data['actions']]
+        calls = [mock.call(*p) for p in parsed]
+
+        self.parser.side_effect = parsed
+
+        ClaraTest(self.client, self.data, self.item).run()
+
+        self.client.request.assert_has_calls(calls)
+        self.assertEqual(self.client.request.call_count, len(calls))
+
+    def test_run_using_result_of_last_action(self):
+        self._assert_result((['A'], ['B'], ['C', 'D']), ['C', 'D'])
+
+    def test_request_test_with_empty_result(self):
+        self._assert_result((['A'], ['B'], []), [])
+
+    def test_raise_if_last_action_returns_wrong_result(self):
+        self.data.update({'result': ['M', 'A']})
+        results = (['A', 'B'], ['C'], ['D', 'E'])
+
+        self.client.request.side_effect = results
+        regex = "Wrong result:.*'D', 'E'.*Expected:.*'M', 'A'"
+
+        self._assert_run_exception(regex)
+
+    def test_raise_if_no_actions_in_data(self):
+        del self.data['actions']
+        self._assert_run_exception("no actions")
+
+    def test_raise_if_no_result_in_data(self):
+        del self.data['result']
+        self._assert_run_exception("no result")
+
+    def test_propagate_parse_exception(self):
+        self.parser.side_effect = ClaraRequestError("Parse error")
+        self._assert_run_exception("Parse error")
+
+    def test_propagate_request_exception(self):
+        self.client.request.side_effect = ClaraRequestError("Request error")
+        self._assert_run_exception("Request error")
+
+    def _assert_result(self, action_results, result):
+        self.data.update({'result': result})
+
+        self.client.request.side_effect = action_results
+        test = ClaraTest(self.client, self.data, self.item)
+
+        self.assertEqual(test.run(), result)
+
+    def _assert_run_exception(self, regex, exc=ClaraRequestError):
+        test = ClaraTest(self.client, self.data, self.item)
+        self.assertRaisesRegexp(exc, regex, test.run)
 
 
 class TestClaraTestSuite(unittest.TestCase):

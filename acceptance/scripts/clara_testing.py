@@ -82,13 +82,32 @@ def get_all_tests(base_dir):
     return all_tests
 
 
+def parse_action(action, item='java'):
+    pass
+
+
 class ClaraTest:
 
     def __init__(self, client, data, item):
-        pass
+        self._client = client
+        self._actions = data.get('actions')
+        self._result = data.get('result')
+        self._item = item
 
     def run(self):
-        pass
+        result = None
+        if not self._actions:
+            raise ClaraRequestError('The test has no actions')
+        if self._result is None:
+            raise ClaraRequestError('The test has no result')
+        for action in self._actions:
+            node, msg = parse_action(action, self._item)
+            result = self._client.request(node, msg)
+        if result == self._result:
+            return result
+        else:
+            raise ClaraRequestError('Wrong result: "%s". Expected: "%s"' %
+                                    (result, self._result))
 
 
 class ClaraTestSuite:
