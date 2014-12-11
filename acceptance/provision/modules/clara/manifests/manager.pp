@@ -1,6 +1,7 @@
 class clara::manager {
     package { [
         "python-mock",
+        "python-psutil",
     ]:
         ensure => latest,
     }

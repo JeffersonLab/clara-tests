@@ -133,11 +133,13 @@ class TestClaraManagerStart(unittest.TestCase):
     def test_start_clara_run_process(self):
         self.manager.start_clara('python', 'dpe')
 
-        self.mock_po.assert_called_once_with(self.cc.cmd,
-                                             env=self.cc.env,
-                                             cwd=self.cc.cwd,
-                                             stdout=self.cc.out,
-                                             stderr=self.cc.err)
+        cc = mock_cc.return_value
+        mock_ps.assert_called_once_with(cc.cmd,
+                                        env=cc.env,
+                                        cwd=cc.cwd,
+                                        preexec_fn=os.setsid,
+                                        stdout=cc.out,
+                                        stderr=cc.err)
 
     def test_start_clara_store_process(self):
         self.manager.start_clara('python', 'platform')
@@ -217,40 +219,81 @@ class TestClaraManagerStop(unittest.TestCase):
 
 class TestStopProcess(unittest.TestCase):
 
-    def test_stop_process_terminates_the_process(self):
-        proc = mock.Mock()
+    @mock.patch('psutil.Process')
+    def test_stop_process_terminates_the_process(self, mock_ps):
+        proc = mock_ps.return_value
         conf = mock.Mock()
         conf.proc = proc
 
-        proc.poll.return_value = 0
+        proc.is_running.return_value = False
+        proc.get_children.return_value = []
         stop_process(conf)
 
         proc.terminate.assert_called_once_with()
         self.assertTrue(not proc.kill.called)
 
     @mock.patch('time.sleep')
-    def test_stop_process_with_forced_kill(self, mock_t):
-        proc = mock.Mock()
+    @mock.patch('psutil.Process')
+    def test_stop_process_with_forced_kill(self, mock_ps, mock_t):
+        proc = mock_ps.return_value
         conf = mock.Mock()
         conf.proc = proc
 
-        proc.poll.return_value = None
+        proc.is_running.return_value = True
+        proc.get_children.return_value = []
 
-        with self.assertRaises(OSError):
-            stop_process(conf)
+        self.assertRaises(OSError, stop_process, conf)
 
         proc.kill.assert_called_once_with()
         proc.wait.assert_called_once_with()
 
-    def test_stop_process_close_logs(self):
-        proc = mock.Mock()
+    @mock.patch('psutil.Process')
+    def test_stop_process_close_logs(self, mock_ps):
+        proc = mock_ps.return_value
         conf = mock.Mock()
         conf.proc = proc
 
-        proc.poll.return_value = 0
+        proc.is_running.return_value = False
+        proc.get_children.return_value = []
+
         stop_process(conf)
 
         conf.close_logs.assert_called_once_with()
+
+    @mock.patch('psutil.Process')
+    def test_stop_process_stop_all_children(self, mock_ps):
+        proc = mock_ps.return_value
+        conf = mock.Mock()
+        conf.proc = proc
+
+        proc.is_running.return_value = False
+        proc.get_children.return_value = [proc] * 2
+
+        stop_process(conf)
+
+        self.assertEqual(proc.terminate.call_count, 2)
+
+    @mock.patch('time.sleep')
+    def test_stop_process_force_children_kill(self, mock_t):
+        with mock.patch('psutil.Process') as mock_bp, \
+                mock.patch('psutil.Process') as mock_ps:
+            bad_proc = mock_bp.return_value
+            proc = mock_ps.return_value
+
+            bad_proc.is_running.return_value = True
+            proc.is_running.return_value = False
+
+            proc.get_children.return_value = [bad_proc]
+
+            conf = mock.Mock()
+            conf.proc = proc
+
+            self.assertRaises(OSError, stop_process, conf)
+
+            bad_proc.kill.assert_called_once_with()
+            bad_proc.wait.assert_called_once_with()
+
+            self.assertFalse(proc.terminate.called)
 
     @mock.patch('clara_manager.stop_process')
     def test_stop_all_processes(self, mock_sp):

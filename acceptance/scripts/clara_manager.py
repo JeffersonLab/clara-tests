@@ -1,5 +1,6 @@
 import atexit
 import os
+import psutil
 import signal
 import socket
 import subprocess
@@ -26,24 +27,31 @@ host_ip = socket.gethostbyname(socket.gethostname())
 port = "7788"
 
 
-def finished_process(proc, limit=25):
-    counter = 0
-    while proc.poll() is None:
-        counter += 1
-        if counter > limit:
-            return False
-        time.sleep(0.2)
-    return True
-
-
 def stop_process(conf):
-    killed = False
+    def finished_process(proc, limit=25):
+        counter = 0
+        while proc.is_running():
+            counter += 1
+            if counter > limit:
+                return False
+            time.sleep(0.2)
+        return True
 
-    conf.proc.terminate()
-    if not finished_process(conf.proc):
-        conf.proc.kill()
-        conf.proc.wait()
-        killed = True
+    def kill_process(proc):
+        proc.terminate()
+        if not finished_process(proc):
+            proc.kill()
+            proc.wait()
+            return True
+        return False
+
+    killed = False
+    process = psutil.Process(conf.proc.pid)
+    children = process.get_children(recursive=True)
+    for proc in children:
+        killed = kill_process(proc) or killed
+    if not children:
+        killed = kill_process(process) or killed
 
     conf.close_logs()
 
@@ -174,6 +182,7 @@ class ClaraManager():
                                       cwd=clara_conf.cwd,
                                       stdout=clara_conf.out,
                                       stderr=clara_conf.err,
+                                      preexec_fn=os.setsid,
                                       env=clara_conf.env)
 
         for i in range(5):
