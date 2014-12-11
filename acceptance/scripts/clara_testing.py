@@ -202,3 +202,14 @@ class ClaraTestRunner():
 
     def print_report(self):
         pass
+
+
+if __name__ == '__main__':
+
+    base = get_base_dir()
+    nodes = get_nodes(base)
+    tests = get_all_tests(base)
+
+    tr = ClaraTestRunner(nodes, tests)
+    tr.start_client()
+    tr.run_all_tests()
