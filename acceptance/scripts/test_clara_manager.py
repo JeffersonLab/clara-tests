@@ -1,6 +1,7 @@
 import unittest
 import mock
 import os
+import subprocess
 import zmq
 
 from clara_manager import ClaraManager
@@ -24,6 +25,7 @@ clara = {
         'fullpath': '/clara/services',
         'platform': './bin/clara-platform',
         'dpe': './bin/clara-dpe -p platform',
+        'orchestrator': './bin/standard-orchestrator',
     },
 }
 
@@ -48,6 +50,10 @@ class TestClaraProcessConfig(unittest.TestCase):
             cmd = ['./bin/clara-dpe', '-p', 'platform']
             env = {'CLARA_SERVICES': '/clara/services'}
             self._assert_clara_config('java', 'dpe', cmd, wd, env)
+
+    def test_standard_request_config(self):
+        conf = ClaraProcessConfig(clara, 'java', 'orchestrator')
+        self.assertEqual(conf.cmd, ['./bin/standard-orchestrator'])
 
     def _assert_clara_config(self, lang, instance, command, working_dir,
                              env=os.environ):
@@ -409,6 +415,17 @@ class TestClaraManagerDispatch(unittest.TestCase):
         mock_sc.assert_called_once_with('python', 'dpe')
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
+    @mock.patch('clara_manager.ClaraManager.standard_request')
+    def test_dispatch_successful_standard_request(self, mock_sr):
+        manager = ClaraManager(clara)
+        msg = 'clara:request:java:list-dpes'
+        mock_sr.return_value = ['OK'], [''], 0
+
+        res = manager.dispatch_request(msg)
+
+        mock_sr.assert_called_once_with('java', 'list-dpes')
+        self.assertSequenceEqual(res, ['SUCCESS', 'OK'])
+
     @mock.patch('clara_manager.stop_all')
     def test_dispatch_sucessful_stop_all_request(self, mock_sa):
         manager = ClaraManager(clara)
@@ -440,6 +457,64 @@ class TestClaraManagerDispatch(unittest.TestCase):
 
         self.assertSequenceEqual(res, ['ERROR',
                                        'Unexpected exception: Popen error'])
+
+    @mock.patch('clara_manager.ClaraManager.standard_request')
+    def test_dispatch_returns_error_if_standard_request_failed(self, mock_sr):
+        manager = ClaraManager(clara)
+        msg = 'clara:request:java:list-dpes'
+        mock_sr.return_value = ['OUT1', 'OUT2'], ['ERR'], 1
+
+        res = manager.dispatch_request(msg)
+
+        self.assertSequenceEqual(res, ['ERROR', 'OUT1', 'OUT2', 'ERR'])
+
+
+class TestClaraManagerStandardRequest(unittest.TestCase):
+
+    def setUp(self):
+        self.manager = ClaraManager(clara)
+
+    def test_standard_request_raises_on_bad_language(self):
+
+        self.assertRaisesRegexp(ClaraManagerError, 'Bad language: erlang',
+                                self.manager.standard_request,
+                                'erlang', 'list-dpes')
+
+    @mock.patch('subprocess.Popen')
+    @mock.patch('clara_manager.ClaraProcessConfig')
+    def test_standard_request_creates_config(self, mock_cc, mock_po):
+        mock_po.return_value.communicate.return_value = '', ''
+
+        self.manager.standard_request('java', 'list-dpes')
+
+        mock_cc.assert_called_once_with(clara, 'java', 'orchestrator')
+
+    @mock.patch('subprocess.Popen')
+    @mock.patch('clara_manager.ClaraProcessConfig')
+    def test_start_clara_run_process(self, mock_cc, mock_po):
+        mock_po.return_value.communicate.return_value = '', ''
+        cc = mock_cc.return_value
+        cc.cmd = ['./bin/std-orch']
+
+        self.manager.standard_request('java', 'list-dpes')
+
+        mock_po.assert_called_once_with(['./bin/std-orch', 'list-dpes'],
+                                        env=cc.env,
+                                        cwd=cc.cwd,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+
+    @mock.patch('subprocess.Popen')
+    @mock.patch('clara_manager.ClaraProcessConfig')
+    def test_start_clara_gets_process_ouput(self, mock_cc, mock_po):
+        mock_po.return_value.communicate.return_value = 'OUT\nALL\n', ''
+        mock_po.return_value.returncode = 0
+
+        out, err, rc = self.manager.standard_request('java', 'list-dpes')
+
+        self.assertEqual(out, ['OUT', 'ALL'])
+        self.assertEqual(err, [])
+        self.assertEqual(rc, 0)
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ clara = {
         'fullpath': '/home/vagrant/clara/services',
         'platform': './bin/clara-platform',
         'dpe': './bin/clara-dpe -host 10.11.1.100 -log',
+        'orchestrator': './bin/clara-orchestrator',
     },
 }
 
@@ -152,6 +153,12 @@ class ClaraManager():
                     stop_all(self)
                 else:
                     self.stop_clara(lang, instance)
+            elif action == 'request':
+                out, err, ec = self.standard_request(lang, instance)
+                if ec == 0:
+                    return ['SUCCESS'] + out
+                else:
+                    return ['ERROR'] + out + err
             else:
                 return ['ERROR', 'Unsupported action: %s' % action]
 
@@ -208,6 +215,29 @@ class ClaraManager():
 
         run = self.instances.pop(key)
         stop_process(run)
+
+    def standard_request(self, clara_lang, request):
+        if clara_lang not in self.clara:
+            raise ClaraManagerError('Bad language: %s' % clara_lang)
+
+        clara_conf = ClaraProcessConfig(self.clara,
+                                        clara_lang,
+                                        'orchestrator')
+        clara_command = clara_conf.cmd + [request]
+
+        clara_proc = subprocess.Popen(clara_command,
+                                      cwd=clara_conf.cwd,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE,
+                                      env=clara_conf.env)
+
+        out, err = clara_proc.communicate()
+        errcode = clara_proc.returncode
+
+        out_lines = out.splitlines()
+        err_lines = err.splitlines()
+
+        return out_lines, err_lines, errcode
 
 
 if __name__ == "__main__":
