@@ -6,6 +6,7 @@ import zmq
 from clara_manager import ClaraManager
 from clara_manager import ClaraManagerError
 from clara_manager import ClaraProcess
+from clara_manager import ClaraProcessConfig
 from clara_manager import stop_process
 from clara_manager import stop_all
 from clara_manager import host_ip
@@ -24,6 +25,70 @@ clara = {
         'dpe': './bin/clara-dpe -p platform',
     },
 }
+
+
+class TestClaraProcessConfig(unittest.TestCase):
+
+    def test_clara_python_config(self):
+        wd = '/clara/python'
+        cmd = ['python', '-u', 'core/system/Platform.py']
+
+        with mock.patch.dict(os.environ, clear=True):
+            env = {'PYTHONPATH': '/clara/python'}
+            self._assert_clara_config('python', 'platform', cmd, wd, env)
+
+        with mock.patch.dict(os.environ, {'PYTHONPATH': '/opt/python'}):
+            env = dict(os.environ, PYTHONPATH='/clara/python:/opt/python')
+            self._assert_clara_config('python', 'platform', cmd, wd, env)
+
+    def test_clara_java_config(self):
+        with mock.patch.dict(os.environ, clear=True):
+            wd = '/clara/services'
+            cmd = ['./bin/clara-dpe', '-p', 'platform']
+            env = {'CLARA_SERVICES': '/clara/services'}
+            self._assert_clara_config('java', 'dpe', cmd, wd, env)
+
+    def _assert_clara_config(self, lang, instance, command, working_dir,
+                             env=os.environ):
+        conf = ClaraProcessConfig(clara, lang, instance)
+
+        self.assertEqual(conf.cmd, command)
+        self.assertEqual(conf.cwd, working_dir)
+        self.assertEqual(conf.env, env)
+
+    def test_open_logs(self):
+        out_log = "/clara/logs/%s-%s-%s.log" % (host_ip, 'java', 'dpe')
+        err_log = "/clara/logs/%s-%s-%s.err" % (host_ip, 'java', 'dpe')
+        conf = ClaraProcessConfig(clara, 'java', 'dpe')
+
+        with mock.patch('%s.open' % cm, mock.mock_open(), create=True) as o:
+
+            o.side_effect = lambda *args: args[0]
+
+            conf.open_logs()
+
+            log_calls = [mock.call(out_log, 'w+'), mock.call(err_log, 'w+')]
+            o.assert_has_calls(log_calls)
+
+            self.assertEqual(conf.out, out_log)
+            self.assertEqual(conf.err, err_log)
+
+    def test_close_logs(self):
+        with mock.patch('%s.open' % cm, mock.mock_open(), create=True) as o:
+            out_mock = mock.Mock()
+            err_mock = mock.Mock()
+
+            o.side_effect = [out_mock, err_mock]
+
+            conf = ClaraProcessConfig(clara, 'java', 'dpe')
+            conf.open_logs()
+            conf.close_logs()
+
+            out_mock.close.assert_called_with()
+            err_mock.close.assert_called_with()
+
+            self.assertEqual(conf.out, None)
+            self.assertEqual(conf.err, None)
 
 
 class TestClaraManagerStart(unittest.TestCase):

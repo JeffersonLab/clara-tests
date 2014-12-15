@@ -67,6 +67,52 @@ class ClaraProcess():
         self.logs = logs
 
 
+class ClaraProcessConfig():
+    def __init__(self, clara, lang='java', instance='platform'):
+        self._conf = clara[lang]
+        self._logs = clara['logs']
+        self._lang = lang
+        self._instance = instance
+
+        self.cmd = self._conf[instance].split()
+        self.cwd = self._conf['fullpath']
+        self.proc = None
+        self.out = None
+        self.err = None
+        self.env = self._env()
+
+    def open_logs(self):
+        self.out = self._open_log('log')
+        self.err = self._open_log('err')
+
+    def close_logs(self):
+        self.out.close()
+        self.err.close()
+
+        self.out = None
+        self.err = None
+
+    def set_proc(self, proc):
+        self.proc = proc
+
+    def _open_log(self, ext):
+        name = '%s-%s-%s.%s' % (host_ip, self._lang, self._instance, ext)
+        return open(os.path.join(self._logs, name), "w+")
+
+    def _env(self):
+        env = os.environ.copy()
+        if self._lang == 'python':
+            fullpath = self._conf['fullpath']
+            if 'PYTHONPATH' in env:
+                env['PYTHONPATH'] = fullpath + ":" + env['PYTHONPATH']
+            else:
+                env['PYTHONPATH'] = fullpath
+        elif self._lang == 'java':
+            fullpath = self._conf['fullpath']
+            env['CLARA_SERVICES'] = fullpath
+        return env
+
+
 class ClaraManagerError(Exception):
     pass
 
