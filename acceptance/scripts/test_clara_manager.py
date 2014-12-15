@@ -26,30 +26,23 @@ clara = {
 }
 
 
-class testClaraManager(unittest.TestCase):
+class TestClaraManagerStart(unittest.TestCase):
 
-    def test_start_clara_bad_instance(self):
-        manager = ClaraManager(clara)
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.start_clara('python', 'monitor')
-        msg = 'Bad instance: monitor'
-        self.assertEquals(str(e.exception), msg)
+    def setUp(self):
+        self.manager = ClaraManager(clara)
 
-    def test_start_clara_bad_lang(self):
-        manager = ClaraManager(clara)
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.start_clara('erlang', 'dpe')
-        msg = 'Bad language: erlang'
-        self.assertEquals(str(e.exception), msg)
+    def test_start_clara_raises_on_bad_instance(self):
+        self.assertRaisesRegexp(ClaraManagerError, 'Bad instance: monitor',
+                                self.manager.start_clara, 'python', 'monitor')
 
-    def test_start_clara_is_running(self):
-        manager = ClaraManager(clara)
-        manager.instances = {'python/dpe': None}
+    def test_start_clara_raises_on_bad_lang(self):
+        self.assertRaisesRegexp(ClaraManagerError, 'Bad language: erlang',
+                                self.manager.start_clara, 'erlang', 'dpe')
 
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.start_clara('python', 'dpe')
-        msg = 'python/dpe already running!'
-        self.assertEquals(str(e.exception), msg)
+    def test_start_clara_raises_if_already_running(self):
+        self.manager.instances = {'python/dpe': None}
+        self.assertRaisesRegexp(ClaraManagerError, 'python/dpe already run',
+                                self.manager.start_clara, 'python', 'dpe')
 
     def test_start_clara_python_platform(self):
         wd = '/clara/python'
@@ -71,15 +64,14 @@ class testClaraManager(unittest.TestCase):
         out_log = "/clara/logs/%s-%s-%s.log" % (host_ip, lang, instance)
         err_log = "/clara/logs/%s-%s-%s.err" % (host_ip, lang, instance)
 
-        manager = ClaraManager(clara)
-
         with mock.patch('%s.open' % cm, mock.mock_open(), create=True) as o, \
                 mock.patch('%s.subprocess' % cm) as sp:
 
             o.side_effect = log_files
             sp.Popen.return_value = 'ok'
 
-            manager.start_clara(lang, instance)
+            self.manager.instances = {}
+            self.manager.start_clara(lang, instance)
 
             log_calls = [mock.call(out_log, 'w+'), mock.call(err_log, 'w+')]
             o.assert_has_calls(log_calls)
@@ -91,39 +83,36 @@ class testClaraManager(unittest.TestCase):
                                         stderr=err_log)
 
             key = lang + "/" + instance
-            self.assertIn(key, manager.instances)
+            self.assertIn(key, self.manager.instances)
 
-            clara_run = manager.instances[key]
+            clara_run = self.manager.instances[key]
 
             self.assertEquals(clara_run.proc, 'ok')
             self.assertSequenceEqual(clara_run.logs, [out_log, err_log])
 
-    def test_stop_clara_bad_instance(self):
+
+class TestClaraManagerStop(unittest.TestCase):
+
+    def test_stop_clara_raises_on_bad_instance(self):
         manager = ClaraManager(clara)
 
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.stop_clara('python', 'monitor')
-        msg = 'Bad instance: monitor'
-        self.assertEquals(str(e.exception), msg)
+        self.assertRaisesRegexp(ClaraManagerError, 'Bad instance: monitor',
+                                manager.stop_clara, 'python', 'monitor')
 
-    def test_stop_clara_bad_lang(self):
+    def test_stop_clara_raises_on_bad_lang(self):
         manager = ClaraManager(clara)
 
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.stop_clara('erlang', 'python')
-        msg = 'Bad language: erlang'
-        self.assertEquals(str(e.exception), msg)
+        self.assertRaisesRegexp(ClaraManagerError, 'Bad language: erlang',
+                                manager.stop_clara, 'erlang', 'dpe')
 
-    def test_stop_clara_not_running(self):
+    def test_stop_clara_raises_if_not_running(self):
         manager = ClaraManager(clara)
 
-        with self.assertRaises(ClaraManagerError) as e:
-            manager.stop_clara('python', 'dpe')
-        msg = 'python/dpe is not running!'
-        self.assertEquals(str(e.exception), msg)
+        self.assertRaisesRegexp(ClaraManagerError, 'python/dpe is not run',
+                                manager.stop_clara, 'python', 'dpe')
 
     @mock.patch('clara_manager.stop_process')
-    def test_stop_clara(self, mock_stop):
+    def test_stop_clara_stops_process(self, mock_stop):
         run1 = ClaraProcess("1", None)
         run2 = ClaraProcess("2", None)
         run3 = ClaraProcess("3", None)
@@ -138,7 +127,10 @@ class testClaraManager(unittest.TestCase):
         mock_stop.assert_called_once_with(run1)
         self.assertDictEqual(manager.instances, result)
 
-    def test_stop_process(self):
+
+class TestStopProcess(unittest.TestCase):
+
+    def test_stop_process_terminates_the_process(self):
         out_log = mock.Mock()
         err_log = mock.Mock()
         proc = mock.Mock()
@@ -154,7 +146,7 @@ class testClaraManager(unittest.TestCase):
         err_log.close.assert_called_once_with()
 
     @mock.patch('time.sleep')
-    def test_stop_process_with_kill(self, mock_t):
+    def test_stop_process_with_forced_kill(self, mock_t):
         proc = mock.Mock()
         run = ClaraProcess(proc, [])
 
@@ -167,7 +159,7 @@ class testClaraManager(unittest.TestCase):
         proc.wait.assert_called_once_with()
 
     @mock.patch('clara_manager.stop_process')
-    def test_stop_all(self, mock_sp):
+    def test_stop_all_processes(self, mock_sp):
         manager = ClaraManager(clara)
         manager.instances = {'p/d': 'p1', 'p/p': 'p2', 'j/d': 'p3'}
 
@@ -180,7 +172,7 @@ class testClaraManager(unittest.TestCase):
         self.assertTrue(not manager.instances)
 
     @mock.patch('clara_manager.stop_process')
-    def test_stop_all_with_kill(self, mock_sp):
+    def test_stop_all_processes_with_forced_kill(self, mock_sp):
         manager = ClaraManager(clara)
         manager.instances = {'p/d': 'p1', 'p/p': 'p2', 'j/d': 'p3'}
 
@@ -194,6 +186,9 @@ class testClaraManager(unittest.TestCase):
         self.assertEqual(mock_sp.call_count, 3)
         self.assertTrue(not manager.instances)
 
+
+class TestClaraManagerDispatch(unittest.TestCase):
+
     @mock.patch('zmq.Socket')
     @mock.patch('zmq.Context')
     @mock.patch('time.sleep')
@@ -206,8 +201,7 @@ class testClaraManager(unittest.TestCase):
         ctx.socket.return_value = sck
         sck.recv.side_effect = NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
-            manager.run()
+        self.assertRaises(NotImplementedError, manager.run)
 
         ctx.socket.assert_called_once_with(zmq.REP)
         sck.bind.assert_called_once_with("tcp://*:7788")
@@ -228,14 +222,13 @@ class testClaraManager(unittest.TestCase):
         mock_dr.return_value = res
         sck.send_multipart.side_effect = NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
-            manager.run()
+        self.assertRaises(NotImplementedError, manager.run)
 
         sck.recv.assert_called_once_with()
         mock_dr.assert_called_once_with(msg)
         sck.send_multipart.assert_called_once_with(res)
 
-    def test_dispatch_empty_request(self):
+    def test_dispatch_returns_error_if_empty_request(self):
         manager = ClaraManager(clara)
         msg = ''
 
@@ -243,7 +236,7 @@ class testClaraManager(unittest.TestCase):
 
         self.assertSequenceEqual(res, ['ERROR', 'Empty request'])
 
-    def test_dispatch_bad_request(self):
+    def test_dispatch_returns_error_if_bad_request(self):
         manager = ClaraManager(clara)
         msg = 'clara:start'
 
@@ -251,7 +244,7 @@ class testClaraManager(unittest.TestCase):
 
         self.assertSequenceEqual(res, ['ERROR', 'Bad request: "clara:start"'])
 
-    def test_dispatch_bad_action(self):
+    def test_dispatch_returns_error_if_bad_action(self):
         manager = ClaraManager(clara)
         msg = 'clara:launch:python:dpe'
 
@@ -260,7 +253,7 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['ERROR', 'Unsupported action: launch'])
 
     @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_start_request(self, mock_sc):
+    def test_dispatch_successful_start_request(self, mock_sc):
         manager = ClaraManager(clara)
         msg = 'clara:start:python:dpe'
 
@@ -270,7 +263,7 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
     @mock.patch('clara_manager.ClaraManager.stop_clara')
-    def test_dispatch_stop_request(self, mock_sc):
+    def test_dispatch_successful_stop_request(self, mock_sc):
         manager = ClaraManager(clara)
         msg = 'clara:stop:python:dpe'
 
@@ -280,7 +273,7 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['SUCCESS', ''])
 
     @mock.patch('clara_manager.stop_all')
-    def test_dispatch_stop_all_request(self, mock_sa):
+    def test_dispatch_sucessful_stop_all_request(self, mock_sa):
         manager = ClaraManager(clara)
         msg = 'clara:stop:all:all'
 
@@ -290,8 +283,8 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['SUCCESS', ''])
         self.assertTrue(not manager.instances)
 
-    @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_request_start_raises(self, mock_sc):
+    @mock.patch('clara_manager.ClaraManager.stop_clara')
+    def test_dispatch_returns_error_if_request_failed(self, mock_sc):
         manager = ClaraManager(clara)
         msg = 'clara:start:python:monitor'
         mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
@@ -301,7 +294,7 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['ERROR', 'Bad instance: monitor'])
 
     @mock.patch('clara_manager.ClaraManager.start_clara')
-    def test_dispatch_request_start_unexpected_problem(self, mock_sc):
+    def test_dispatch_returns_error_on_request_error(self, mock_sc):
         manager = ClaraManager(clara)
         msg = 'clara:start:python:dpe'
         mock_sc.side_effect = OSError('Popen error')
@@ -311,15 +304,6 @@ class testClaraManager(unittest.TestCase):
         self.assertSequenceEqual(res, ['ERROR',
                                        'Unexpected exception: Popen error'])
 
-    @mock.patch('clara_manager.ClaraManager.stop_clara')
-    def test_dispatch_request_stop_raises(self, mock_sc):
-        manager = ClaraManager(clara)
-        msg = 'clara:stop:python:monitor'
-        mock_sc.side_effect = ClaraManagerError('Bad instance: monitor')
-
-        res = manager.dispatch_request(msg)
-
-        self.assertSequenceEqual(res, ['ERROR', 'Bad instance: monitor'])
 
 if __name__ == '__main__':
     unittest.main()
