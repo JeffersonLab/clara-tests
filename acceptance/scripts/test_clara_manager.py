@@ -5,12 +5,13 @@ import zmq
 
 from clara_manager import ClaraManager
 from clara_manager import ClaraManagerError
-from clara_manager import ClaraProcess
 from clara_manager import ClaraProcessConfig
 from clara_manager import stop_process
 from clara_manager import stop_all
 from clara_manager import host_ip
 from clara_manager import __name__ as cm
+
+from test_clara_testing import patch_on_setup
 
 clara = {
     'logs': '/clara/logs',
@@ -96,6 +97,12 @@ class TestClaraManagerStart(unittest.TestCase):
     def setUp(self):
         self.manager = ClaraManager(clara)
 
+        self.mock_po = patch_on_setup(self, 'subprocess.Popen')
+        self.mock_cc = patch_on_setup(self, 'clara_manager.ClaraProcessConfig')
+
+        self.ps = self.mock_po.return_value
+        self.cc = self.mock_cc.return_value
+
     def test_start_clara_raises_on_bad_instance(self):
         self.assertRaisesRegexp(ClaraManagerError, 'Bad instance: monitor',
                                 self.manager.start_clara, 'python', 'monitor')
@@ -109,51 +116,39 @@ class TestClaraManagerStart(unittest.TestCase):
         self.assertRaisesRegexp(ClaraManagerError, 'python/dpe already run',
                                 self.manager.start_clara, 'python', 'dpe')
 
-    def test_start_clara_python_platform(self):
-        wd = '/clara/python'
-        cmd = ['python', '-u', 'core/system/Platform.py']
+    def test_start_clara_creates_config(self):
+        self.manager.start_clara('python', 'dpe')
 
-        with mock.patch.dict(os.environ, clear=True):
-            env = {'PYTHONPATH': '/clara/python'}
-            self._assert_start_clara('python', 'platform', cmd, wd, env)
+        self.mock_cc.assert_called_once_with(clara, 'python', 'dpe')
 
-        with mock.patch.dict(os.environ, {'PYTHONPATH': '/opt/python'}):
-            env = dict(os.environ, PYTHONPATH='/clara/python:/opt/python')
-            self._assert_start_clara('python', 'platform', cmd, wd, env)
+    def test_start_clara_open_logs(self):
+        self.manager.start_clara('python', 'dpe')
 
-    def _assert_start_clara(self, lang, instance, command, working_dir,
-                            env=os.environ):
-        def log_files(*args):
-            return args[0]
+        self.cc.open_logs.assert_called_once_with()
+        self.assertFalse(self.cc.close_logs.called)
 
-        out_log = "/clara/logs/%s-%s-%s.log" % (host_ip, lang, instance)
-        err_log = "/clara/logs/%s-%s-%s.err" % (host_ip, lang, instance)
+    def test_start_clara_run_process(self):
+        self.manager.start_clara('python', 'dpe')
 
-        with mock.patch('%s.open' % cm, mock.mock_open(), create=True) as o, \
-                mock.patch('%s.subprocess' % cm) as sp:
+        self.mock_po.assert_called_once_with(self.cc.cmd,
+                                             env=self.cc.env,
+                                             cwd=self.cc.cwd,
+                                             stdout=self.cc.out,
+                                             stderr=self.cc.err)
 
-            o.side_effect = log_files
-            sp.Popen.return_value = 'ok'
+    def test_start_clara_store_process(self):
+        self.manager.start_clara('python', 'platform')
 
-            self.manager.instances = {}
-            self.manager.start_clara(lang, instance)
+        self.cc.set_proc.assert_called_once_with(self.ps)
 
-            log_calls = [mock.call(out_log, 'w+'), mock.call(err_log, 'w+')]
-            o.assert_has_calls(log_calls)
+    def test_start_clara_store_config(self):
+        self.manager.start_clara('python', 'platform')
 
-            sp.Popen.assert_called_with(command,
-                                        env=env,
-                                        cwd=working_dir,
-                                        stdout=out_log,
-                                        stderr=err_log)
+        key = 'python/platform'
+        self.assertIn(key, self.manager.instances)
 
-            key = lang + "/" + instance
-            self.assertIn(key, self.manager.instances)
-
-            clara_run = self.manager.instances[key]
-
-            self.assertEquals(clara_run.proc, 'ok')
-            self.assertSequenceEqual(clara_run.logs, [out_log, err_log])
+        clara_run = self.manager.instances[key]
+        self.assertEquals(clara_run, self.cc)
 
 
 class TestClaraManagerStop(unittest.TestCase):
@@ -178,9 +173,9 @@ class TestClaraManagerStop(unittest.TestCase):
 
     @mock.patch('clara_manager.stop_process')
     def test_stop_clara_stops_process(self, mock_stop):
-        run1 = ClaraProcess("1", None)
-        run2 = ClaraProcess("2", None)
-        run3 = ClaraProcess("3", None)
+        run1 = ClaraProcessConfig(clara)
+        run2 = ClaraProcessConfig(clara)
+        run3 = ClaraProcessConfig(clara)
         manager = ClaraManager(clara)
         manager.instances = {
             'python/dpe': run1, 'python/platform': run2, 'java/dpe': run3
@@ -196,32 +191,39 @@ class TestClaraManagerStop(unittest.TestCase):
 class TestStopProcess(unittest.TestCase):
 
     def test_stop_process_terminates_the_process(self):
-        out_log = mock.Mock()
-        err_log = mock.Mock()
         proc = mock.Mock()
-        run = ClaraProcess(proc, [out_log, err_log])
+        conf = mock.Mock()
+        conf.proc = proc
 
         proc.poll.return_value = 0
-        stop_process(run)
+        stop_process(conf)
 
         proc.terminate.assert_called_once_with()
         self.assertTrue(not proc.kill.called)
 
-        out_log.close.assert_called_once_with()
-        err_log.close.assert_called_once_with()
-
     @mock.patch('time.sleep')
     def test_stop_process_with_forced_kill(self, mock_t):
         proc = mock.Mock()
-        run = ClaraProcess(proc, [])
+        conf = mock.Mock()
+        conf.proc = proc
 
         proc.poll.return_value = None
 
         with self.assertRaises(OSError):
-            stop_process(run)
+            stop_process(conf)
 
         proc.kill.assert_called_once_with()
         proc.wait.assert_called_once_with()
+
+    def test_stop_process_close_logs(self):
+        proc = mock.Mock()
+        conf = mock.Mock()
+        conf.proc = proc
+
+        proc.poll.return_value = 0
+        stop_process(conf)
+
+        conf.close_logs.assert_called_once_with()
 
     @mock.patch('clara_manager.stop_process')
     def test_stop_all_processes(self, mock_sp):

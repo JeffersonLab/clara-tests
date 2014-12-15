@@ -36,17 +36,16 @@ def finished_process(proc, limit=25):
     return True
 
 
-def stop_process(run):
+def stop_process(conf):
     killed = False
 
-    run.proc.terminate()
-    if not finished_process(run.proc):
-        run.proc.kill()
-        run.proc.wait()
+    conf.proc.terminate()
+    if not finished_process(conf.proc):
+        conf.proc.kill()
+        conf.proc.wait()
         killed = True
 
-    for log in run.logs:
-        log.close()
+    conf.close_logs()
 
     if killed:
         raise OSError("Process has been killed")
@@ -59,12 +58,6 @@ def stop_all(manager):
         except Exception:
             pass
     manager.instances.clear()
-
-
-class ClaraProcess():
-    def __init__(self, proc, logs):
-        self.proc = proc
-        self.logs = logs
 
 
 class ClaraProcessConfig():
@@ -172,21 +165,21 @@ class ClaraManager():
         if key in self.instances:
             raise ClaraManagerError('%s already running!' % key)
 
-        clara_conf = self.clara[clara_lang]
+        clara_conf = ClaraProcessConfig(self.clara,
+                                        clara_lang,
+                                        clara_instance)
+        clara_conf.open_logs()
 
-        clara_env = self._get_clara_env(clara_lang)
-        clara_dir = clara_conf['fullpath']
-        clara_command = clara_conf[clara_instance].split()
-        clara_out = self._get_clara_logfile(clara_lang, clara_instance, "log")
-        clara_err = self._get_clara_logfile(clara_lang, clara_instance, "err")
+        clara_proc = subprocess.Popen(clara_conf.cmd,
+                                      cwd=clara_conf.cwd,
+                                      stdout=clara_conf.out,
+                                      stderr=clara_conf.err,
+                                      env=clara_conf.env)
 
-        clara_proc = subprocess.Popen(clara_command,
-                                      cwd=clara_dir,
-                                      stdout=clara_out,
-                                      stderr=clara_err,
-                                      env=clara_env)
 
-        self.instances[key] = ClaraProcess(clara_proc, [clara_out, clara_err])
+        clara_conf.set_proc(clara_proc)
+
+        self.instances[key] = clara_conf
 
     def stop_clara(self, clara_lang, clara_instance):
         if clara_lang not in self.clara:
@@ -201,23 +194,6 @@ class ClaraManager():
 
         run = self.instances.pop(key)
         stop_process(run)
-
-    def _get_clara_logfile(self, clara_type, clara_instance, log_ext):
-        name = '%s-%s-%s.%s' % (host_ip, clara_type, clara_instance, log_ext)
-        return open(os.path.join(self.clara['logs'], name), "w+")
-
-    def _get_clara_env(self, clara_lang):
-        env = os.environ.copy()
-        if clara_lang == 'python':
-            clara_path = self.clara[clara_lang]['fullpath']
-            if 'PYTHONPATH' in env:
-                env['PYTHONPATH'] = clara_path + ":" + env['PYTHONPATH']
-            else:
-                env['PYTHONPATH'] = clara_path
-        elif clara_lang == 'java':
-            clara_path = self.clara[clara_lang]['fullpath']
-            env['CLARA_SERVICES'] = clara_path
-        return env
 
 
 if __name__ == "__main__":
