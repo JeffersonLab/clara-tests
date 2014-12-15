@@ -18,6 +18,11 @@ clara = {
         'platform': 'python -u core/system/Platform.py',
         'dpe': 'python -u core/system/Dpe.py',
     },
+    'java': {
+        'fullpath': '/clara/services',
+        'platform': './bin/clara-platform',
+        'dpe': './bin/clara-dpe -p platform',
+    },
 }
 
 

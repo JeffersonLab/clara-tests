@@ -15,6 +15,11 @@ clara = {
         'platform': 'python -u core/system/Platform.py',
         'dpe': 'python -u core/system/Dpe.py',
     },
+    'java': {
+        'fullpath': '/home/vagrant/clara/services',
+        'platform': './bin/clara-platform',
+        'dpe': './bin/clara-dpe -host 10.11.1.100 -log',
+    },
 }
 
 host_ip = socket.gethostbyname(socket.gethostname())
@@ -163,6 +168,9 @@ class ClaraManager():
                 env['PYTHONPATH'] = clara_path + ":" + env['PYTHONPATH']
             else:
                 env['PYTHONPATH'] = clara_path
+        elif clara_lang == 'java':
+            clara_path = self.clara[clara_lang]['fullpath']
+            env['CLARA_SERVICES'] = clara_path
         return env
 
 
