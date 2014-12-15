@@ -97,11 +97,14 @@ class TestClaraManagerStart(unittest.TestCase):
     def setUp(self):
         self.manager = ClaraManager(clara)
 
+        self.mock_t = patch_on_setup(self, 'time.sleep')
         self.mock_po = patch_on_setup(self, 'subprocess.Popen')
         self.mock_cc = patch_on_setup(self, 'clara_manager.ClaraProcessConfig')
 
         self.ps = self.mock_po.return_value
         self.cc = self.mock_cc.return_value
+
+        self.ps.poll.return_value = None
 
     def test_start_clara_raises_on_bad_instance(self):
         self.assertRaisesRegexp(ClaraManagerError, 'Bad instance: monitor',
@@ -149,6 +152,30 @@ class TestClaraManagerStart(unittest.TestCase):
 
         clara_run = self.manager.instances[key]
         self.assertEquals(clara_run, self.cc)
+
+    def test_start_clara_dont_store_config_on_process_error(self):
+        self.ps.poll.return_value = 1
+        try:
+            self.manager.start_clara('python', 'platform')
+        except:
+            pass
+        self.assertNotIn('python/platform', self.manager.instances)
+
+    def test_start_clara_raises_on_process_error(self):
+        self.ps.poll.return_value = 1
+
+        self.assertRaisesRegexp(ClaraManagerError,
+                                'Could not start python/platform',
+                                self.manager.start_clara,
+                                'python', 'platform')
+
+    def test_start_clara_close_logs_on_process_error(self):
+        self.ps.poll.return_value = 1
+        try:
+            self.manager.start_clara('python', 'platform')
+        except:
+            pass
+        self.cc.close_logs.assert_called_once_with()
 
 
 class TestClaraManagerStop(unittest.TestCase):

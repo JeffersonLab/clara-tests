@@ -176,6 +176,11 @@ class ClaraManager():
                                       stderr=clara_conf.err,
                                       env=clara_conf.env)
 
+        for i in range(5):
+            if clara_proc.poll() is not None:
+                clara_conf.close_logs()
+                raise ClaraManagerError('Could not start %s' % key)
+            time.sleep(0.4)
 
         clara_conf.set_proc(clara_proc)
 
