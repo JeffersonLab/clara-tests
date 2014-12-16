@@ -130,22 +130,26 @@ class TestClaraManagerStart(unittest.TestCase):
 
         self.mock_cc.assert_called_once_with(clara, 'python', 'dpe')
 
-    def test_start_clara_open_logs(self):
+    def test_start_clara_open_logs_before_running_process(self):
+        def assert_open_logs(*args, **kwargs):
+            self.cc.open_logs.assert_called_once_with()
+            return mock.DEFAULT
+
+        self.mock_po.side_effect = assert_open_logs
+
         self.manager.start_clara('python', 'dpe')
 
-        self.cc.open_logs.assert_called_once_with()
         self.assertFalse(self.cc.close_logs.called)
 
     def test_start_clara_run_process(self):
         self.manager.start_clara('python', 'dpe')
 
-        cc = mock_cc.return_value
-        mock_ps.assert_called_once_with(cc.cmd,
-                                        env=cc.env,
-                                        cwd=cc.cwd,
-                                        preexec_fn=os.setsid,
-                                        stdout=cc.out,
-                                        stderr=cc.err)
+        self.mock_po.assert_called_once_with(self.cc.cmd,
+                                             env=self.cc.env,
+                                             cwd=self.cc.cwd,
+                                             preexec_fn=os.setsid,
+                                             stdout=self.cc.out,
+                                             stderr=self.cc.err)
 
     def test_start_clara_store_process(self):
         self.manager.start_clara('python', 'platform')
@@ -161,14 +165,6 @@ class TestClaraManagerStart(unittest.TestCase):
         clara_run = self.manager.instances[key]
         self.assertEquals(clara_run, self.cc)
 
-    def test_start_clara_dont_store_config_on_process_error(self):
-        self.ps.poll.return_value = 1
-        try:
-            self.manager.start_clara('python', 'platform')
-        except:
-            pass
-        self.assertNotIn('python/platform', self.manager.instances)
-
     def test_start_clara_raises_on_process_error(self):
         self.ps.poll.return_value = 1
 
@@ -176,6 +172,14 @@ class TestClaraManagerStart(unittest.TestCase):
                                 'Could not start python/platform',
                                 self.manager.start_clara,
                                 'python', 'platform')
+
+    def test_start_clara_dont_store_config_on_process_error(self):
+        self.ps.poll.return_value = 1
+        try:
+            self.manager.start_clara('python', 'platform')
+        except:
+            pass
+        self.assertNotIn('python/platform', self.manager.instances)
 
     def test_start_clara_close_logs_on_process_error(self):
         self.ps.poll.return_value = 1
