@@ -1,7 +1,11 @@
+import logging
 import os
 import re
 import yaml
 import zmq
+
+logging.basicConfig()
+log = logging.getLogger("ACCEPTANCE")
 
 port = "7788"
 standard_requests = (
@@ -142,9 +146,11 @@ class ClaraTest:
         if self._result is None:
             raise ClaraRequestError('The test has no result')
         for action in self._actions:
+            log.info("Request '%s'" % action)
             node, msg = parse_action(action, self._item)
             result = self._client.request(node, msg)
         if result == self._result:
+            log.info("Result %s" % result)
             return result
         else:
             raise ClaraRequestError('Wrong result: "%s". Expected: "%s"' %
@@ -164,14 +170,17 @@ class ClaraTestSuite:
 
     def run_tests(self):
         if not self._tests:
+            log.error("Missing tests")
             return (False, self._name)
         try:
+            log.info("Running %s" % self._name)
             for item in self._context:
                 for data in self._tests:
                     test = ClaraTest(self._client, data, item)
                     test.run()
             return (True, self._name)
         except ClaraRequestError as e:
+            log.error(str(e))
             return (False, self._name)
         finally:
             self._client.request_all('clara:stop:all:all')
@@ -209,6 +218,8 @@ if __name__ == '__main__':
     base = get_base_dir()
     nodes = get_nodes(base)
     tests = get_all_tests(base)
+
+    log.setLevel(logging.INFO)
 
     tr = ClaraTestRunner(nodes, tests)
     tr.start_client()
