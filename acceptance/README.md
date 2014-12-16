@@ -63,4 +63,6 @@ See the [Vagrant docs][vd] for advanced usage.
 
 ## Run Tests
 
-TODO.
+Once all the machines are up and provisioned, launch all the tests with:
+
+    $ ./run

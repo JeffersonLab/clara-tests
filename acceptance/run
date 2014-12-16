@@ -1,0 +1,60 @@
+#!/bin/sh
+
+set +e
+
+run_ssh_command()
+{
+    ssh -i .vagrant/machines/$1/virtualbox/private_key \
+        -l vagrant \
+        -o UserKnownHostsFile=/dev/null \
+        -o StrictHostKeyChecking=no \
+        -o LogLevel=quiet \
+        $2 "$3"
+}
+
+restart_daemon()
+{
+    run_ssh_command $1 $2 'sudo service clara-manager restart' | tail -1
+}
+
+
+RESTART=false
+CONTINUE=false
+
+while getopts "rn" o; do
+    case $o in
+        r)
+            RESTART=true
+            ;;
+        c)
+            CONTINUE=true
+            ;;
+        *)
+            echo "Wrong option"
+            exit 1
+            ;;
+    esac
+done
+
+if [ $RESTART = true -a $CONTINUE = true ]; then
+    echo "Cannot combine options"
+    exit 1
+fi
+
+if [ $CONTINUE = false ]; then
+    echo "Restarting daemons..."
+    echo
+    # Ensure the clara-manager daemon is up to date
+    restart_daemon platform 10.11.1.100
+    restart_daemon dpe1 10.11.1.101
+    restart_daemon dpe2 10.11.1.102
+fi
+
+if [ $RESTART = false ]; then
+    echo
+    echo
+    echo "Running acceptance tests..."
+    echo
+    # Run all tests
+    run_ssh_command platform 10.11.1.100 'cd /vagrant && python scripts/clara_testing.py'
+fi
