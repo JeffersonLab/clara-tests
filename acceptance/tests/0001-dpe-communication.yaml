@@ -1,0 +1,35 @@
+---
+name: DPE registration
+tests:
+  - actions:
+      - start platform
+      - request list dpes
+    result:
+      - 10.11.1.100_admin
+  - actions:
+      - start {{item}} dpe on dpe1
+      - request list dpes
+    result:
+      - 10.11.1.100_admin
+      - 10.11.1.101_admin
+  - actions:
+      - start {{item}} dpe on dpe2
+      - request list dpes
+    result:
+      - 10.11.1.100_admin
+      - 10.11.1.101_admin
+      - 10.11.1.102_admin
+  - actions:
+      - stop {{item}} dpe on dpe1
+      - stop {{item}} dpe on dpe2
+      - request list dpes
+    result:
+      - 10.11.1.100_admin
+  - actions:
+      - start {{item}} dpe on dpe1
+      - request list dpes
+    result:
+      - 10.11.1.100_admin
+      - 10.11.1.101_admin
+with:
+  - java
