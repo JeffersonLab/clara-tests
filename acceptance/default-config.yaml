@@ -19,6 +19,9 @@ clara:
     provision:
       - bundle install
       - rake db:migrate
+
+# WARNING: DO NOT EDIT THIS DICTIONARY
+# UNLESS YOU KNOW WHAT YOU ARE DOING
 nodes:
   platform: '10.11.1.100'
   dpe1: '10.11.1.101'
