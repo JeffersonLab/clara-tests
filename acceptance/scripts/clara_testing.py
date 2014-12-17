@@ -1,8 +1,12 @@
 import logging
 import os
 import re
-import yaml
 import zmq
+
+from clara_common import get_base_dir
+from clara_common import get_config_file
+from clara_common import get_config_section
+from clara_common import read_yaml
 
 logging.basicConfig()
 log = logging.getLogger("ACCEPTANCE")
@@ -53,31 +57,6 @@ class ClaraDaemonClient():
         if status != 'SUCCESS':
             raise ClaraRequestError('Bad status: "%s"' % status)
         return text
-
-
-def get_base_dir():
-    cwd = os.getcwd()
-    base_cwd = os.path.basename(cwd)
-    if base_cwd == 'scripts':
-        return '..'
-    elif base_cwd == 'acceptance' or base_cwd == 'vagrant':
-        return '.'
-    else:
-        raise RuntimeError("Run from the 'acceptance (or vagrant)' directory")
-
-
-def read_yaml(yaml_file):
-    with open(yaml_file) as f:
-        return yaml.load(f)
-
-
-def get_nodes(base_dir):
-    config_file = os.path.join(base_dir, 'default-config.yaml')
-    data = read_yaml(config_file)
-    nodes = data.get('nodes')
-    if not nodes:
-        raise RuntimeError('Bad config file: missing nodes')
-    return nodes
 
 
 def get_all_files(base_dir):
@@ -216,7 +195,7 @@ class ClaraTestRunner():
 if __name__ == '__main__':
 
     base = get_base_dir()
-    nodes = get_nodes(base)
+    nodes = get_config_section(get_config_file(base), 'nodes')
     tests = get_all_files(base)
 
     log.setLevel(logging.INFO)

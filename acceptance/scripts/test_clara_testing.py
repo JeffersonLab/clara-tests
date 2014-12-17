@@ -8,16 +8,10 @@ from clara_testing import ClaraTest
 from clara_testing import ClaraTestSuite
 from clara_testing import ClaraTestRunner
 
-from clara_testing import get_base_dir
-from clara_testing import get_nodes
 from clara_testing import get_all_files
 from clara_testing import parse_action
 
-nodes = {
-    'platform': '10.11.1.100',
-    'dpe1': '10.11.1.101',
-    'dpe2': '10.11.1.102',
-}
+from test_clara_common import nodes
 
 
 def patch_on_setup(instance, name):
@@ -359,45 +353,6 @@ class TestClaraTestRunner(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-
-    @mock.patch('os.getcwd')
-    def test_get_base_dir(self, mock_cwd):
-        mock_cwd.return_value = '/home/user/dev/clara-test/acceptance/scripts'
-        self.assertEqual(get_base_dir(), '..')
-
-        mock_cwd.return_value = '/home/user/dev/clara-test/acceptance'
-        self.assertEqual(get_base_dir(), '.')
-
-        mock_cwd.return_value = '/vagrant/scripts'
-        self.assertEqual(get_base_dir(), '..')
-
-        mock_cwd.return_value = '/vagrant'
-        self.assertEqual(get_base_dir(), '.')
-
-    @mock.patch('os.getcwd')
-    def test_get_base_dir_raises_if_wrong_current_directory(self, mock_cwd):
-        mock_cwd.return_value = '/home/user/dev/'
-        self.assertRaisesRegexp(RuntimeError, 'Run from', get_base_dir)
-
-    @mock.patch('clara_testing.read_yaml')
-    def test_get_nodes(self, mock_ry):
-        mock_ry.return_value = {'nodes': nodes}
-
-        self.assertEqual(get_nodes('.'), nodes)
-
-    @mock.patch('clara_testing.read_yaml')
-    def test_get_nodes_uses_config_file(self, mock_ry):
-        mock_ry.return_value = {'nodes': nodes}
-        get_nodes('.')
-
-        mock_ry.assert_called_once_with('./default-config.yaml')
-
-    @mock.patch('clara_testing.read_yaml')
-    def test_get_nodes_raises_if_missing_nodes(self, mock_ry):
-        mock_ry.return_value = {}
-
-        self.assertRaisesRegexp(RuntimeError, 'missing nodes',
-                                get_nodes, '.')
 
     @mock.patch('os.listdir')
     def test_get_all_files(self, mock_ls):
