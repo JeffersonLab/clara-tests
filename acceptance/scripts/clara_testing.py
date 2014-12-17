@@ -80,7 +80,7 @@ def get_nodes(base_dir):
     return nodes
 
 
-def get_all_tests(base_dir):
+def get_all_files(base_dir):
     all_tests = []
     td = os.path.join(base_dir, 'tests')
     for f in os.listdir(td):
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
     base = get_base_dir()
     nodes = get_nodes(base)
-    tests = get_all_tests(base)
+    tests = get_all_files(base)
 
     log.setLevel(logging.INFO)
 

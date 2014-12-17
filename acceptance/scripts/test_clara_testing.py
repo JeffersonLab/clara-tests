@@ -10,7 +10,7 @@ from clara_testing import ClaraTestRunner
 
 from clara_testing import get_base_dir
 from clara_testing import get_nodes
-from clara_testing import get_all_tests
+from clara_testing import get_all_files
 from clara_testing import parse_action
 
 nodes = {
@@ -400,10 +400,10 @@ class TestUtils(unittest.TestCase):
                                 get_nodes, '.')
 
     @mock.patch('os.listdir')
-    def test_get_all_tests(self, mock_ls):
+    def test_get_all_files(self, mock_ls):
         mock_ls.return_value = ['01-run.yaml', '02-dpes.yaml', 'dummmy']
 
-        self.assertEqual(get_all_tests('.'),
+        self.assertEqual(get_all_files('.'),
                          ['./tests/01-run.yaml', './tests/02-dpes.yaml'])
 
     def test_parse_action_replace_item(self):
