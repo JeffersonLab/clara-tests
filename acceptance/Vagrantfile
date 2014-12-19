@@ -31,6 +31,7 @@ Vagrant.configure("2") do |config|
       node_config.vm.box = "ubuntu/trusty64"
       node_config.vm.hostname = node_name.to_s
       node_config.vm.network :private_network, ip: node_ip
+      node_config.ssh.forward_agent = true
 
       dev_dir = "/home/vagrant/clara/dev"
       node_config.vm.synced_folder src_dir, dev_dir
