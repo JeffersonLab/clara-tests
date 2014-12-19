@@ -12,8 +12,8 @@ class common {
 
     file { [
         "/home/vagrant/clara",
-        "/vagrant/services",
-        "/vagrant/services/log",
+        "/vagrant/acceptance/services",
+        "/vagrant/acceptance/services/log",
     ]:
         ensure => "directory",
         owner => "vagrant",
@@ -22,7 +22,7 @@ class common {
 
     file { "/home/vagrant/clara/services":
         ensure => "link",
-        target => "/vagrant/services",
+        target => "/vagrant/acceptance/services",
         force  => "true",
     }
 }
