@@ -1,3 +1,11 @@
 class clara::java {
-    include xmsg::java
+    Package {
+        ensure => latest,
+    }
+
+    package { [
+        "openjdk-7-jdk",
+        "ant",
+    ]:
+    }
 }
