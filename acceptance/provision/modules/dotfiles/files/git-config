@@ -2,6 +2,8 @@
     autocrlf = false
     excludesfile = ~/.config/git/ignore
     attributesfile = ~/.config/git/attributes
+[include]
+    path = ~/.config/git/local
 [color]
     diff = auto
     status = auto

@@ -44,6 +44,19 @@ Vagrant.configure("2") do |config|
         puppet.options = "--verbose --debug"
       end
 
+      # Copy Git user info to VM
+      git_name = `git config user.name`.chomp
+      git_email = `git config user.email`.chomp
+      if not git_name.empty? and not git_email.empty?
+        script = %{
+            echo 'Setting Git user...' &&
+            git config --file ~/.config/git/local user.name '#{git_name.chomp}' &&
+            git config --file ~/.config/git/local user.email '#{git_email.chomp}'
+        }.gsub(/\s+/, " ").strip
+        node_config.vm.provision :shell, :inline => script, :privileged => false
+      else
+        node_config.vm.provision :shell, :inline => "echo 'Git user not set!' >&2"
+      end
 
       ["xmsg", "clara"].each do | project |
         project_conf = test_conf[project]
