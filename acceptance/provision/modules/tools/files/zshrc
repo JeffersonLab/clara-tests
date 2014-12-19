@@ -17,6 +17,7 @@ TIMEFMT=$'\nreal\t%E\nuser\t%U\nsys\t%S'
 # (more like bash)
 WORDCHARS=''
 
+eval `dircolors -b`
 
 # Use emacs keybindings even if our EDITOR is set to vi
 bindkey -e
