@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
       dev_dir = "/home/vagrant/clara/dev"
       node_config.vm.synced_folder src_dir, dev_dir
 
-      node_config.vm.provision :shell, :path => "provision/apt-update.sh"
+      node_config.vm.provision :shell, :path => "provision/apt-bootstrap.sh"
 
       node_config.vm.provision :puppet do | puppet |
         puppet.manifests_path = "provision/manifests"
