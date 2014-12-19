@@ -1,6 +1,9 @@
-class dotfiles::shell {
+class tools::shell {
 
-    package { ["zsh", "ncurses-term"]:
+    package { [
+        "zsh",
+        "ncurses-term",
+    ]:
         ensure => installed,
     }
 
@@ -14,22 +17,26 @@ class dotfiles::shell {
         ensure => present,
         owner => "vagrant",
         group => "vagrant",
-        require => Package["zsh"]
+    }
+
+    file { "/home/vagrant/bin":
+        mode => 0700,
+        ensure => "directory",
     }
 
     file { "/home/vagrant/.profile":
-        source => "puppet:///modules/dotfiles/profile",
+        source => "puppet:///modules/tools/profile",
     }
 
     file { "/home/vagrant/.zprofile":
-        source => "puppet:///modules/dotfiles/zprofile",
+        source => "puppet:///modules/tools/zprofile",
     }
 
     file { "/home/vagrant/.zshrc":
-        source => "puppet:///modules/dotfiles/zshrc",
+        source => "puppet:///modules/tools/zshrc",
     }
 
     file { "/home/vagrant/.zlogout":
-        source => "puppet:///modules/dotfiles/zlogout",
+        source => "puppet:///modules/tools/zlogout",
     }
 }

@@ -29,6 +29,5 @@ class common {
 
 include common
 include locales
-include clara
 include tools
-include dotfiles
+include clara

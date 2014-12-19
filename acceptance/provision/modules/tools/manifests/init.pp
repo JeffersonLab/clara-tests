@@ -1,28 +1,6 @@
 class tools {
-    Package {
-        ensure => installed,
-    }
-
-    package { [
-        "git",
-        "git-svn",
-        "tig",
-        "subversion",
-    ]:
-    }
-
-    package { [
-        "vim-nox",
-        "emacs24-nox",
-        "screen",
-        "tmux",
-    ]:
-    }
-
-    package { [
-        "colordiff",
-        "cdargs",
-        "ranger",
-    ]:
-    }
+    include tools::shell
+    include tools::terminal
+    include tools::vc
+    include tools::editors
 }
