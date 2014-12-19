@@ -18,4 +18,8 @@ class clara::env {
         target => "/vagrant/acceptance/services",
         force  => "true",
     }
+
+    file { "/home/vagrant/bin/clara-testing":
+        source => "puppet:///modules/clara/clara-testing",
+    }
 }

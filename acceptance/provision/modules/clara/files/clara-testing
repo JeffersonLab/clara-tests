@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python /vagrant/acceptance/scripts/clara_session.py
