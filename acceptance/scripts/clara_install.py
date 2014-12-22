@@ -180,6 +180,7 @@ def get_arguments():
     parser.add_argument("--src-dir", required=True)
     parser.add_argument("--conf-file", required=True)
     parser.add_argument("--skip-download", action="store_true")
+    parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--clean-build", action="store_true")
     parser.add_argument("--clean-install", action="store_true")
 
@@ -201,7 +202,9 @@ if __name__ == '__main__':
         if args.clean_install:
             pm.clean_install_directory()
 
-        pm.build_projects(args.clean_build)
+        if not args.skip_build:
+            pm.build_projects(args.clean_build)
+
         print Fore.GREEN + "Done!"
     except Exception as e:
         print Fore.RED + str(e)
