@@ -1,7 +1,7 @@
 class tools::editors {
     package { [
-        "vim-nox",
-        "emacs24-nox",
+        "vim-gtk",
+        "emacs24",
     ]:
         ensure => installed,
     }
