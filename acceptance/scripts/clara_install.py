@@ -2,6 +2,7 @@ import argparse
 import getpass
 import os
 import pexpect
+import re
 import subprocess
 import sys
 import time
@@ -108,6 +109,8 @@ class Project(object):
     def build(self):
         for cmd in self.build_cmds:
             print Fore.BLUE + cmd
+            if re.match(r'^cmake', cmd):
+                cmd += ' -DCMAKE_COLOR_MAKEFILE=OFF'
             time.sleep(1)
             rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
             if rc != 0:
