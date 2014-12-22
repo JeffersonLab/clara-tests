@@ -1,24 +1,5 @@
 ---
 srcdir: ../..
-xmsg:
-  java:
-    path: xmsg-java
-  cpp:
-    path: xmsg-cpp
-  python:
-    path: xmsg-python
-clara:
-  java:
-    path: clara-java
-  cpp:
-    path: clara-cpp
-  python:
-    path: clara-python
-  webapp:
-    path: clara-webapp
-    provision:
-      - bundle install
-      - rake db:migrate
 
 # WARNING: DO NOT EDIT THIS DICTIONARY
 # UNLESS YOU KNOW WHAT YOU ARE DOING
