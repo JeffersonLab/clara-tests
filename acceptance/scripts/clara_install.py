@@ -1,7 +1,10 @@
+import argparse
 import getpass
+import os
 import pexpect
 import sys
 
+from clara_common import get_config_section
 from colorama import init as color_init
 from colorama import Fore
 
@@ -77,9 +80,37 @@ def accept_jlab_svn_certificate():
         svn_proc.expect(pexpect.EOF)
 
 
+class Project(object):
+    def __init__(self, src_dir, data):
+        self.name = data['name']
+        self.path = os.path.expanduser(os.path.join(src_dir, self.name))
+
+
+class ProjectManager:
+    def __init__(self, src_dir):
+        self.src_dir = src_dir
+        self.projects = []
+
+    def register_projects(self, data):
+        print Fore.YELLOW + "Registering projects..."
+        self.projects = [Project(self.src_dir, pd) for pd in data]
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--src-dir", required=True)
+    parser.add_argument("--conf-file", required=True)
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
     try:
+        args = get_arguments()
+        data = get_config_section(args.conf_file, 'projects')
         accept_jlab_svn_certificate()
+        pm = ProjectManager(args.src_dir)
+        pm.register_projects(data)
         print Fore.GREEN + "Done!"
     except Exception as e:
         print Fore.RED + str(e)
