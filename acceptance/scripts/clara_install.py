@@ -3,6 +3,7 @@ import getpass
 import os
 import pexpect
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -163,6 +164,16 @@ class ProjectManager:
             else:
                 raise RuntimeError("'%s' is not on disk" % p.name)
 
+    def clean_install_directory(self):
+        print Fore.YELLOW + "Removing contents of $CLARA_SERVICES..."
+        clara_services = os.getenv('CLARA_SERVICES')
+        for f in os.listdir(clara_services):
+            path = os.path.join(clara_services, f)
+            if os.path.isfile(path):
+                os.remove(path)
+            else:
+                shutil.rmtree(path)
+
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -170,6 +181,7 @@ def get_arguments():
     parser.add_argument("--conf-file", required=True)
     parser.add_argument("--skip-download", action="store_true")
     parser.add_argument("--clean-build", action="store_true")
+    parser.add_argument("--clean-install", action="store_true")
 
     return parser.parse_args()
 
@@ -185,6 +197,9 @@ if __name__ == '__main__':
         if not args.skip_download:
             accept_jlab_svn_certificate()
             pm.download_projects()
+
+        if args.clean_install:
+            pm.clean_install_directory()
 
         pm.build_projects(args.clean_build)
         print Fore.GREEN + "Done!"
