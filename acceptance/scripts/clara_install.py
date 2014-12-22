@@ -100,12 +100,14 @@ class Project(object):
             cmd = 'git clone %s %s' % (self.url, self.path)
         else:
             raise RuntimeError('Bad URL: %s' % self.url)
+        print Fore.BLUE + cmd
         time.sleep(1)
         rc = subprocess.check_call(cmd.split())
         return rc == 0
 
     def build(self):
         for cmd in self.build_cmds:
+            print Fore.BLUE + cmd
             time.sleep(1)
             rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
             if rc != 0:
