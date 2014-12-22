@@ -1,11 +1,18 @@
 class tools::vc {
+    Package {
+        ensure => installed,
+    }
+
     package { [
         "git",
         "git-svn",
         "tig",
         "subversion",
     ]:
-        ensure => installed,
+    }
+
+    if $hostname =~ /^platform/ {
+        package { "meld": }
     }
 
     File {
