@@ -87,6 +87,7 @@ class Project(object):
         self.name = data['name']
         self.path = os.path.expanduser(os.path.join(src_dir, self.name))
         self.url = data['url']
+        self.build_cmds = data['build']
 
     def is_present(self):
         return os.path.isdir(self.path)
@@ -101,6 +102,14 @@ class Project(object):
         time.sleep(1)
         rc = subprocess.check_call(cmd.split())
         return rc == 0
+
+    def build(self):
+        for cmd in self.build_cmds:
+            time.sleep(1)
+            rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
+            if rc != 0:
+                return False
+        return True
 
 
 class ProjectManager:
@@ -123,6 +132,18 @@ class ProjectManager:
             else:
                 print "'%s' is already on disk" % p.name
 
+    def build_projects(self):
+        for p in self.projects:
+            print Fore.YELLOW + "Installing '%s'..." % p.name
+            if p.is_present():
+                time.sleep(1)
+                stat = p.build()
+                if not stat:
+                    raise RuntimeError('Could no build %s' % p.name)
+                print Fore.GREEN + "'%s' successfully installed" % p.name
+            else:
+                raise RuntimeError("'%s' is not on disk" % p.name)
+
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -142,6 +163,7 @@ if __name__ == '__main__':
         pm = ProjectManager(args.src_dir)
         pm.register_projects(data)
         pm.download_projects()
+        pm.build_projects()
         print Fore.GREEN + "Done!"
     except Exception as e:
         print Fore.RED + str(e)
