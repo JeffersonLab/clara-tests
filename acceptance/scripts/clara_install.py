@@ -88,6 +88,7 @@ class Project(object):
         self.path = os.path.expanduser(os.path.join(src_dir, self.name))
         self.url = data['url']
         self.build_cmds = data['build']
+        self.clean_cmds = data['clean']
 
     def is_present(self):
         return os.path.isdir(self.path)
@@ -105,6 +106,15 @@ class Project(object):
 
     def build(self):
         for cmd in self.build_cmds:
+            time.sleep(1)
+            rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
+            if rc != 0:
+                return False
+        return True
+
+    def clean(self):
+        for cmd in self.clean_cmds:
+            print Fore.BLUE + cmd
             time.sleep(1)
             rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
             if rc != 0:
@@ -132,11 +142,15 @@ class ProjectManager:
             else:
                 print "'%s' is already on disk" % p.name
 
-    def build_projects(self):
+    def build_projects(self, clean):
         for p in self.projects:
             print Fore.YELLOW + "Installing '%s'..." % p.name
             if p.is_present():
                 time.sleep(1)
+                if clean:
+                    stat = p.clean()
+                    if not stat:
+                        raise RuntimeError('Could no clean %s' % p.name)
                 stat = p.build()
                 if not stat:
                     raise RuntimeError('Could no build %s' % p.name)
@@ -150,6 +164,7 @@ def get_arguments():
     parser.add_argument("--src-dir", required=True)
     parser.add_argument("--conf-file", required=True)
     parser.add_argument("--skip-download", action="store_true")
+    parser.add_argument("--clean-build", action="store_true")
 
     return parser.parse_args()
 
@@ -166,7 +181,7 @@ if __name__ == '__main__':
             accept_jlab_svn_certificate()
             pm.download_projects()
 
-        pm.build_projects()
+        pm.build_projects(args.clean_build)
         print Fore.GREEN + "Done!"
     except Exception as e:
         print Fore.RED + str(e)
