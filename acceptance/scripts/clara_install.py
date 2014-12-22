@@ -149,6 +149,7 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--src-dir", required=True)
     parser.add_argument("--conf-file", required=True)
+    parser.add_argument("--skip-download", action="store_true")
 
     return parser.parse_args()
 
@@ -158,11 +159,13 @@ if __name__ == '__main__':
         args = get_arguments()
         data = get_config_section(args.conf_file, 'projects')
 
-        accept_jlab_svn_certificate()
-
         pm = ProjectManager(args.src_dir)
         pm.register_projects(data)
-        pm.download_projects()
+
+        if not args.skip_download:
+            accept_jlab_svn_certificate()
+            pm.download_projects()
+
         pm.build_projects()
         print Fore.GREEN + "Done!"
     except Exception as e:
