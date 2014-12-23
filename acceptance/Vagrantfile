@@ -11,6 +11,7 @@ else
 end
 
 src_dir = test_conf["srcdir"]
+dev_dir = "/home/vagrant/clara/dev"
 clara_nodes = test_conf["nodes"]
 
 
@@ -32,7 +33,6 @@ Vagrant.configure("2") do |config|
       node_config.ssh.forward_x11 = true
 
       node_config.vm.synced_folder "..", "/vagrant"
-      dev_dir = "/home/vagrant/clara/dev"
       node_config.vm.synced_folder src_dir, dev_dir
 
       node_config.vm.provision :shell, :path => "provision/apt-bootstrap.sh"
