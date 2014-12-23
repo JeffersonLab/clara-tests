@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set +e
+
+run_ssh_command()
+{
+    ssh -i .vagrant/machines/platform/virtualbox/private_key \
+        -l vagrant \
+        -o UserKnownHostsFile=/dev/null \
+        -o StrictHostKeyChecking=no \
+        -o LogLevel=quiet \
+        10.11.1.100 \
+        "source ~/.profile; $1"
+}
+
+
+EXTRA_ARGS=""
+while getopts "rfbc" o; do
+    case $o in
+        r)
+            EXTRA_ARGS="$EXTRA_ARGS --clean-install"
+            ;;
+        f)
+            EXTRA_ARGS="$EXTRA_ARGS --clean-build"
+            ;;
+        b)
+            EXTRA_ARGS="$EXTRA_ARGS --skip-download"
+            ;;
+        c)
+            EXTRA_ARGS="$EXTRA_ARGS --skip-build"
+            ;;
+        *)
+            echo "Wrong option"
+            exit 1
+            ;;
+    esac
+done
+
+
+SRC_DIR=/home/vagrant/clara/dev
+if [ -f custom-config.yaml ]; then
+    CONFIG_FILE=/vagrant/acceptance/custom-config.yaml
+else
+    CONFIG_FILE=/vagrant/acceptance/default-config.yaml
+fi
+
+CMD="python /vagrant/acceptance/scripts/clara_install.py"
+CMD="$CMD --src-dir $SRC_DIR --conf-file $CONFIG_FILE $EXTRA_ARGS"
+
+run_ssh_command "$CMD"
