@@ -15,6 +15,10 @@ from colorama import Fore
 color_init(autoreset=True)
 
 
+def print_c(color, msg):
+    print color + msg + Fore.RESET
+
+
 def query_yes_no(question, default="yes"):
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -61,7 +65,7 @@ def send_jlab_credentials(proc):
 
 
 def accept_jlab_svn_certificate():
-    print Fore.YELLOW + "Configuring JLab SVN credentials..."
+    print_c(Fore.YELLOW, "Configuring JLab SVN credentials...")
 
     jlab_svn = 'https://clas12svn.jlab.org/repos/'
     svn_cmd = 'svn info %s' % jlab_svn
@@ -102,14 +106,14 @@ class Project(object):
             cmd = 'git clone %s %s' % (self.url, self.path)
         else:
             raise RuntimeError('Bad URL: %s' % self.url)
-        print Fore.BLUE + cmd
+        print_c(Fore.BLUE, cmd)
         time.sleep(1)
         rc = subprocess.check_call(cmd.split())
         return rc == 0
 
     def build(self):
         for cmd in self.build_cmds:
-            print Fore.BLUE + cmd
+            print_c(Fore.BLUE, cmd)
             if re.match(r'^cmake', cmd):
                 cmd += ' -DCMAKE_COLOR_MAKEFILE=OFF'
             time.sleep(1)
@@ -120,7 +124,7 @@ class Project(object):
 
     def clean(self):
         for cmd in self.clean_cmds:
-            print Fore.BLUE + cmd
+            print_c(Fore.BLUE, cmd)
             time.sleep(1)
             rc = subprocess.check_call(cmd, shell=True, cwd=self.path)
             if rc != 0:
@@ -134,23 +138,23 @@ class ProjectManager:
         self.projects = []
 
     def register_projects(self, data):
-        print Fore.YELLOW + "Registering projects..."
+        print_c(Fore.YELLOW, "Registering projects...")
         self.projects = [Project(self.src_dir, pd) for pd in data]
 
     def download_projects(self):
         for p in self.projects:
-            print Fore.YELLOW + "Downloading '%s'..." % p.name
+            print_c(Fore.YELLOW, "Downloading '%s'..." % p.name)
             if not p.is_present():
                 stat = p.download()
                 if not stat:
                     raise RuntimeError('Could no download %s' % p.name)
-                print Fore.GREEN + "'%s' successfully downloaded" % p.name
+                print_c(Fore.GREEN, "'%s' successfully downloaded" % p.name)
             else:
                 print "'%s' is already on disk" % p.name
 
     def build_projects(self, clean):
         for p in self.projects:
-            print Fore.YELLOW + "Installing '%s'..." % p.name
+            print_c(Fore.YELLOW, "Installing '%s'..." % p.name)
             if p.is_present():
                 time.sleep(1)
                 if clean:
@@ -160,12 +164,12 @@ class ProjectManager:
                 stat = p.build()
                 if not stat:
                     raise RuntimeError('Could no build %s' % p.name)
-                print Fore.GREEN + "'%s' successfully installed" % p.name
+                print_c(Fore.GREEN, "'%s' successfully installed" % p.name)
             else:
                 raise RuntimeError("'%s' is not on disk" % p.name)
 
     def clean_install_directory(self):
-        print Fore.YELLOW + "Removing contents of $CLARA_SERVICES..."
+        print_c(Fore.YELLOW, "Removing contents of $CLARA_SERVICES...")
         clara_services = os.getenv('CLARA_SERVICES')
         for f in os.listdir(clara_services):
             path = os.path.join(clara_services, f)
@@ -205,7 +209,7 @@ if __name__ == '__main__':
         if not args.skip_build:
             pm.build_projects(args.clean_build)
 
-        print Fore.GREEN + "Done!"
+        print_c(Fore.GREEN, "Done!")
     except Exception as e:
-        print Fore.RED + str(e)
+        print_c(Fore.RED, str(e))
         sys.exit(1)
