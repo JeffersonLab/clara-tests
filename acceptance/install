@@ -9,6 +9,7 @@ run_ssh_command()
         -o UserKnownHostsFile=/dev/null \
         -o StrictHostKeyChecking=no \
         -o LogLevel=quiet \
+        -t \
         10.11.1.100 \
         "source ~/.profile; $1"
 }
