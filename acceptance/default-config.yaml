@@ -1,6 +1,68 @@
 ---
 srcdir: ../..
 
+projects:
+  - name: jtoolbox
+    url: https://clas12svn.jlab.org/repos/clas12/JToolBox/trunk/
+    build:
+      - ant
+    clean:
+      - ant clean
+
+  - name: clara-java
+    url: https://clas12svn.jlab.org/repos/clas12/Clara/trunk/
+    build:
+      - ant
+    clean:
+      - ant clean
+
+  - name: evio
+    url: https://clas12svn.jlab.org/repos/clas12/evio/tags/4.3.1-1/
+    build:
+      - mkdir -p build
+      - cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$CLARA_SERVICES
+      - make -C build
+      - make -C build install
+    clean:
+      - rm -rf build
+
+  - name: ctoolbox
+    url: https://github.com/usm-data-analysis/ctoolbox.git
+    build:
+      - mkdir -p build
+      - cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$CLARA_SERVICES
+      - make -C build
+      - make -C build install
+    clean:
+      - rm -rf build
+
+  - name: cmsg
+    url: https://clas12svn.jlab.org/repos/clas12/cmsg/tags/cmsg-3.5.1/
+    build:
+      - mkdir -p build
+      - cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$CLARA_SERVICES
+      - make -C build
+      - make -C build install
+    clean:
+      - rm -rf build
+
+  - name: clara-cpp
+    url: https://github.com/usm-data-analysis/clara-cpp.git
+    build:
+      - mkdir -p build
+      - cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$CLARA_SERVICES -DCLARA_BUILD_SERVICES=ON
+      - make -C build
+      - make -C build install
+    clean:
+      - rm -rf build
+
+  - name: clara-webapp
+    url: https://github.com/usm-data-analysis/clara-web-app.git
+    build:
+      - bundle install
+      - rake db:migrate
+    clean: []
+
 # WARNING: DO NOT EDIT THIS DICTIONARY
 # UNLESS YOU KNOW WHAT YOU ARE DOING
 nodes:
