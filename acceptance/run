@@ -62,5 +62,6 @@ if [ $RESTART = false ]; then
     echo "Running acceptance tests..."
     echo
     # Run all tests
-    run_ssh_command platform 10.11.1.100 'cd /vagrant && python scripts/clara_testing.py'
+    run_ssh_command platform 10.11.1.100 \
+        'cd /vagrant/acceptance && python scripts/clara_testing.py'
 fi
