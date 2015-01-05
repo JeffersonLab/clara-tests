@@ -4,7 +4,12 @@ set +e
 
 run_ssh_command()
 {
-    ssh -i .vagrant/machines/$1/virtualbox/private_key \
+    if [ -e .vagrant/machines/$1/virtualbox/private_key ]; then
+        KEY=.vagrant/machines/$1/virtualbox/private_key
+    else
+        KEY=$HOME/.vagrant.d/insecure_private_key
+    fi
+    ssh -i $KEY \
         -l vagrant \
         -o UserKnownHostsFile=/dev/null \
         -o StrictHostKeyChecking=no \
