@@ -1,8 +1,8 @@
-Scripts to run an stress test of ClaRA
-======================================
+Clara Stress Tests
+==================
 
-These scripts use GNU Screen to launch the ClaRA platform and the specified number
-of DPEs. When the screen session is terminated, all ClaRA processes will be
+These scripts use GNU Screen to launch the Clara platform and the specified number
+of DPEs. When the screen session is terminated, all Clara processes will be
 automatically killed.
 
 
@@ -19,7 +19,7 @@ Configuration
     The container setting is optional. If a global container value is set in
     the file, it will be used for all services that do not have a container
     field in its specification. The default container name is `USERNAME`.
-    
+
     Use the distributed `services.yaml.sample` file as a template.
     Note that indentation is important.
 
@@ -70,7 +70,7 @@ Usage
 
         $ ./run <input_file> <output_file> <number_of_cores>
 
-    This script will launch the `DefaultOrchestrator`, provided by ClaRA.
+    This script will launch the `DefaultOrchestrator`, provided by Clara.
     It will configure the reader to read events from the given <input_file>
     and the writer to save the reconstructed events to <output_file>.
 
@@ -84,11 +84,11 @@ Usage
     far, etc.
 
  -  Once the reconstruction is done, execute the `quit` script to terminate the
-    screen session, kill all ClaRA processes and remove temporary files.
+    screen session, kill all Clara processes and remove temporary files.
 
         $ ./quit
 
-    Alternatively, ClaRA processes can be killed one by one by moving to each
+    Alternatively, Clara processes can be killed one by one by moving to each
     window in the screen session and hitting `C-c`.
 
-    Don't keep ClaRA running after finishing the reconstruction.
+    Don't keep Clara running after finishing the reconstruction.
