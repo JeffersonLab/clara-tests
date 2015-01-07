@@ -2,4 +2,6 @@
 /acceptance/custom-config.yaml
 /acceptance/services
 /acceptance/log
+/stress/log
+/stress/services.yaml
 *.pyc
