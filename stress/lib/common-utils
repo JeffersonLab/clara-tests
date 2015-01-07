@@ -1,0 +1,34 @@
+#!/bin/bash
+
+function check_screen()
+{
+    command -v screen >/dev/null 2>&1 ||
+        { echo "GNU Screen it's not installed. Aborting."; exit 1; }
+}
+
+
+function runClara()
+{
+    java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
+}
+
+
+function get_platform_host()
+{
+    if [[ -f $CLARA_SERVICES/setup.xml ]]; then
+        parser=std.orchestrators.ReconstructionConfigParser
+        PLATFORM_HOST=$(runClara $parser platform-host)
+    else
+        PLATFORM_HOST=$(hostname -s)
+    fi
+}
+
+
+function contains()
+{
+    local e
+    for e in "${@:2}"; do
+        [[ "$e" == "$1" ]] && return 0;
+    done
+    return 1
+}

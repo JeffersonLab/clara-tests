@@ -1,0 +1,8 @@
+#!/bin/bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SESSION=TEST
+
+if screen -ls | grep -q $SESSION; then
+    screen -S $SESSION -X quit
+fi

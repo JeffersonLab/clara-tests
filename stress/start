@@ -1,0 +1,159 @@
+#!/bin/bash
+
+##############################################################################
+# Helper functions
+##############################################################################
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SESSION=TEST
+
+source $TEST_DIR/lib/common-utils
+
+
+function start_platform()
+{
+    screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
+    sleep 0.3
+    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
+}
+
+
+function start_dpe()
+{
+    screen -S $SESSION -X screen -t $1 ssh -t $1 "bash -lc '\$0 \$1 \$2' $TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES"
+}
+
+##############################################################################
+# Check the plaftorm
+##############################################################################
+
+check_screen
+get_platform_host
+
+##############################################################################
+# Options
+##############################################################################
+
+function usage()
+{
+    echo -e "Usage:"
+    echo -e "\t$0 [ -f <nodes_file> ] [ -s <first_node> ] <num_nodes>"
+}
+
+
+FIRST_NODE=1
+KEEP_DETACHED=1
+DRY_RUN=1
+while getopts "hds:f:p:n" OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 0 ;;
+        d)
+            KEEP_DETACHED=0 ;;
+        s)
+            FIRST_NODE=$OPTARG ;;
+        f)
+            NODES_FILE=$OPTARG ;;
+        n)
+            DRY_RUN=0 ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ ! $# -eq 1 ]]; then
+    usage
+    exit 1
+fi
+
+NUMBER_OF_NODES=$1
+if [[ $NUMBER_OF_NODES -lt 0 ]]; then
+    echo "Wrong number of nodes: $NUMBER_OF_NODES"
+    exit 1
+fi
+
+case $(hostname -s) in
+    "head")
+        NODES_FILE=$TEST_DIR/nodes/quark.list
+        ;;
+    "hadlab")
+        NODES_FILE=$TEST_DIR/nodes/csu.list
+        ;;
+    "claradm")
+        echo "Running on claradm. Only the platform node can be used."
+        NODES_FILE=
+        NUMBER_OF_NODES=0
+        ;;
+esac
+
+if [[ $NUMBER_OF_NODES -gt 0 ]]; then
+    if [[ -z $NODES_FILE ]]; then
+        echo "A file with the list of available nodes is required."
+        echo "See nodes/quark.list as an example."
+        echo
+        usage
+        exit 1
+    fi
+    echo "NODES_FILE=$NODES_FILE"
+else
+    echo "Running everything on platform node. No extra DPEs will be deployed."
+fi
+echo "---"
+
+
+##############################################################################
+# Start the platform and the DPEs
+##############################################################################
+
+# Remove any existing screen session first
+$TEST_DIR/quit
+
+cd $TEST_DIR
+rm -rf $TEST_DIR/log
+mkdir -p $TEST_DIR/log
+
+echo "Starting platform on local node $PLATFORM_HOST"
+if [[ $DRY_RUN -eq 1 ]]; then
+    start_platform
+    sleep 2
+fi
+
+cat << EOF > $TEST_DIR/log/nodes.yaml
+---
+input-output:
+  - name: $PLATFORM_HOST
+reconstruction:
+EOF
+
+if [[ $NUMBER_OF_NODES -eq 0 ]]; then
+    echo "  - name: $PLATFORM_HOST" >> $TEST_DIR/log/nodes.yaml
+else
+    counter=0
+    last=$(($FIRST_NODE+$NUMBER_OF_NODES-1))
+    while read NODE
+    do
+        let counter=counter+1
+        if [[ $counter -ge $FIRST_NODE ]]; then
+            echo "Starting DPE on $NODE"
+            echo "  - name: $NODE" >> $TEST_DIR/log/nodes.yaml
+            if [[ $DRY_RUN -eq 1 ]]; then
+                start_dpe $NODE
+                sleep 0.25
+            fi
+        fi
+        if [[ $counter -eq $last ]]; then
+            break
+        fi
+    done < $NODES_FILE
+fi
+
+if [[ $DRY_RUN -eq 0 ]]; then
+    exit 0
+fi
+
+sleep 1
+if [[ $KEEP_DETACHED -eq 1 ]]; then
+    screen -r -S $SESSION -p 0
+fi
