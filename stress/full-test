@@ -107,7 +107,7 @@ done
 if [[ -f $TEST_DIR/mail ]]; then
     MAILTO=$(cat $TEST_DIR/mail)
 else
-    MAILTO=${USERNAME}@jlab.org
+    MAILTO=${USER}@jlab.org
 fi
 
 BODY=$(mktemp)
