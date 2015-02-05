@@ -1,16 +1,14 @@
 ---
 services:
-  - class: org.jlab.clas12.ec.services.ECReconstruction
-    name: ECReconstruction
-  - class: pcal.reconstruction.services.PCALReconstructionService
-    name: PCALReconstructionService
-  - class: org.jlab.clas12.ctof.services.CTOFReconstruction
-    name: CTOFReconstruction
-  - class: org.jlab.clas12.ftof.services.FTOFReconstruction
-    name: FTOFReconstruction
-  - class: trac.services.centraltracker.BSTTrackCandFinder
-    name: BSTTrackCandFinder
-  - class: trac.services.centraltracker.BSTKalmanFilterSvc
-    name: BSTKalmanFilterSvc
-  - class: trac.services.forwardtracking.DCTrackCandFinder
-    name: DCTrackCandFinder
+- name: BST
+  class: org.jlab.rec.bst.services.BSTReconstruction
+- name: DCHB
+  class: org.jlab.rec.dc.services.HitBasedTracking
+- name: DCTB
+  class: org.jlab.rec.dc.services.TimeBasedTracking
+- name: EB
+  class: org.jlab.rec.eb.CLASEventBuilder
+- name: EC
+  class: org.jlab.rec.ec.ECReconstruction
+- name: FTOF
+  class: org.jlab.rec.ftof.SCReconstruction
