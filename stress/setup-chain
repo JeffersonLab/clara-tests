@@ -46,3 +46,5 @@ fi
 
 ${CLARA_SERVICES}/bin/default-orchestrator setup-chain -n $NODES_FILE "$1" 2>&1 |
     tee $TEST_DIR/log/setup-chain.log
+
+exit ${PIPESTATUS[0]}

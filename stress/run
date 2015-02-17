@@ -86,3 +86,5 @@ fi
 
 ${CLARA_SERVICES}/bin/default-orchestrator run "$INFILE" "$OUTFILE" $CORES $NODES_LIST 2>&1 |
     tee $TEST_DIR/log/run.log
+
+exit ${PIPESTATUS[0]}
