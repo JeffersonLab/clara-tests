@@ -4,6 +4,8 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
 PLATFORM_HOST=$1
 CLARA_SERVICES=$2
+CLAS12DIR=$2
 export CLARA_SERVICES
+export CLAS12DIR
 
 $CLARA_SERVICES/bin/clara-dpe -host $PLATFORM_HOST -log 2>&1 | tee $TEST_DIR/log/$HOSTNAME.log

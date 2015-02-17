@@ -3,6 +3,8 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
 CLARA_SERVICES=$1
+CLAS12DIR=$1
 export CLARA_SERVICES
+export CLAS12DIR
 
 $CLARA_SERVICES/bin/clara-platform 2>&1 | tee $TEST_DIR/log/platform.log
