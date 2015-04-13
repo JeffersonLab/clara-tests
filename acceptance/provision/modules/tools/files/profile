@@ -1,3 +1,2 @@
 export PATH="$HOME/bin:$PATH"
 export CLARA_SERVICES="$HOME/clara/services"
-[ -s $HOME/.rvm/scripts/rvm ] && source $HOME/.rvm/scripts/rvm
