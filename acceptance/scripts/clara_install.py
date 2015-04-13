@@ -29,9 +29,7 @@ class Project(object):
         return os.path.isdir(self.path)
 
     def download(self):
-        if 'clas12svn' in self.url:
-            cmd = 'svn co %s %s' % (self.url, self.path)
-        elif 'github' in self.url:
+        if 'git' in self.url:
             cmd = 'git clone %s %s' % (self.url, self.path)
         else:
             raise RuntimeError('Bad URL: %s' % self.url)
