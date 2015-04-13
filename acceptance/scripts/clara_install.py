@@ -105,8 +105,8 @@ class ProjectManager:
                 raise RuntimeError("'%s' is not on disk" % p.name)
 
     def clean_install_directory(self):
-        print_c(Fore.YELLOW, "Removing contents of $CLARA_SERVICES...")
-        clara_services = os.getenv('CLARA_SERVICES')
+        print_c(Fore.YELLOW, "Removing contents of $CLARA_HOME...")
+        clara_services = os.getenv('CLARA_HOME')
         for f in os.listdir(clara_services):
             path = os.path.join(clara_services, f)
             if os.path.isfile(path):

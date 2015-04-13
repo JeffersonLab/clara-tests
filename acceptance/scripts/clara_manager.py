@@ -111,7 +111,7 @@ class ClaraProcessConfig():
                 env['PYTHONPATH'] = fullpath
         elif self._lang == 'java':
             fullpath = self._conf['fullpath']
-            env['CLARA_SERVICES'] = fullpath
+            env['CLARA_HOME'] = fullpath
         return env
 
 

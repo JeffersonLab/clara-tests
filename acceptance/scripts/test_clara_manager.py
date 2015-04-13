@@ -48,7 +48,7 @@ class TestClaraProcessConfig(unittest.TestCase):
         with mock.patch.dict(os.environ, clear=True):
             wd = '/clara/services'
             cmd = ['./bin/clara-dpe', '-p', 'platform']
-            env = {'CLARA_SERVICES': '/clara/services'}
+            env = {'CLARA_HOME': '/clara/services'}
             self._assert_clara_config('java', 'dpe', cmd, wd, env)
 
     def test_standard_request_config(self):

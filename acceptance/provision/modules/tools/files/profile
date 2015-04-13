@@ -1,2 +1,2 @@
 export PATH="$HOME/bin:$PATH"
-export CLARA_SERVICES="$HOME/clara/services"
+export CLARA_HOME="$HOME/clara/services"

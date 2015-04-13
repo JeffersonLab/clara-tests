@@ -67,7 +67,7 @@ project is located), and uses specific names for each project:
     $ ls ../..
     clara-cpp  clara-java  clara-tests  clara-webapp  ctoolbox  jtoolbox
 
-The `$CLARA_SERVICES` directory is also a shared folder, common to all the
+The `$CLARA_HOME` directory is also a shared folder, common to all the
 machines. This directory is created when the machines are provisioned:
 
     $ ls services
@@ -103,7 +103,7 @@ run all the tests with:
     $ ./run
 
 The result of the tests will be printed in the standard output.
-The Clara logs can be found in `$CLARA_SERVICES/log`.
+The Clara logs can be found in `$CLARA_HOME/log`.
 
 
 ## Manual Testing and Development
