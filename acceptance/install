@@ -16,7 +16,7 @@ run_ssh_command()
         -o LogLevel=quiet \
         -t \
         10.11.1.100 \
-        "source ~/.profile; $1"
+        ". /etc/profile; . ~/.profile; $1"
 }
 
 
