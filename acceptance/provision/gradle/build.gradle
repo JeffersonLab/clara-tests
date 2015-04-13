@@ -1,0 +1,5 @@
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+    scriptFile = "gradle"
+    jarFile = "${project.projectDir}/wrapper/gradle-wrapper.jar"
+}
