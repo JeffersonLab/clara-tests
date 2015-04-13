@@ -12,6 +12,8 @@ from colorama import Fore
 
 color_init(autoreset=True)
 
+credentials_cache = {}
+
 
 def print_c(color, msg):
     print color + msg + Fore.RESET
@@ -30,6 +32,13 @@ class Project(object):
 
     def download(self):
         if 'git' in self.url:
+            if 'https://' in self.url and '@' not in self.url:
+                base_url = self.url[:self.url.find('/', 10)]
+                if base_url not in credentials_cache:
+                    sys.stdout.write("Username for '%s': " % base_url)
+                    credentials_cache[base_url] = raw_input()
+                username = credentials_cache[base_url]
+                self.url = self.url[:8] + username + '@' + self.url[8:]
             cmd = 'git clone %s %s' % (self.url, self.path)
         else:
             raise RuntimeError('Bad URL: %s' % self.url)
