@@ -3,7 +3,6 @@ class clara::manager {
         "python-mock",
         "python-nose",
         "python-psutil",
-        "python-pexpect",
         "python-colorama",
     ]:
         ensure => latest,
