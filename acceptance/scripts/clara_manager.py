@@ -18,8 +18,8 @@ clara = {
     },
     'java': {
         'fullpath': '/home/vagrant/clara/services',
-        'platform': './bin/clara-platform',
-        'dpe': './bin/clara-dpe -host 10.11.1.100 -log',
+        'platform': './bin/j_dpe',
+        'dpe': './bin/j_dpe -fe_host 10.11.1.100',
         'orchestrator': './bin/clara-orchestrator',
     },
 }
