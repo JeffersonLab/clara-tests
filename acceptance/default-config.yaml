@@ -2,6 +2,19 @@
 srcdir: ../..
 
 projects:
+  - name: xmsg-java
+    url: https://git.earthdata.nasa.gov/scm/naiads/xmsg-java.git
+    build:
+      - gradle install
+    clean:
+      - gradle clean
+
+  - name: clara-java
+    url: https://git.earthdata.nasa.gov/scm/naiads/clara-java.git
+    build:
+      - gradle install deploy
+    clean:
+      - gradle clean
 
 # WARNING: DO NOT EDIT THIS DICTIONARY
 # UNLESS YOU KNOW WHAT YOU ARE DOING
