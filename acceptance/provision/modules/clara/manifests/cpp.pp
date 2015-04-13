@@ -11,11 +11,6 @@ class clara::cpp {
     }
 
     package { [
-        "libexpat1-dev",
-    ]:
-    }
-
-    package { [
         "libzmq3-dev",
         "libprotobuf-dev",
         "protobuf-compiler",
