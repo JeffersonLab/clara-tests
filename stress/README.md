@@ -1,8 +1,8 @@
 Clara Stress Tests
 ==================
 
-These scripts use GNU Screen to launch the Clara platform and the specified number
-of DPEs. When the screen session is terminated, all Clara processes will be
+These scripts use tmux to launch the Clara platform and the specified number
+of DPEs. When the tmux session is terminated, all Clara processes will be
 automatically killed.
 
 
@@ -32,7 +32,7 @@ Usage
 
         $ ./start <number_of_dpes>
 
-    An screen session will be created. Window 1 will show the platform running
+    A tmux session will be created. Window 1 will show the platform running
     and each of the next windows will show the running DPEs. The focus will be
     in Window 0, to run the following scripts.
 
@@ -84,11 +84,11 @@ Usage
     far, etc.
 
  -  Once the reconstruction is done, execute the `quit` script to terminate the
-    screen session, kill all Clara processes and remove temporary files.
+    tmux session, kill all Clara processes and remove temporary files.
 
         $ ./quit
 
     Alternatively, Clara processes can be killed one by one by moving to each
-    window in the screen session and hitting `C-c`.
+    window in the tmux session and hitting `C-c`.
 
     Don't keep Clara running after finishing the reconstruction.

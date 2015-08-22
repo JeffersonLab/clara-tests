@@ -5,6 +5,7 @@
 ##############################################################################
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TMUX="tmux"
 SESSION=TEST
 
 source $TEST_DIR/lib/common-utils
@@ -12,22 +13,24 @@ source $TEST_DIR/lib/common-utils
 
 function start_platform()
 {
-    screen -d -m -S $SESSION -c $TEST_DIR/lib/screenrc
-    sleep 0.3
-    screen -S $SESSION -X screen -t platform $TEST_DIR/lib/run-platform $CLARA_SERVICES
+    $TMUX -f $TEST_DIR/lib/tmux.conf new-session -s "$SESSION" -n orchestrator -d
+    $TMUX new-window -d -t "$SESSION" -n "platform"
+    $TMUX send-keys -R -t "$SESSION:platform" "$TEST_DIR/lib/run-platform $CLARA_SERVICES" "C-m"
 }
 
 
 function start_dpe()
 {
-    screen -S $SESSION -X screen -t $1 ssh -t $1 "bash -lc '\$0 \$1 \$2' $TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES"
+    $TMUX new-window -d -t "$SESSION" -n "$1"
+    $TMUX send-keys -R -t "$SESSION:$1" "ssh -t $1" "C-m"
+    $TMUX send-keys -R -t "$SESSION:$1" "$TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES" "C-m"
 }
 
 ##############################################################################
 # Check the plaftorm
 ##############################################################################
 
-check_screen
+check_tmux
 get_platform_host
 
 ##############################################################################
@@ -107,7 +110,7 @@ echo "---"
 # Start the platform and the DPEs
 ##############################################################################
 
-# Remove any existing screen session first
+# Remove any existing tmux session first
 $TEST_DIR/quit
 
 cd $TEST_DIR
@@ -140,7 +143,6 @@ else
             echo "  - name: $NODE" >> $TEST_DIR/log/nodes.yaml
             if [[ $DRY_RUN -eq 1 ]]; then
                 start_dpe $NODE
-                sleep 0.25
             fi
         fi
         if [[ $counter -eq $last ]]; then
@@ -155,5 +157,6 @@ fi
 
 sleep 1
 if [[ $KEEP_DETACHED -eq 1 ]]; then
-    screen -r -S $SESSION -p 0
+    $TMUX select-window -t "$SESSION:orchestrator"
+    $TMUX -2 attach-session -t "$SESSION"
 fi

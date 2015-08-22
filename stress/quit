@@ -2,7 +2,8 @@
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SESSION=TEST
+TMUX="tmux"
 
-if screen -ls | grep -q $SESSION; then
-    screen -S $SESSION -X quit
+if $TMUX ls 2> /dev/null | grep -q $SESSION; then
+    $TMUX kill-session -t "$SESSION"
 fi

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-function check_screen()
+function check_tmux()
 {
-    command -v screen >/dev/null 2>&1 ||
-        { echo "GNU Screen it's not installed. Aborting."; exit 1; }
+    command -v tmux >/dev/null 2>&1 ||
+        { echo "tmux it's not installed. Aborting."; exit 1; }
 }
 
 
