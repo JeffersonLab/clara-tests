@@ -37,4 +37,4 @@ fi
 # Launch ProductionOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/production-orchestrator -l $LOOPS "$@"
+${CLARA_HOME}/bin/production-orchestrator -l $LOOPS "$@"

@@ -73,7 +73,7 @@ do
     if [[ $counter -eq $NODES ]]; then
         break
     fi
-done < <(runClara $parser parse-nodes reconstruction $NODES_FILE)
+done < <(run_clara $parser parse-nodes reconstruction $NODES_FILE)
 
 if [[ $counter -lt $NODES ]]; then
     echo "Wrong number of nodes: $NODES"
@@ -84,7 +84,7 @@ fi
 # Launch DefaultOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/default-orchestrator run "$INFILE" "$OUTFILE" $CORES $NODES_LIST 2>&1 |
+${CLARA_HOME}/bin/default-orchestrator run "$INFILE" "$OUTFILE" $CORES $NODES_LIST 2>&1 |
     tee $TEST_DIR/log/run.log
 
 exit ${PIPESTATUS[0]}

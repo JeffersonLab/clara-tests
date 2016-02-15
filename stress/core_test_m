@@ -25,7 +25,7 @@ RUN_LOG="$5"
 # Run the test
 ##############################################################################
 
-ORCHESTRATOR="${CLARA_SERVICES}/bin/default-orchestrator"
+ORCHESTRATOR="${CLARA_HOME}/bin/default-orchestrator"
 
 rm -f $RESULTS_FILE
 rm -f $RUN_LOG

@@ -15,9 +15,9 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Check the plaftorm
 ##############################################################################
 
-PLATFORM_HOST=$(hostname -s)
+FE_HOST=$(hostname -s)
 
-if [[ $PLATFORM_HOST != "head" && $PLATFORM_HOST != "claradm" ]]; then
+if [[ $FE_HOST != "head" && $FE_HOST != "claradm" ]]; then
     echo "These scripts should run in head (UofR cluster) or claradm"
     exit 1
 fi
@@ -50,7 +50,7 @@ fi
 # Check the nodes
 ##############################################################################
 
-if [[ $PLATFORM_HOST == "head" ]]; then
+if [[ $FE_HOST == "head" ]]; then
     NUM_NODES=12
     NUM_CORES=12
 else
@@ -117,7 +117,7 @@ echo "You can find the results in the attached file." >> $BODY
 
 SUBJECT="CLARA test finished"
 
-if [[ $PLATFORM_HOST == "head" ]]; then
+if [[ $FE_HOST == "head" ]]; then
     cat $BODY | mutt  -s "$SUBJECT" -a $TEST_DIR/$RESULTS_FILE $MAILTO
 else
     cat $BODY | mailx -s "$SUBJECT" -a $TEST_DIR/$RESULTS_FILE $MAILTO

@@ -7,20 +7,15 @@ function check_tmux()
 }
 
 
-function runClara()
+function run_clara()
 {
-    java -cp "$CLARA_SERVICES/.:$CLARA_SERVICES/lib/*" $*
+    java -cp "$CLARA_HOME/.:$CLARA_HOME/lib/*" $*
 }
 
 
-function get_platform_host()
+function get_fe_host()
 {
-    if [[ -f $CLARA_SERVICES/setup.xml ]]; then
-        parser=std.orchestrators.ReconstructionConfigParser
-        PLATFORM_HOST=$(runClara $parser platform-host)
-    else
-        PLATFORM_HOST=$(hostname -s)
-    fi
+    FE_HOST=$(hostname -s)
 }
 
 

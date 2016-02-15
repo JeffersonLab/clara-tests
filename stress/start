@@ -11,11 +11,11 @@ SESSION=TEST
 source $TEST_DIR/lib/common-utils
 
 
-function start_platform()
+function start_fe()
 {
     $TMUX -f $TEST_DIR/lib/tmux.conf new-session -s "$SESSION" -n orchestrator -d
-    $TMUX new-window -d -t "$SESSION" -n "platform"
-    $TMUX send-keys -R -t "$SESSION:platform" "$TEST_DIR/lib/run-platform $CLARA_SERVICES" "C-m"
+    $TMUX new-window -d -t "$SESSION" -n "fe"
+    $TMUX send-keys -R -t "$SESSION:fe" "$TEST_DIR/lib/run-fe $CLARA_HOME $FE_HOST" "C-m"
 }
 
 
@@ -23,7 +23,7 @@ function start_dpe()
 {
     $TMUX new-window -d -t "$SESSION" -n "$1"
     $TMUX send-keys -R -t "$SESSION:$1" "ssh -t $1" "C-m"
-    $TMUX send-keys -R -t "$SESSION:$1" "$TEST_DIR/lib/run-dpe $PLATFORM_HOST $CLARA_SERVICES" "C-m"
+    $TMUX send-keys -R -t "$SESSION:$1" "$TEST_DIR/lib/run-dpe $CLARA_HOME $FE_HOST" "C-m"
 }
 
 ##############################################################################
@@ -31,7 +31,7 @@ function start_dpe()
 ##############################################################################
 
 check_tmux
-get_platform_host
+get_fe_host
 
 ##############################################################################
 # Options
@@ -85,7 +85,7 @@ case $(hostname -s) in
         NODES_FILE=$TEST_DIR/nodes/csu.list
         ;;
     "claradm")
-        echo "Running on claradm. Only the platform node can be used."
+        echo "Running on claradm. Only the front-end node can be used."
         NODES_FILE=
         NUMBER_OF_NODES=0
         ;;
@@ -101,13 +101,13 @@ if [[ $NUMBER_OF_NODES -gt 0 ]]; then
     fi
     echo "NODES_FILE=$NODES_FILE"
 else
-    echo "Running everything on platform node. No extra DPEs will be deployed."
+    echo "Running everything on front-end node. No extra DPEs will be deployed."
 fi
 echo "---"
 
 
 ##############################################################################
-# Start the platform and the DPEs
+# Start the FE and the DPEs
 ##############################################################################
 
 # Remove any existing tmux session first
@@ -117,21 +117,21 @@ cd $TEST_DIR
 rm -rf $TEST_DIR/log
 mkdir -p $TEST_DIR/log
 
-echo "Starting platform on local node $PLATFORM_HOST"
+echo "Starting front-end on local node $FE_HOST"
 if [[ $DRY_RUN -eq 1 ]]; then
-    start_platform
+    start_fe
     sleep 2
 fi
 
 cat << EOF > $TEST_DIR/log/nodes.yaml
 ---
 input-output:
-  - name: $PLATFORM_HOST
+  - name: $FE_HOST
 reconstruction:
 EOF
 
 if [[ $NUMBER_OF_NODES -eq 0 ]]; then
-    echo "  - name: $PLATFORM_HOST" >> $TEST_DIR/log/nodes.yaml
+    echo "  - name: $FE_HOST" >> $TEST_DIR/log/nodes.yaml
 else
     counter=0
     last=$(($FIRST_NODE+$NUMBER_OF_NODES-1))

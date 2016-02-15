@@ -1,8 +1,8 @@
-Clara Stress Tests
+CLARA Stress Tests
 ==================
 
-These scripts use tmux to launch the Clara platform and the specified number
-of DPEs. When the tmux session is terminated, all Clara processes will be
+These scripts use tmux to launch the CLARA front-end and the specified number
+of DPEs. When the tmux session is terminated, all CLARA processes will be
 automatically killed.
 
 
@@ -28,25 +28,25 @@ Configuration
 Usage
 -----
 
- -  Execute the `start` script to launch the platform and the DPEs:
+ -  Execute the `start` script to launch the front-end and the DPEs:
 
         $ ./start <number_of_dpes>
 
-    A tmux session will be created. Window 1 will show the platform running
+    A tmux session will be created. Window 1 will show the front-end running
     and each of the next windows will show the running DPEs. The focus will be
     in Window 0, to run the following scripts.
 
     If the number of DPEs is set to 0 then no DPE will be started, and only
-    the platform will be used to run services.
+    the front-end will be used to run services.
 
  -  Execute the `setup-chain` script with the services.yaml file as argument
     to deploy and link the reconstruction services.
 
         $ ./setup-chain <services.yaml>
 
-    The standard reader and writer will be deployed in the platform.
+    The standard reader and writer will be deployed in the front-end.
     The reconstruction chain will be deployed on each running DPE. If no DPEs
-    were started, then the chain will be deployed in the platform.
+    were started, then the chain will be deployed in the front-end.
 
     Once all the services in all nodes are deployed, the reader will be linked
     to the first service of the reconstruction chain in each DPE. The last
@@ -70,7 +70,7 @@ Usage
 
         $ ./run <input_file> <output_file> <number_of_cores>
 
-    This script will launch the `DefaultOrchestrator`, provided by Clara.
+    This script will launch the `DefaultOrchestrator`, provided by CLARA.
     It will configure the reader to read events from the given <input_file>
     and the writer to save the reconstructed events to <output_file>.
 
@@ -84,11 +84,11 @@ Usage
     far, etc.
 
  -  Once the reconstruction is done, execute the `quit` script to terminate the
-    tmux session, kill all Clara processes and remove temporary files.
+    tmux session, kill all CLARA processes and remove temporary files.
 
         $ ./quit
 
-    Alternatively, Clara processes can be killed one by one by moving to each
+    Alternatively, CLARA processes can be killed one by one by moving to each
     window in the tmux session and hitting `C-c`.
 
-    Don't keep Clara running after finishing the reconstruction.
+    Don't keep CLARA running after finishing the reconstruction.

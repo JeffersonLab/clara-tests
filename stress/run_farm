@@ -14,10 +14,10 @@ usage:
 options:
 
     -i <input_files_dir>        --  location of the input files
-                                    (default: \$CLARA_SERVICES/data/in)
+                                    (default: \$CLARA_HOME/data/in)
 
     -o <output_files_dir>       --  location of the output files
-                                    (default: \$CLARA_SERVICES/data/out)
+                                    (default: \$CLARA_HOME/data/out)
 
     -s <staging_dir>            --  local directory to put temporary files
                                     (default: /scratch)
@@ -53,11 +53,11 @@ if [ ! "$#" = 2 ]; then
 fi
 
 if [ -z "$INPUT_DIR" ]; then
-    INPUT_DIR="$CLARA_SERVICES/data/in"
+    INPUT_DIR="$CLARA_HOME/data/in"
 fi
 
 if [ -z "$OUTPUT_DIR" ]; then
-    OUTPUT_DIR="$CLARA_SERVICES/data/out"
+    OUTPUT_DIR="$CLARA_HOME/data/out"
 fi
 
 if [ -z "$STAGE_DIR" ]; then
@@ -72,7 +72,7 @@ fi
 # Launch FarmOrchestrator
 ##############################################################################
 
-${CLARA_SERVICES}/bin/farm-orchestrator \
+${CLARA_HOME}/bin/farm-orchestrator \
         -i "$INPUT_DIR"\
         -o "$OUTPUT_DIR"\
         -s "$STAGE_DIR"\
