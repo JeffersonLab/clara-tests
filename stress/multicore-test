@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+
+# Run a stress test with all the combinations of cores.
+
+##############################################################################
+# Setup
+##############################################################################
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NUM_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+
+source $TEST_DIR/lib/common-utils
+get_mail $TEST_DIR
+
+##############################################################################
+# Helpers
+##############################################################################
+
+function run_orchestrator()
+{
+    local classpath="$CLARA_HOME/lib/*:$CLARA_HOME/services/*"
+    local main=org.jlab.clas.std.orchestrators.LocalOrchestrator
+
+    java -cp ${classpath} ${main} "$@"
+}
+
+function generate_cores()
+{
+    if [[ $CORES_FIRST -eq 1 ]]; then
+        if [[ $CORES_STEP -eq 1 ]]; then
+            echo "$(seq 1 $CORES_MAX)"
+        else
+            echo "1 $(seq $CORES_STEP $CORES_STEP $CORES_MAX)"
+        fi
+    else
+        echo "$(seq $CORES_FIRST $CORES_STEP $CORES_MAX)"
+    fi
+}
+
+function send_report()
+{
+    if [[ $SEND_MAIL -eq 0 && `uname` != Darwin ]]; then
+        if [[ $DRY_RUN -eq 0 ]]; then
+            echo "Report sent to $MAILTO"
+        else
+            $TEST_DIR/lib/send-mail $MAILTO $RESULTS_FILE $RUN_LOG $1
+        fi
+    fi
+}
+
+##############################################################################
+# Check the arguments
+##############################################################################
+
+usage()
+{
+    cat << EOF
+usage:
+
+    $(basename $0) [ OPTIONS ] <services_file> <input_file> <output_file>
+
+options:
+
+    -b <cores>                  --  initial number of cores to be used
+                                    (default: 1)
+
+    -s <cores>                  --  the increase step of the number of cores
+                                    (default: 1)
+
+    -e <cores>                  --  final number of cores to be used
+                                    (default: $NUM_CORES)
+
+    -r <report_file>            --  output file where results will be saved
+                                    (default: log/results.csv)
+
+    -l <log_file>               --  log file with the orchestrator output
+                                    (default: log/run-local.log)
+
+    -m                          --  send a mail with the results
+
+    -a <mail_address>           --  where to to send the report email
+                                    (default: $USER@jlab.org)
+
+    -n                          --  dry run
+EOF
+}
+
+CORES_FIRST=1
+CORES_STEP=1
+CORES_MAX=$NUM_CORES
+
+RESULTS_FILE=$TEST_DIR/log/results.csv
+RUN_LOG=$TEST_DIR/log/run.log
+SEND_MAIL=1
+DRY_RUN=1
+while getopts "b:s:e:r:l:ma:nh" OPTION
+do
+    case $OPTION in
+        h)
+            usage; exit 0 ;;
+        b)
+            CORES_FIRST=$OPTARG ;;
+        s)
+            CORES_STEP=$OPTARG ;;
+        e)
+            CORES_MAX=$OPTARG ;;
+        r)
+            RESULTS_FILE=$OPTARG ;;
+        l)
+            RUN_LOG=$OPTARG ;;
+        m)
+            SEND_MAIL=0 ;;
+        a)
+            MAILTO=$OPTARG ;;
+        n)
+            DRY_RUN=0 ;;
+        ?)
+            echo; usage; exit 1 ;;
+    esac
+done
+
+shift $((OPTIND-1))
+if [[ ! $# -eq 3 ]]; then
+    usage
+    exit 1
+fi
+
+SERVICES="$1"
+INFILE="$2"
+OUTFILE="$3"
+
+if [ ! -f "$SERVICES" ]; then
+    echo "Services file doesn't exist."
+    exit 1
+fi
+
+if [ ! -f "$INFILE" ]; then
+    echo "Input file doesn't exist."
+    exit 1
+fi
+
+##############################################################################
+# Run the test
+##############################################################################
+
+if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Running a warm up reconstruction with all cores"
+    run_orchestrator -t $NUM_CORES "$SERVICES" "$INFILE" "$OUTFILE" 2>&1 | tee $RUN_LOG
+    if [ ${PIPESTATUS[0]} -ne 0 ]; then
+        touch "$RESULTS_FILE"
+        send_report 1
+        exit 1
+    fi
+fi
+
+rm -f $RESULTS_FILE
+rm -f $RUN_LOG
+
+for t in $(generate_cores); do
+    echo "Requesting $t threads"
+    RESULT="$t"
+    [[ $DRY_RUN -eq 0 ]] && continue
+
+    for i in $(seq 1 3); do
+        run_orchestrator -t $t "$SERVICES" "$INFILE" "$OUTFILE" >> $RUN_LOG 2>&1
+        if [ $? -ne 0 ]; then
+            tail -20 "$RUN_LOG"
+            send_report 1
+            exit 1
+        fi
+        sleep 1
+        AVG_TIME=$(grep "Average event processing time" $RUN_LOG | tail -n 1 | awk '{ print $6 }')
+        RESULT="$RESULT;$AVG_TIME"
+    done
+
+    echo $RESULT >> $RESULTS_FILE
+done
+[[ $DRY_RUN -eq 1 ]] && echo >> $RESULTS_FILE
+
+echo "Test completed."
+echo "Results can be found in: $RESULTS_FILE"
+send_report 0
