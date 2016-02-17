@@ -3,5 +3,6 @@
 /acceptance/services
 /acceptance/log
 /stress/log
+/stress/mail
 /stress/services.yaml
 *.pyc

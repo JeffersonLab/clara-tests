@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Send a mail with the results
+
+MAILTO="$1"
+RESULTS_FILE="$2"
+RUNLOG_FILE="$3"
+STATUS="$4"
+
+BODY=$(mktemp 2>/dev/null || mktemp -t mail)
+trap "rm -f $BODY" EXIT
+if [ "$STATUS" -eq 0 ]; then
+    echo "The CLARA stress test in $HOSTNAME has finished." > $BODY
+    echo >> $BODY
+    echo "You can find the results in the attached file." >> $BODY
+    SUBJECT="CLARA test finished"
+else
+    echo "The CLARA stress test in $HOSTNAME has failed." > $BODY
+    echo >> $BODY
+    tail $RUNLOG_FILE >> $BODY
+    echo >> $BODY
+    echo "You can find the unfinished results in the attached file." >> $BODY
+    SUBJECT="CLARA test failed"
+fi
+
+if ( command -v mutt >/dev/null 2>&1 ); then
+    cat $BODY | mutt  -s "$SUBJECT" -a "$RESULTS_FILE" $MAILTO && echo "Report sent to $MAILTO"
+elif ( command -v mailx >/dev/null 2>&1 ); then
+    cat $BODY | mailx -s "$SUBJECT" -a "$RESULTS_FILE" $MAILTO && echo "Report sent to $MAILTO"
+else
+    echo "Could not send mail: missing mutt or mailx"
+fi
