@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]; then
+    echo "usage: $0 <data_file> <output_plot>"
+    exit 1
+fi
+
+cat <<EOF | gnuplot
+set terminal png
+set output '$2'
+set grid ytics lc rgb "#bbbbbb" lw 1 lt 0
+set grid xtics lc rgb "#bbbbbb" lw 1 lt 0
+plot '$1' using 1
+EOF

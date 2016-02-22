@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
+DPE_PID=$(pgrep -f -d',' Dpe)
+LOG_FILE="$TEST_DIR/log/$HOSTNAME.load"
+top -b -d 1 -p $DPE_PID | awk "/$DPE_PID/ {print \$9 | \"tee $LOG_FILE\"}"

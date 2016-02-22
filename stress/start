@@ -30,13 +30,16 @@ function usage()
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-while getopts "hds:f:a:" OPTION
+MONITOR=1
+while getopts "hds:f:a:m" OPTION
 do
     case $OPTION in
         h)
             usage; exit 0 ;;
         d)
             KEEP_DETACHED=0 ;;
+        m)
+            MONITOR=0 ;;
         s)
             FIRST_NODE=$OPTARG ;;
         f)
@@ -143,6 +146,14 @@ function start_clara()
     done
 }
 
+function start_monitoring()
+{
+    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
+        $TMUX send-keys -R -t "$SESSION:$1.$i" \
+                " ssh -t ${NODES[i]} $TEST_DIR/lib/monitor-dpe" "C-m"
+    done
+}
+
 
 ORCH_PANE=$(($NUMBER_OF_NODES + 1))
 
@@ -160,6 +171,14 @@ if [[ "$?" -eq 1 ]]; then
     split_window $REC_WINDOW
     connect_nodes $REC_WINDOW
     start_clara $REC_WINDOW
+
+    if [[ $MONITOR -eq 0 ]]; then
+        MON_WINDOW=2
+        new_window $MON_WINDOW monitor
+        split_window $MON_WINDOW
+        connect_nodes $MON_WINDOW
+        start_monitoring $MON_WINDOW
+    fi
 
     if [ $NUMBER_OF_NODES -eq 0 ]; then
         $TMUX send-keys -t "$SESSION:$REC_WINDOW.$ORCH_PANE" "./run-local"
