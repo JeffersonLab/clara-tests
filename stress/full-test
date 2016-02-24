@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Run a full stress test with all the combinations of nodes and cores.
 #
