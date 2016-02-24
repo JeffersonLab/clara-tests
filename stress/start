@@ -10,22 +10,6 @@ SESSION=TEST
 
 source $TEST_DIR/lib/common-utils
 
-
-function start_fe()
-{
-    $TMUX -f $TEST_DIR/lib/tmux.conf new-session -s "$SESSION" -n orchestrator -d
-    $TMUX new-window -d -t "$SESSION" -n "fe"
-    $TMUX send-keys -R -t "$SESSION:fe" "$TEST_DIR/lib/run-fe $CLARA_HOME $FE_HOST" "C-m"
-}
-
-
-function start_dpe()
-{
-    $TMUX new-window -d -t "$SESSION" -n "$1"
-    $TMUX send-keys -R -t "$SESSION:$1" "ssh -t $1" "C-m"
-    $TMUX send-keys -R -t "$SESSION:$1" "$TEST_DIR/lib/run-dpe $CLARA_HOME $FE_HOST" "C-m"
-}
-
 ##############################################################################
 # Check the plaftorm
 ##############################################################################
@@ -46,8 +30,7 @@ function usage()
 
 FIRST_NODE=1
 KEEP_DETACHED=1
-DRY_RUN=1
-while getopts "hds:f:p:n" OPTION
+while getopts "hds:f:a:" OPTION
 do
     case $OPTION in
         h)
@@ -58,20 +41,24 @@ do
             FIRST_NODE=$OPTARG ;;
         f)
             NODES_FILE=$OPTARG ;;
-        n)
-            DRY_RUN=0 ;;
+        a)
+            FE_HOST=$OPTARG ;;
         ?)
             echo; usage; exit 1 ;;
     esac
 done
 
 shift $((OPTIND-1))
-if [[ ! $# -eq 1 ]]; then
+if [[ $# -gt 1 ]]; then
     usage
     exit 1
 fi
 
-NUMBER_OF_NODES=$1
+##############################################################################
+# Define the list of nodes to be used
+##############################################################################
+
+NUMBER_OF_NODES=${1:-0}
 if [[ $NUMBER_OF_NODES -lt 0 ]]; then
     echo "Wrong number of nodes: $NUMBER_OF_NODES"
     exit 1
@@ -81,11 +68,14 @@ case $(hostname -s) in
     "head")
         NODES_FILE=$TEST_DIR/nodes/quark.list
         ;;
-    "hadlab")
-        NODES_FILE=$TEST_DIR/nodes/csu.list
-        ;;
     "claradm")
-        echo "Running on claradm. Only the front-end node can be used."
+        echo "Running on claradm. Only the local front-end can be used."
+        NODES_FILE=
+        NUMBER_OF_NODES=0
+        ;;
+    *)
+        echo "Running on local node. Only the local front-end can be used."
+        FE_HOST=localhost
         NODES_FILE=
         NUMBER_OF_NODES=0
         ;;
@@ -100,63 +90,86 @@ if [[ $NUMBER_OF_NODES -gt 0 ]]; then
         exit 1
     fi
     echo "NODES_FILE=$NODES_FILE"
+    IFS=$'\r\n' GLOBIGNORE='*' command eval "NODES=(localhost $(cat $NODES_FILE))"
 else
     echo "Running everything on front-end node. No extra DPEs will be deployed."
+    NODES=()
 fi
 echo "---"
 
-
 ##############################################################################
-# Start the FE and the DPEs
+# Start from a clean session
 ##############################################################################
 
 # Remove any existing tmux session first
 $TEST_DIR/quit
 
 cd $TEST_DIR
-rm -rf $TEST_DIR/log
 mkdir -p $TEST_DIR/log
+rm -f $TEST_DIR/log/*
 
-echo "Starting front-end on local node $FE_HOST"
-if [[ $DRY_RUN -eq 1 ]]; then
-    start_fe
-    sleep 2
+##############################################################################
+# Start the FE and the DPEs
+##############################################################################
+
+function new_window()
+{
+    $TMUX new-window -d -t "$SESSION:$1" -n $2
+    $TMUX setw -q -t "$SESSION:$1" pane-base-index 0
+}
+
+function split_window()
+{
+    for (( i=0; i<=$NUMBER_OF_NODES; i++ )); do
+        $TMUX split-window -v -t "$SESSION:$1"
+        $TMUX select-layout -t "$SESSION:$1" tiled
+    done
+}
+
+function connect_nodes()
+{
+    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
+        $TMUX send-keys -t "$SESSION:$1.$i" " ssh ${NODES[$i]}" "C-m"
+    done
+}
+
+function start_clara()
+{
+    $TMUX send-keys -R -t "$SESSION:$1.0" \
+            " $TEST_DIR/lib/run-fe $CLARA_HOME $FE_HOST" "C-m"
+    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
+        $TMUX send-keys -R -t "$SESSION:$1.$i" \
+                " $TEST_DIR/lib/run-dpe $CLARA_HOME $FE_HOST" "C-m"
+    done
+}
+
+
+ORCH_PANE=$(($NUMBER_OF_NODES + 1))
+
+$TMUX has-session -t "$SESSION" 2>/dev/null
+if [[ "$?" -eq 1 ]]; then
+    if [ -e ~/.tmux.conf ]; then
+        $TMUX new-session -s "$SESSION" -n test -d
+    else
+        $TMUX -f $TEST_DIR/lib/tmux.conf new-session -s "$SESSION" -n test -d
+    fi
+
+    REC_WINDOW=1
+    $TMUX setw -q -t "$SESSION:$REC_WINDOW" pane-base-index 0
+
+    split_window $REC_WINDOW
+    connect_nodes $REC_WINDOW
+    start_clara $REC_WINDOW
+
+    if [ $NUMBER_OF_NODES -eq 0 ]; then
+        $TMUX send-keys -t "$SESSION:$REC_WINDOW.$ORCH_PANE" "./run-local"
+    else
+        $TMUX send-keys -t "$SESSION:$REC_WINDOW.$ORCH_PANE" "./run-cloud"
+    fi
+    $TMUX select-window -t "$SESSION:$REC_WINDOW"
+    $TMUX select-pane -t "$SESSION:$REC_WINDOW.$ORCH_PANE"
 fi
 
-cat << EOF > $TEST_DIR/log/nodes.yaml
----
-input-output:
-  - name: $FE_HOST
-reconstruction:
-EOF
-
-if [[ $NUMBER_OF_NODES -eq 0 ]]; then
-    echo "  - name: $FE_HOST" >> $TEST_DIR/log/nodes.yaml
-else
-    counter=0
-    last=$(($FIRST_NODE+$NUMBER_OF_NODES-1))
-    while read NODE
-    do
-        let counter=counter+1
-        if [[ $counter -ge $FIRST_NODE ]]; then
-            echo "Starting DPE on $NODE"
-            echo "  - name: $NODE" >> $TEST_DIR/log/nodes.yaml
-            if [[ $DRY_RUN -eq 1 ]]; then
-                start_dpe $NODE
-            fi
-        fi
-        if [[ $counter -eq $last ]]; then
-            break
-        fi
-    done < $NODES_FILE
-fi
-
-if [[ $DRY_RUN -eq 0 ]]; then
-    exit 0
-fi
-
-sleep 1
 if [[ $KEEP_DETACHED -eq 1 ]]; then
-    $TMUX select-window -t "$SESSION:orchestrator"
     $TMUX -2 attach-session -t "$SESSION"
 fi
