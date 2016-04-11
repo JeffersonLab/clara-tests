@@ -9,4 +9,4 @@ FE_HOST=$2
 export CLARA_HOME
 export CLAS12DIR
 
-$CLARA_HOME/bin/j_dpe -fe_host $FE_HOST 2>&1 | tee $TEST_DIR/log/$HOSTNAME.log
+$CLARA_HOME/bin/j_dpe --fe-host $FE_HOST 2>&1 | tee $TEST_DIR/log/$HOSTNAME.log
