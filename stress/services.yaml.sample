@@ -1,14 +1,12 @@
 ---
 services:
-- name: BST
-  class: org.jlab.rec.bst.services.BSTReconstruction
-- name: DCHB
-  class: org.jlab.rec.dc.services.HitBasedTracking
-- name: DCTB
-  class: org.jlab.rec.dc.services.TimeBasedTracking
-- name: EB
-  class: org.jlab.rec.eb.CLASEventBuilder
-- name: EC
-  class: org.jlab.rec.ec.ECReconstruction
-- name: FTOF
-  class: org.jlab.rec.ftof.SCReconstruction
+  - class: org.jlab.rec.ec.ECReconstruction
+    name: EC
+  - class: org.jlab.rec.ftof.SCReconstruction
+    name: FTOF
+  - class: org.jlab.rec.dc.services.HitBasedTracking
+    name: DCHB
+  - class: org.jlab.rec.dc.services.TimeBasedTracking
+    name: DCTB
+  - class: org.jlab.rec.eb.CLASEventBuilder
+    name: EB
