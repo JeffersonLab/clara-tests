@@ -169,7 +169,7 @@ for t in $(generate_cores); do
             exit 1
         fi
         sleep 1
-        AVG_TIME=$(grep "Average event processing time" $RUN_LOG | tail -n 1 | awk '{ print $6 }')
+        AVG_TIME=$(grep "Average processing time" $RUN_LOG | tail -n 1 | awk '{ print $5 }')
         RESULT="$RESULT;$AVG_TIME"
     done
 
