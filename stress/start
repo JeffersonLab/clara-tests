@@ -118,7 +118,7 @@ rm -f $TEST_DIR/log/*
 function new_window()
 {
     $TMUX new-window -d -t "$SESSION:$1" -n $2
-    $TMUX setw -q -t "$SESSION:$1" pane-base-index 0
+    $TMUX setw -t "$SESSION:$1" pane-base-index 0
 }
 
 function split_window()
@@ -166,7 +166,7 @@ if [[ "$?" -eq 1 ]]; then
     fi
 
     REC_WINDOW=1
-    $TMUX setw -q -t "$SESSION:$REC_WINDOW" pane-base-index 0
+    $TMUX setw -t "$SESSION:$REC_WINDOW" pane-base-index 0
 
     split_window $REC_WINDOW
     connect_nodes $REC_WINDOW
