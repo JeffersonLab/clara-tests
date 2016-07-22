@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+import argparse
+
+tokens = []
+times = {}
+
+
+def nonblank_lines(f):
+    for line in f.readlines():
+        l = line.strip()
+        if l:
+            yield l
+
+
+def parse_services(services_file):
+    rec_chain = []
+    with open(services_file) as f:
+        for line in nonblank_lines(f):
+            if line.startswith('name'):
+                l = line.split()
+                rec_chain.append(l[-1])
+
+    global tokens
+    tokens = ['READER'] + rec_chain + ['WRITER', 'TOTAL']
+    for token in tokens:
+        times[token] = []
+
+
+def parse_time(log_file):
+    with open(log_file) as f:
+        for line in nonblank_lines(f):
+            l = line.split()
+            token = l[0]
+            if token in times:
+                t = l[-2]
+                times[token].append(t)
+
+
+def print_results():
+    N = 3
+    T = int(len(times['TOTAL']) / N)
+    print('Cores;' + ';'.join(tokens))
+    for n in range(T):
+        l = '%d' % (n + 1)
+        i = n * N
+        for token in tokens:
+            t = [float(v) for v in times[token][i:i+N]]
+            a = sum(t) / N
+            l += ';%.2f' % a
+        print(l)
+
+
+if __name__ == '__main__':
+
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('services_yaml', help='the services.yaml file')
+    argparser.add_argument('log_file', help='the multicore-test output')
+    args = argparser.parse_args()
+
+    parse_services(args.services_yaml)
+    parse_time(args.log_file)
+    print_results()
