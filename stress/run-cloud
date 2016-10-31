@@ -6,7 +6,9 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Launch cloud orchestrator
 ##############################################################################
 
-CLASSPATH="$CLARA_HOME/lib/*:$CLARA_HOME/services/*"
+source $TEST_DIR/lib/common-utils
+set_classpath
+
 MAIN=org.jlab.clas.std.orchestrators.CloudOrchestrator
 
 java -cp $CLASSPATH $MAIN "$@" 2>&1 | tee $TEST_DIR/log/run-cloud.log

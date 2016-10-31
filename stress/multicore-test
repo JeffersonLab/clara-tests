@@ -10,6 +10,7 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUM_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
 source $TEST_DIR/lib/common-utils
+set_classpath
 get_mail $TEST_DIR
 
 ##############################################################################
@@ -18,10 +19,9 @@ get_mail $TEST_DIR
 
 function run_orchestrator()
 {
-    local classpath="$CLARA_HOME/lib/*:$CLARA_HOME/services/*"
     local main=org.jlab.clas.std.orchestrators.LocalOrchestrator
 
-    java -cp ${classpath} ${main} "$@"
+    java -cp ${CLASSPATH} ${main} "$@"
 }
 
 function generate_cores()

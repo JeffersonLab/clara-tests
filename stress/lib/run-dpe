@@ -3,7 +3,7 @@
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
 CLARA_HOME=$1
-CLAS12DIR=$1
+CLAS12DIR=$1/plugins/clas12
 FE_HOST=$2
 
 export CLARA_HOME
