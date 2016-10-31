@@ -7,12 +7,6 @@ function check_tmux()
 }
 
 
-function run_clara()
-{
-    java -cp "$CLARA_HOME/.:$CLARA_HOME/lib/*" $*
-}
-
-
 function get_fe_host()
 {
     FE_HOST=$(hostname -s)
