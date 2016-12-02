@@ -145,7 +145,7 @@ fi
 
 if [[ $DRY_RUN -eq 1 ]]; then
     echo "Running a warm up reconstruction with all cores"
-    run_orchestrator -t $NUM_CORES "$SERVICES" "$INFILE" "$OUTFILE" 2>&1 | tee $RUN_LOG
+    run_orchestrator -t $CORES_MAX "$SERVICES" "$INFILE" "$OUTFILE" 2>&1 | tee $RUN_LOG
     if [ ${PIPESTATUS[0]} -ne 0 ]; then
         touch "$RESULTS_FILE"
         send_report 1
