@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
 import argparse
+import re
+import yaml
 
 tokens = []
 times = {}
 
 
 def nonblank_lines(f):
+    r = '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}: '
     for line in f.readlines():
-        l = line.strip()
+        l = re.sub(r, '', line.strip())
         if l:
             yield l
 
@@ -16,10 +19,9 @@ def nonblank_lines(f):
 def parse_services(services_file):
     rec_chain = []
     with open(services_file) as f:
-        for line in nonblank_lines(f):
-            if line.startswith('name'):
-                l = line.split()
-                rec_chain.append(l[-1])
+        data = yaml.safe_load(f)
+        for service in data['services']:
+            rec_chain.append(service['name'])
 
     global tokens
     tokens = ['READER'] + rec_chain + ['WRITER', 'TOTAL']

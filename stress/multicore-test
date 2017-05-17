@@ -10,7 +10,6 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUM_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
 source $TEST_DIR/lib/common-utils
-set_classpath
 get_mail $TEST_DIR
 
 ##############################################################################
@@ -19,9 +18,7 @@ get_mail $TEST_DIR
 
 function run_orchestrator()
 {
-    local main=org.jlab.clas.std.orchestrators.LocalOrchestrator
-
-    java -cp ${CLASSPATH} ${main} "$@"
+    "$CLARA_HOME/bin/clara-orchestrator" "$@"
 }
 
 function generate_cores()
@@ -169,7 +166,7 @@ for t in $(generate_cores); do
             exit 1
         fi
         sleep 1
-        AVG_TIME=$(grep "Average processing time" $RUN_LOG | tail -n 1 | awk '{ print $5 }')
+        AVG_TIME=$(grep "Average processing time" $RUN_LOG | tail -n 1 | awk '{ print $7 }')
         RESULT="$RESULT;$AVG_TIME"
     done
 

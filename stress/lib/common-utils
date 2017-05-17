@@ -7,29 +7,6 @@ function check_tmux()
 }
 
 
-function set_classpath()
-{
-    if [ -z "${CLASSPATH}" ]; then
-        CLASSPATH="${CLARA_HOME}/lib/*"
-        if [ -n "${CLARA_PLUGINS}" ]; then
-            if [ ! -d "${CLARA_PLUGINS}" ]; then
-                echo "Error: \$CLARA_PLUGINS is not a directory."
-                exit 1
-            fi
-            plugins_dir="${CLARA_PLUGINS}"
-        else
-            plugins_dir="${CLARA_HOME}/plugins"
-        fi
-        for plugin in "${plugins_dir}"/*; do
-            if [ -d "${plugin}" ]; then
-                CLASSPATH+=":${plugin}/lib/*:${plugin}/services/*"
-            fi
-        done
-        CLASSPATH+=":${CLARA_HOME}/services/*"
-    fi
-}
-
-
 function get_fe_host()
 {
     FE_HOST=$(hostname -s)
