@@ -141,6 +141,8 @@ fi
 # Run the test
 ##############################################################################
 
+mkdir -p $LOG_DIR
+
 if [[ $DRY_RUN -eq 1 ]]; then
     echo "Running a warm up reconstruction with all cores"
     run_orchestrator -t $CORES_MAX "$SERVICES" "$INFILE" "$OUTFILE" 2>&1 | tee $RUN_LOG
@@ -153,7 +155,6 @@ fi
 
 rm -f $RESULTS_FILE
 rm -f $RUN_LOG
-mkdir -p $LOG_DIR
 
 for t in $(generate_cores); do
     echo "Requesting $t threads"
