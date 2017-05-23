@@ -86,8 +86,9 @@ CORES_FIRST=1
 CORES_STEP=1
 CORES_MAX=$NUM_CORES
 
-RESULTS_FILE=$TEST_DIR/log/results.csv
-RUN_LOG=$TEST_DIR/log/run.log
+LOG_DIR=$TEST_DIR/log
+RESULTS_FILE=$LOG_DIR/results.csv
+RUN_LOG=$LOG_DIR/run.log
 SEND_MAIL=1
 DRY_RUN=1
 while getopts "b:s:e:r:l:ma:nh" OPTION
@@ -152,6 +153,7 @@ fi
 
 rm -f $RESULTS_FILE
 rm -f $RUN_LOG
+mkdir -p $LOG_DIR
 
 for t in $(generate_cores); do
     echo "Requesting $t threads"
