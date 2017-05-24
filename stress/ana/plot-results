@@ -50,9 +50,10 @@ rates = []
 
 with open(results_file) as f:
     for line in f:
-        values = line.strip().split(";")
-        if len(values) == 0:
+        line = line.strip()
+        if not line:
             continue
+        values = line.split(";")
         if len(values) != 4:
             print 'Bad formatted line: "%s"' % line.strip()
             sys.exit(1)
