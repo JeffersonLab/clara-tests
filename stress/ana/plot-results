@@ -97,6 +97,11 @@ if options.fit:
     text = r'$y = %.4fx + %.4f$'"\n"r'$R^2 = %.4f$' % (pl[0], pl[1], r2)
     plt.text(0.6, 0.3, text, transform=plt.gca().transAxes)
 
+axes = plt.gca()
+axes.set_axisbelow(True)
+axes.xaxis.grid(color='gray')
+axes.yaxis.grid(color='gray')
+
 if not options.no_fig:
     plt.savefig(output_fig)
     print "Plot saved to", output_fig
