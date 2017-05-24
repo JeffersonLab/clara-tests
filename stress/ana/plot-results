@@ -22,9 +22,9 @@ parser.add_option("-o",
                   dest="figure",
                   help="set the name of the output PNG figure")
 parser.add_option("-t",
-                   action="store",
-                   dest="title",
-                   help="set the title of the plot")
+                  action="store",
+                  dest="title",
+                  help="set the title of the plot")
 options, args = parser.parse_args()
 
 if len(args) != 1:
@@ -57,7 +57,7 @@ with open(results_file) as f:
             print 'Bad formatted line: "%s"' % line.strip()
             sys.exit(1)
         num_cores = int(values[0])
-        times = [ float(i) for i in values[-3:] ]
+        times = [float(i) for i in values[-3:]]
         avg_time = sum(times) / 3
         rate = 1 / avg_time
         cores.append(num_cores)
@@ -71,7 +71,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 pl = np.polyfit(cores, rates, 1)
-cr = np.corrcoef(cores, rates)[0,1]
+cr = np.corrcoef(cores, rates)[0, 1]
 r2 = cr ** 2
 
 print "y = %.4fx + %.4f" % (pl[0], pl[1])
