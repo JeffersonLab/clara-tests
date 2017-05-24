@@ -102,6 +102,11 @@ axes.set_axisbelow(True)
 axes.xaxis.grid(color='gray')
 axes.yaxis.grid(color='gray')
 
+one_rate = rates[0] / cores[0]
+exp_rate = one_rate * cores[-1]
+max_rate = max(exp_rate, rates[-1])
+axes.set_ylim([0, max_rate])
+
 if not options.no_fig:
     plt.savefig(output_fig)
     print "Plot saved to", output_fig
