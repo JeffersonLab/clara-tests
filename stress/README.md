@@ -8,18 +8,41 @@ all CLARA processes will be automatically killed.
 
 ## Setup
 
-Create a `services.yaml` file describing your reconstruction chain.
-Each service should be specified with the following format:
+Create a `services.yaml` file describing the application to be tested.
+Each service should be specified with the following key/value pairs:
 
-    - class: <service_class_name>
-      name: <service_name>
+    class: <service_class_name>
+    name: <service_name>
 
-The default container name is `USERNAME`.
+The default container for all services is is `USERNAME`.
+
+The `io-services` section must have the `reader` and `writer` keys
+declaring the I/O services that will process the set of files.
+The `services` section must contain the list of reconstruction services. 
+The services will be linked in the order they appear in this list.
+Finally, the `mime-types` section is also required in order to
+list the data types used by the services.
+
+    ---
+    io-services:
+      reader:
+        class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+        name: HipoToHipoReader
+      writer:
+        class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+        name: HipoToHipoWriter
+    services:
+      - class: org.jlab.service.dc.DCHBEngine
+        name: DCHB
+      - class: org.jlab.service.dc.DCTBEngine
+        name: DCTB
+      - class: org.jlab.service.ec.ECEngine
+        name: EC
+    mime-types:
+      - binary/data-hipo
 
 Use the distributed `services.yaml.sample` file as a template.
 Note that indentation is important.
-
-Services will be linked in the order they appear in the file.
 
 ## Start
 
