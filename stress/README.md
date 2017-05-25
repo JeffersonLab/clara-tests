@@ -78,7 +78,7 @@ bee reconstructed.
 The `multicore-test` runs the local reconstruction multiple times,
 looping the number of reconstruction threads from 1 to all available cores.
 
-    $ ./run-cloud [ -i <input_dir> ] [ -o <output_dir> ] <services_file> <input_files>
+    $ ./multicore-test <services_file> <input_file> <output_file>
 
 For each number of threads, the reconstruction will run three times.
 The average reconstruction times are stored in CSV format,
