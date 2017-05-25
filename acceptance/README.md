@@ -1,6 +1,6 @@
-# Clara Acceptance Tests
+# CLARA Acceptance Tests
 
-Test Clara messaging using a local mini cloud of virtual machines.
+Test CLARA messaging using a local mini cloud of virtual machines.
 
 ## Dependencies
 
@@ -15,7 +15,7 @@ Test Clara messaging using a local mini cloud of virtual machines.
 
 ## Quick Run
 
-To create the virtual machines, download and install Clara, and run all tests,
+To create the virtual machines, download and install CLARA, and run all tests,
 do:
 
     $ vagrant up
@@ -52,9 +52,9 @@ See the [Vagrant docs][vd] for advanced usage.
 [vd]: https://docs.vagrantup.com/v2/getting-started/index.html
 
 
-## Installing Clara
+## Installing CLARA
 
-The different Clara sources and dependencies should be in the same directory,
+The different CLARA sources and dependencies should be in the same directory,
 because that directory will be mounted as a synced folder in every virtual
 machine.
 
@@ -97,13 +97,13 @@ Take a look to the `install` script to see the advanced options.
 
 ## Running the Tests
 
-Once all the machines are up and provisioned, and Clara is installed,
+Once all the machines are up and provisioned, and CLARA is installed,
 run all the tests with:
 
     $ ./run
 
 The result of the tests will be printed in the standard output.
-The Clara logs can be found in `$CLARA_HOME/log`.
+The CLARA logs can be found in `$CLARA_HOME/log`.
 
 
 ## Manual Testing and Development
@@ -111,7 +111,7 @@ The Clara logs can be found in `$CLARA_HOME/log`.
 All the scripts are designed to run inside the virtual machines (the
 `install` and `run` scripts are simple ssh wrappers).
 
-It is recommended to use the _platform_ node to manually run and check Clara
+It is recommended to use the _platform_ node to manually run and check CLARA
 commands (or the scripts).
 
     $ vagrant ssh platform
