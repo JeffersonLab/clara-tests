@@ -25,14 +25,14 @@ Services will be linked in the order they appear in the file.
 
 Execute the `start` script to launch the local front-end DPE:
 
-    $ ./start <number_of_dpes>
+    $ ./start [ <number_of_dpes> ]
 
 A tmux session will be created. Pane 1 will show the front-end running and
-each of the next panes will show the running DPEs.
-The focus will be in last pane, to run the reconstruction/stress scripts.
+each of the next panes will show the running worker DPEs, if any.
+The focus will be in last pane, to run the stress test scripts.
 
-If the number of DPEs is set to 0 then no DPE will be started,
-and only the front-end will be used to run services.
+If the number of worker DPEs is not set,
+then only the local front-end will be used to run services.
 
 
 ## Scripts
