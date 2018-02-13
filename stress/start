@@ -6,9 +6,9 @@
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tmux="tmux"
-session=TEST
+session="TEST"
 
-source $test_dir/lib/common-utils
+source "$test_dir/lib/common-utils"
 check_tmux
 
 ##############################################################################
@@ -24,7 +24,7 @@ function usage()
 
 keep_detached=1
 monitor=1
-fe_host=$(get_fe_host)
+fe_host="$(get_fe_host)"
 
 while getopts "hdf:a:m" OPTION
 do
@@ -60,7 +60,7 @@ if [[ $number_of_nodes -lt 0 ]]; then
     exit 1
 fi
 
-case $(hostname -s) in
+case "$(hostname -s)" in
     "head")
         nodes_file=$test_dir/nodes/quark.list
         ;;
@@ -86,7 +86,7 @@ if [[ $number_of_nodes -gt 0 ]]; then
         exit 1
     fi
     echo "nodes_file=$nodes_file"
-    IFS=$'\r\n' GLOBIGNORE='*' command eval "nodes=(localhost $(cat $nodes_file))"
+    IFS=$'\r\n' GLOBIGNORE='*' command eval "nodes=(localhost $(cat "$nodes_file"))"
 else
     echo "Running everything on front-end node. No extra DPEs will be deployed."
     nodes=()
@@ -98,11 +98,11 @@ echo "---"
 ##############################################################################
 
 # Remove any existing tmux session first
-$test_dir/quit
+"$test_dir"/quit
 
-cd $test_dir
-mkdir -p $test_dir/log
-rm -f $test_dir/log/*
+cd "$test_dir"
+mkdir -p "$test_dir"/log
+rm -f "$test_dir"/log/*
 
 ##############################################################################
 # Start the FE and the DPEs
@@ -110,7 +110,7 @@ rm -f $test_dir/log/*
 
 function new_window()
 {
-    $tmux new-window -d -t "$session:$1" -n $2
+    $tmux new-window -d -t "$session:$1" -n "$2"
     $tmux setw -t "$session:$1" pane-base-index 0
 }
 
@@ -153,7 +153,7 @@ if [[ "$?" -eq 1 ]]; then
     if [ -e ~/.tmux.conf ]; then
         $tmux new-session -s "$session" -n test -d
     else
-        $tmux -f $test_dir/lib/tmux.conf new-session -s "$session" -n test -d
+        $tmux -f "$test_dir/lib/tmux.conf" new-session -s "$session" -n test -d
     fi
 
     rec_window=1

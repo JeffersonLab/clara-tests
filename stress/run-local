@@ -2,12 +2,12 @@
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-mkdir -p $test_dir/log
+mkdir -p "$test_dir/log"
 
 ##############################################################################
 # Launch local orchestrator
 ##############################################################################
 
-"$CLARA_HOME/bin/clara-orchestrator" "$@" 2>&1 | tee $test_dir/log/run-local.log
+"$CLARA_HOME"/bin/clara-orchestrator "$@" 2>&1 | tee "$test_dir/log/run-local.log"
 
-exit ${PIPESTATUS[0]}
+exit "${PIPESTATUS[0]}"

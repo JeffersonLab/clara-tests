@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-session=TEST
+session="TEST"
 tmux="tmux"
 
-if $tmux ls 2> /dev/null | grep -q $session; then
+if $tmux ls 2> /dev/null | grep -q "$session"; then
     $tmux kill-session -t "$session"
 fi

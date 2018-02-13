@@ -10,4 +10,4 @@ export CLAS12DIR
 
 fe_host=$2
 
-$CLARA_HOME/bin/j_dpe --host $fe_host 2>&1 | tee $test_dir/log/fe.log
+"$CLARA_HOME"/bin/j_dpe --host "$fe_host" 2>&1 | tee "$test_dir/log/fe.log"

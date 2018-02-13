@@ -5,11 +5,11 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-num_nodes=$(ls -1 $1/*.load | wc -l)
+num_nodes="$(ls -1 $1/*.load | wc -l)"
 echo "Total nodes: $num_nodes"
-for data_file in $1/*.load; do
-    node_id=$(basename $data_file | cut -c8-9)
-    plot_file="w${node_id}n$(printf "%02d" $num_nodes).png"
+for data_file in "$1"/*.load; do
+    node_id="$(basename "$data_file" | cut -c8-9)"
+    plot_file="w${node_id}n$(printf "%02d" "$num_nodes").png"
     echo "Plotting $data_file into $plot_file"
-    ./plot-cpu-usage.sh $data_file $plot_file
+    ./plot-cpu-usage.sh "$data_file" "$plot_file"
 done

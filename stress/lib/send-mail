@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 # Send a mail with the results
 
-mailto="$1"
-results_file="$2"
-runlog_file="$3"
-test_status="$4"
+mailto=$1
+results_file=$2
+runlog_file=$3
+test_status=$4
 
-body_file=$(mktemp 2>/dev/null || mktemp -t mail)
-trap "rm -f $body_file" EXIT
+body_file="$(mktemp 2>/dev/null || mktemp -t mail)"
+trap 'rm -f "$body_file"' EXIT
 if [ "$test_status" -eq 0 ]; then
-    echo "The CLARA stress test in $HOSTNAME has finished." > $body_file
-    echo >> $body_file
-    echo "You can find the results in the attached file." >> $body_file
+    echo "The CLARA stress test in $HOSTNAME has finished." > "$body_file"
+    echo >> "$body_file"
+    echo "You can find the results in the attached file." >> "$body_file"
     subject="CLARA test finished"
 else
-    echo "The CLARA stress test in $HOSTNAME has failed." > $body_file
-    echo >> $body_file
-    tail $runlog_file >> $body_file
-    echo >> $body_file
-    echo "You can find the unfinished results in the attached file." >> $body_file
+    echo "The CLARA stress test in $HOSTNAME has failed." > "$body_file"
+    echo >> "$body_file"
+    tail $runlog_file >> "$body_file"
+    echo >> "$body_file"
+    echo "You can find the unfinished results in the attached file." >> "$body_file"
     subject="CLARA test failed"
 fi
 
 if ( command -v mutt >/dev/null 2>&1 ); then
-    cat $body_file | mutt  -s "$subject" -a "$results_file" $mailto && echo "Report sent to $mailto"
+    cat "$body_file" | mutt  -s "$subject" -a "$results_file" "$mailto" && echo "Report sent to $mailto"
 elif ( command -v mailx >/dev/null 2>&1 ); then
-    cat $body_file | mailx -s "$subject" -a "$results_file" $mailto && echo "Report sent to $mailto"
+    cat "$body_file" | mailx -s "$subject" -a "$results_file" "$mailto" && echo "Report sent to $mailto"
 else
     echo "Could not send mail: missing mutt or mailx"
 fi

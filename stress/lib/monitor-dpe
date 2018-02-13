@@ -2,6 +2,6 @@
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
-dpe_pid=$(pgrep -f -d',' Dpe)
+dpe_pid="$(pgrep -f -d',' Dpe)"
 log_file="$test_dir/log/$HOSTNAME.load"
-top -b -d 1 -p $dpe_pid | awk "/$dpe_pid/ {print \$9 | \"tee $log_file\"}"
+top -b -d 1 -p "$dpe_pid" | awk "/$dpe_pid/ {print \$9 | \"tee \\\"$log_file\\\"\"}"
