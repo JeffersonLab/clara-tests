@@ -6,11 +6,11 @@
 # Setup
 ##############################################################################
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NUM_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+num_cores=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
-source $TEST_DIR/lib/common-utils
-MAILTO=$(get_mail $TEST_DIR)
+source $test_dir/lib/common-utils
+mailto=$(get_mail $test_dir)
 
 ##############################################################################
 # Helpers
@@ -23,24 +23,24 @@ function run_orchestrator()
 
 function generate_cores()
 {
-    if [[ $CORES_FIRST -eq 1 ]]; then
-        if [[ $CORES_STEP -eq 1 ]]; then
-            echo "$(seq 1 $CORES_MAX)"
+    if [[ $cores_first -eq 1 ]]; then
+        if [[ $cores_step -eq 1 ]]; then
+            echo "$(seq 1 $cores_max)"
         else
-            echo "1 $(seq $CORES_STEP $CORES_STEP $CORES_MAX)"
+            echo "1 $(seq $cores_step $cores_step $cores_max)"
         fi
     else
-        echo "$(seq $CORES_FIRST $CORES_STEP $CORES_MAX)"
+        echo "$(seq $cores_first $cores_step $cores_max)"
     fi
 }
 
 function send_report()
 {
-    if [[ $SEND_MAIL -eq 0 && `uname` != Darwin ]]; then
-        if [[ $DRY_RUN -eq 0 ]]; then
-            echo "Report sent to $MAILTO"
+    if [[ $send_mail -eq 0 && `uname` != Darwin ]]; then
+        if [[ $dry_run -eq 0 ]]; then
+            echo "Report sent to $mailto"
         else
-            $TEST_DIR/lib/send-mail $MAILTO $RESULTS_FILE $RUN_LOG $1
+            $test_dir/lib/send-mail $mailto $results_file $run_log $1
         fi
     fi
 }
@@ -65,7 +65,7 @@ options:
                                     (default: 1)
 
     -e <cores>                  --  final number of cores to be used
-                                    (default: $NUM_CORES)
+                                    (default: $num_cores)
 
     -r <report_file>            --  output file where results will be saved
                                     (default: log/results.csv)
@@ -82,36 +82,36 @@ options:
 EOF
 }
 
-CORES_FIRST=1
-CORES_STEP=1
-CORES_MAX=$NUM_CORES
+cores_first=1
+cores_step=1
+cores_max=$num_cores
 
-LOG_DIR=$TEST_DIR/log
-RESULTS_FILE=$LOG_DIR/results.csv
-RUN_LOG=$LOG_DIR/run.log
-SEND_MAIL=1
-DRY_RUN=1
+log_dir=$test_dir/log
+results_file=$log_dir/results.csv
+run_log=$log_dir/run.log
+send_mail=1
+dry_run=1
 while getopts "b:s:e:r:l:ma:nh" OPTION
 do
     case $OPTION in
         h)
             usage; exit 0 ;;
         b)
-            CORES_FIRST=$OPTARG ;;
+            cores_first=$OPTARG ;;
         s)
-            CORES_STEP=$OPTARG ;;
+            cores_step=$OPTARG ;;
         e)
-            CORES_MAX=$OPTARG ;;
+            cores_max=$OPTARG ;;
         r)
-            RESULTS_FILE=$OPTARG ;;
+            results_file=$OPTARG ;;
         l)
-            RUN_LOG=$OPTARG ;;
+            run_log=$OPTARG ;;
         m)
-            SEND_MAIL=0 ;;
+            send_mail=0 ;;
         a)
-            MAILTO=$OPTARG ;;
+            mailto=$OPTARG ;;
         n)
-            DRY_RUN=0 ;;
+            dry_run=0 ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -123,16 +123,16 @@ if [[ ! $# -eq 3 ]]; then
     exit 1
 fi
 
-SERVICES="$1"
-INFILE="$2"
-OUTFILE="$3"
+services="$1"
+infile="$2"
+outfile="$3"
 
-if [ ! -f "$SERVICES" ]; then
+if [ ! -f "$services" ]; then
     echo "Services file doesn't exist."
     exit 1
 fi
 
-if [ ! -f "$INFILE" ]; then
+if [ ! -f "$infile" ]; then
     echo "Input file doesn't exist."
     exit 1
 fi
@@ -141,42 +141,42 @@ fi
 # Run the test
 ##############################################################################
 
-mkdir -p $LOG_DIR
+mkdir -p $log_dir
 
-if [[ $DRY_RUN -eq 1 ]]; then
+if [[ $dry_run -eq 1 ]]; then
     echo "Running a warm up reconstruction with all cores"
-    run_orchestrator -t $CORES_MAX "$SERVICES" "$INFILE" "$OUTFILE" 2>&1 | tee $RUN_LOG
+    run_orchestrator -t $cores_max "$services" "$infile" "$outfile" 2>&1 | tee $run_log
     if [ ${PIPESTATUS[0]} -ne 0 ]; then
-        touch "$RESULTS_FILE"
+        touch "$results_file"
         send_report 1
         exit 1
     fi
 fi
 
-rm -f $RESULTS_FILE
-rm -f $RUN_LOG
+rm -f $results_file
+rm -f $run_log
 
 for t in $(generate_cores); do
     echo "Requesting $t threads"
-    RESULT="$t"
-    [[ $DRY_RUN -eq 0 ]] && continue
+    result="$t"
+    [[ $dry_run -eq 0 ]] && continue
 
     for i in $(seq 1 3); do
-        run_orchestrator -t $t "$SERVICES" "$INFILE" "$OUTFILE" >> $RUN_LOG 2>&1
+        run_orchestrator -t $t "$services" "$infile" "$outfile" >> $run_log 2>&1
         if [ $? -ne 0 ]; then
-            tail -20 "$RUN_LOG"
+            tail -20 "$run_log"
             send_report 1
             exit 1
         fi
         sleep 1
-        AVG_TIME=$(grep "Average processing time" $RUN_LOG | tail -n 1 | awk '{ print $7 }')
-        RESULT="$RESULT;$AVG_TIME"
+        avg_time=$(grep "Average processing time" $run_log | tail -n 1 | awk '{ print $7 }')
+        result="$result;$avg_time"
     done
 
-    echo $RESULT >> $RESULTS_FILE
+    echo $result >> $results_file
 done
-[[ $DRY_RUN -eq 1 ]] && echo >> $RESULTS_FILE
+[[ $dry_run -eq 1 ]] && echo >> $results_file
 
 echo "Test completed."
-echo "Results can be found in: $RESULTS_FILE"
+echo "Results can be found in: $results_file"
 send_report 0

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
 CLARA_HOME=$1
 CLAS12DIR=$1/plugins/clas12
-FE_HOST=$2
 
 export CLARA_HOME
 export CLAS12DIR
 
-$CLARA_HOME/bin/j_dpe --fe-host $FE_HOST 2>&1 | tee $TEST_DIR/log/$HOSTNAME.log
+fe_host=$2
+
+$CLARA_HOME/bin/j_dpe --fe-host $fe_host 2>&1 | tee $test_dir/log/$HOSTNAME.log

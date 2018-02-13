@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-mkdir -p $TEST_DIR/log
+mkdir -p $test_dir/log
 
 ##############################################################################
 # Launch local orchestrator
 ##############################################################################
 
-"$CLARA_HOME/bin/clara-orchestrator" "$@" 2>&1 | tee $TEST_DIR/log/run-local.log
+"$CLARA_HOME/bin/clara-orchestrator" "$@" 2>&1 | tee $test_dir/log/run-local.log
 
 exit ${PIPESTATUS[0]}

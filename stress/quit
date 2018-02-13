@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SESSION=TEST
-TMUX="tmux"
+session=TEST
+tmux="tmux"
 
-if $TMUX ls 2> /dev/null | grep -q $SESSION; then
-    $TMUX kill-session -t "$SESSION"
+if $tmux ls 2> /dev/null | grep -q $session; then
+    $tmux kill-session -t "$session"
 fi

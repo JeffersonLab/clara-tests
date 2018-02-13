@@ -4,11 +4,11 @@
 # Setup
 ##############################################################################
 
-TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TMUX="tmux"
-SESSION=TEST
+test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+tmux="tmux"
+session=TEST
 
-source $TEST_DIR/lib/common-utils
+source $test_dir/lib/common-utils
 check_tmux
 
 ##############################################################################
@@ -22,9 +22,9 @@ function usage()
 }
 
 
-KEEP_DETACHED=1
-MONITOR=1
-FE_HOST=$(get_fe_host)
+keep_detached=1
+monitor=1
+fe_host=$(get_fe_host)
 
 while getopts "hdf:a:m" OPTION
 do
@@ -32,13 +32,13 @@ do
         h)
             usage; exit 0 ;;
         d)
-            KEEP_DETACHED=0 ;;
+            keep_detached=0 ;;
         m)
-            MONITOR=0 ;;
+            monitor=0 ;;
         f)
-            NODES_FILE=$OPTARG ;;
+            nodes_file=$OPTARG ;;
         a)
-            FE_HOST=$OPTARG ;;
+            fe_host=$OPTARG ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -54,42 +54,42 @@ fi
 # Define the list of nodes to be used
 ##############################################################################
 
-NUMBER_OF_NODES=${1:-0}
-if [[ $NUMBER_OF_NODES -lt 0 ]]; then
-    echo "Wrong number of nodes: $NUMBER_OF_NODES"
+number_of_nodes=${1:-0}
+if [[ $number_of_nodes -lt 0 ]]; then
+    echo "Wrong number of nodes: $number_of_nodes"
     exit 1
 fi
 
 case $(hostname -s) in
     "head")
-        NODES_FILE=$TEST_DIR/nodes/quark.list
+        nodes_file=$test_dir/nodes/quark.list
         ;;
     "claradm")
         echo "Running on claradm. Only the local front-end can be used."
-        NODES_FILE=
-        NUMBER_OF_NODES=0
+        nodes_file=
+        number_of_nodes=0
         ;;
     *)
         echo "Running on local node. Only the local front-end can be used."
-        FE_HOST=localhost
-        NODES_FILE=
-        NUMBER_OF_NODES=0
+        fe_host=localhost
+        nodes_file=
+        number_of_nodes=0
         ;;
 esac
 
-if [[ $NUMBER_OF_NODES -gt 0 ]]; then
-    if [[ -z $NODES_FILE ]]; then
+if [[ $number_of_nodes -gt 0 ]]; then
+    if [[ -z $nodes_file ]]; then
         echo "A file with the list of available nodes is required."
         echo "See nodes/quark.list as an example."
         echo
         usage
         exit 1
     fi
-    echo "NODES_FILE=$NODES_FILE"
-    IFS=$'\r\n' GLOBIGNORE='*' command eval "NODES=(localhost $(cat $NODES_FILE))"
+    echo "nodes_file=$nodes_file"
+    IFS=$'\r\n' GLOBIGNORE='*' command eval "nodes=(localhost $(cat $nodes_file))"
 else
     echo "Running everything on front-end node. No extra DPEs will be deployed."
-    NODES=()
+    nodes=()
 fi
 echo "---"
 
@@ -98,11 +98,11 @@ echo "---"
 ##############################################################################
 
 # Remove any existing tmux session first
-$TEST_DIR/quit
+$test_dir/quit
 
-cd $TEST_DIR
-mkdir -p $TEST_DIR/log
-rm -f $TEST_DIR/log/*
+cd $test_dir
+mkdir -p $test_dir/log
+rm -f $test_dir/log/*
 
 ##############################################################################
 # Start the FE and the DPEs
@@ -110,78 +110,77 @@ rm -f $TEST_DIR/log/*
 
 function new_window()
 {
-    $TMUX new-window -d -t "$SESSION:$1" -n $2
-    $TMUX setw -t "$SESSION:$1" pane-base-index 0
+    $tmux new-window -d -t "$session:$1" -n $2
+    $tmux setw -t "$session:$1" pane-base-index 0
 }
 
 function split_window()
 {
-    for (( i=0; i<=$NUMBER_OF_NODES; i++ )); do
-        $TMUX split-window -v -t "$SESSION:$1"
-        $TMUX select-layout -t "$SESSION:$1" tiled
+    for (( i=0; i<=$number_of_nodes; i++ )); do
+        $tmux split-window -v -t "$session:$1"
+        $tmux select-layout -t "$session:$1" tiled
     done
 }
 
 function connect_nodes()
 {
-    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
-        $TMUX send-keys -t "$SESSION:$1.$i" " ssh ${NODES[$i]}" "C-m"
+    for (( i=1; i<=$number_of_nodes; i++ )); do
+        $tmux send-keys -t "$session:$1.$i" " ssh ${nodes[$i]}" "C-m"
     done
 }
 
 function start_clara()
 {
-    $TMUX send-keys -R -t "$SESSION:$1.0" \
-            " $TEST_DIR/lib/run-fe $CLARA_HOME $FE_HOST" "C-m"
-    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
-        $TMUX send-keys -R -t "$SESSION:$1.$i" \
-                " $TEST_DIR/lib/run-dpe $CLARA_HOME $FE_HOST" "C-m"
+    $tmux send-keys -R -t "$session:$1.0" \
+            " $test_dir/lib/run-fe $CLARA_HOME $fe_host" "C-m"
+    for (( i=1; i<=$number_of_nodes; i++ )); do
+        $tmux send-keys -R -t "$session:$1.$i" \
+                " $test_dir/lib/run-dpe $CLARA_HOME $fe_host" "C-m"
     done
 }
 
 function start_monitoring()
 {
-    for (( i=1; i<=$NUMBER_OF_NODES; i++ )); do
-        $TMUX send-keys -R -t "$SESSION:$1.$i" \
-                " ssh -t ${NODES[i]} $TEST_DIR/lib/monitor-dpe" "C-m"
+    for (( i=1; i<=$number_of_nodes; i++ )); do
+        $tmux send-keys -R -t "$session:$1.$i" \
+                " ssh -t ${nodes[i]} $test_dir/lib/monitor-dpe" "C-m"
     done
 }
 
 
-ORCH_PANE=$(($NUMBER_OF_NODES + 1))
-
-$TMUX has-session -t "$SESSION" 2>/dev/null
+$tmux has-session -t "$session" 2>/dev/null
 if [[ "$?" -eq 1 ]]; then
     if [ -e ~/.tmux.conf ]; then
-        $TMUX new-session -s "$SESSION" -n test -d
+        $tmux new-session -s "$session" -n test -d
     else
-        $TMUX -f $TEST_DIR/lib/tmux.conf new-session -s "$SESSION" -n test -d
+        $tmux -f $test_dir/lib/tmux.conf new-session -s "$session" -n test -d
     fi
 
-    REC_WINDOW=1
-    $TMUX setw -t "$SESSION:$REC_WINDOW" pane-base-index 0
+    rec_window=1
+    $tmux setw -t "$session:$rec_window" pane-base-index 0
 
-    split_window $REC_WINDOW
-    connect_nodes $REC_WINDOW
-    start_clara $REC_WINDOW
+    split_window $rec_window
+    connect_nodes $rec_window
+    start_clara $rec_window
 
-    if [[ $MONITOR -eq 0 ]]; then
-        MON_WINDOW=2
-        new_window $MON_WINDOW monitor
-        split_window $MON_WINDOW
-        connect_nodes $MON_WINDOW
-        start_monitoring $MON_WINDOW
+    if [[ $monitor -eq 0 ]]; then
+        mon_window=2
+        new_window $mon_window monitor
+        split_window $mon_window
+        connect_nodes $mon_window
+        start_monitoring $mon_window
     fi
 
-    if [ $NUMBER_OF_NODES -eq 0 ]; then
-        $TMUX send-keys -t "$SESSION:$REC_WINDOW.$ORCH_PANE" "./run-local"
+    orch_pane=$(($number_of_nodes + 1))
+    if [ $number_of_nodes -eq 0 ]; then
+        $tmux send-keys -t "$session:$rec_window.$orch_pane" "./run-local"
     else
-        $TMUX send-keys -t "$SESSION:$REC_WINDOW.$ORCH_PANE" "./run-cloud"
+        $tmux send-keys -t "$session:$rec_window.$orch_pane" "./run-cloud"
     fi
-    $TMUX select-window -t "$SESSION:$REC_WINDOW"
-    $TMUX select-pane -t "$SESSION:$REC_WINDOW.$ORCH_PANE"
+    $tmux select-window -t "$session:$rec_window"
+    $tmux select-pane -t "$session:$rec_window.$orch_pane"
 fi
 
-if [[ $KEEP_DETACHED -eq 1 ]]; then
-    $TMUX -2 attach-session -t "$SESSION"
+if [[ $keep_detached -eq 1 ]]; then
+    $tmux -2 attach-session -t "$session"
 fi
