@@ -9,7 +9,7 @@ function check_tmux()
 
 function get_fe_host()
 {
-    FE_HOST=$(hostname -s)
+    hostname -s
 }
 
 
@@ -17,8 +17,8 @@ function get_mail()
 {
     local test_dir=$1
     if [[ -f $test_dir/mail ]]; then
-        MAILTO=$(cat $test_dir/mail)
+        cat "$test_dir/mail"
     else
-        MAILTO=${USER}@jlab.org
+        echo "$USER@jlab.org"
     fi
 }

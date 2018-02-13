@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##############################################################################
-# Helper functions
+# Setup
 ##############################################################################
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,13 +9,7 @@ TMUX="tmux"
 SESSION=TEST
 
 source $TEST_DIR/lib/common-utils
-
-##############################################################################
-# Check the plaftorm
-##############################################################################
-
 check_tmux
-get_fe_host
 
 ##############################################################################
 # Options
@@ -31,6 +25,8 @@ function usage()
 FIRST_NODE=1
 KEEP_DETACHED=1
 MONITOR=1
+FE_HOST=$(get_fe_host)
+
 while getopts "hds:f:a:m" OPTION
 do
     case $OPTION in
