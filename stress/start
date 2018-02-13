@@ -18,16 +18,15 @@ check_tmux
 function usage()
 {
     echo -e "Usage:"
-    echo -e "\t$0 [ -f <nodes_file> ] [ -s <first_node> ] <num_nodes>"
+    echo -e "\t$0 [ -f <nodes_file> ] <num_nodes>"
 }
 
 
-FIRST_NODE=1
 KEEP_DETACHED=1
 MONITOR=1
 FE_HOST=$(get_fe_host)
 
-while getopts "hds:f:a:m" OPTION
+while getopts "hdf:a:m" OPTION
 do
     case $OPTION in
         h)
@@ -36,8 +35,6 @@ do
             KEEP_DETACHED=0 ;;
         m)
             MONITOR=0 ;;
-        s)
-            FIRST_NODE=$OPTARG ;;
         f)
             NODES_FILE=$OPTARG ;;
         a)
