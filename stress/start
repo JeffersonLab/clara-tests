@@ -8,6 +8,7 @@ test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tmux="tmux"
 session="TEST"
 
+# shellcheck source=/dev/null
 source "$test_dir/lib/common-utils"
 check_tmux
 
@@ -18,7 +19,7 @@ check_tmux
 function usage()
 {
     echo -e "Usage:"
-    echo -e "\t$0 [ -f <nodes_file> ] <num_nodes>"
+    echo -e "\\t$0 [ -f <nodes_file> ] <num_nodes>"
 }
 
 
@@ -100,7 +101,7 @@ echo "---"
 # Remove any existing tmux session first
 "$test_dir"/quit
 
-cd "$test_dir"
+cd "$test_dir" || exit
 mkdir -p "$test_dir"/log
 rm -f "$test_dir"/log/*
 
@@ -116,7 +117,7 @@ function new_window()
 
 function split_window()
 {
-    for (( i=0; i<=$number_of_nodes; i++ )); do
+    for (( i=0; i<=number_of_nodes; i++ )); do
         $tmux split-window -v -t "$session:$1"
         $tmux select-layout -t "$session:$1" tiled
     done
@@ -124,7 +125,7 @@ function split_window()
 
 function connect_nodes()
 {
-    for (( i=1; i<=$number_of_nodes; i++ )); do
+    for (( i=1; i<=number_of_nodes; i++ )); do
         $tmux send-keys -t "$session:$1.$i" " ssh ${nodes[$i]}" "C-m"
     done
 }
@@ -133,7 +134,7 @@ function start_clara()
 {
     $tmux send-keys -R -t "$session:$1.0" \
             " $test_dir/lib/run-fe $CLARA_HOME $fe_host" "C-m"
-    for (( i=1; i<=$number_of_nodes; i++ )); do
+    for (( i=1; i<=number_of_nodes; i++ )); do
         $tmux send-keys -R -t "$session:$1.$i" \
                 " $test_dir/lib/run-dpe $CLARA_HOME $fe_host" "C-m"
     done
@@ -141,15 +142,14 @@ function start_clara()
 
 function start_monitoring()
 {
-    for (( i=1; i<=$number_of_nodes; i++ )); do
+    for (( i=1; i<=number_of_nodes; i++ )); do
         $tmux send-keys -R -t "$session:$1.$i" \
                 " ssh -t ${nodes[i]} $test_dir/lib/monitor-dpe" "C-m"
     done
 }
 
 
-$tmux has-session -t "$session" 2>/dev/null
-if [[ "$?" -eq 1 ]]; then
+if ! $tmux has-session -t "$session" 2>/dev/null; then
     if [ -e ~/.tmux.conf ]; then
         $tmux new-session -s "$session" -n test -d
     else
@@ -171,7 +171,7 @@ if [[ "$?" -eq 1 ]]; then
         start_monitoring $mon_window
     fi
 
-    orch_pane=$(($number_of_nodes + 1))
+    orch_pane=$((number_of_nodes + 1))
     if [ $number_of_nodes -eq 0 ]; then
         $tmux send-keys -t "$session:$rec_window.$orch_pane" "./run-local"
     else

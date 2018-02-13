@@ -5,7 +5,7 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-num_nodes="$(ls -1 $1/*.load | wc -l)"
+num_nodes="$(find "$1" -type f -name '*.load' | wc -l)"
 echo "Total nodes: $num_nodes"
 for data_file in "$1"/*.load; do
     node_id="$(basename "$data_file" | cut -c8-9)"

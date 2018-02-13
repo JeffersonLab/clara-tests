@@ -9,6 +9,7 @@
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 num_cores="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)"
 
+# shellcheck source=/dev/null
 source "$test_dir/lib/common-utils"
 mailto="$(get_mail "$test_dir")"
 
@@ -25,18 +26,19 @@ function generate_cores()
 {
     if [[ $cores_first -eq 1 ]]; then
         if [[ $cores_step -eq 1 ]]; then
-            echo "$(seq 1 "$cores_max")"
+            seq 1 "$cores_max"
         else
-            echo "1 $(seq "$cores_step" "$cores_step" "$cores_max")"
+            echo 1
+            seq "$cores_step" "$cores_step" "$cores_max"
         fi
     else
-        echo "$(seq "$cores_first" "$cores_step" "$cores_max")"
+        seq "$cores_first" "$cores_step" "$cores_max"
     fi
 }
 
 function send_report()
 {
-    if [[ $send_mail -eq 0 && `uname` != Darwin ]]; then
+    if [[ $send_mail -eq 0 && $(uname) != Darwin ]]; then
         if [[ $dry_run -eq 0 ]]; then
             echo "Report sent to $mailto"
         else
@@ -161,9 +163,8 @@ for t in $(generate_cores); do
     result="$t"
     [[ $dry_run -eq 0 ]] && continue
 
-    for i in $(seq 1 3); do
-        run_orchestrator -t "$t" "$services" "$infile" "$outfile" >> "$run_log" 2>&1
-        if [[ $? -ne 0 ]]; then
+    for _ in $(seq 1 3); do
+        if ! run_orchestrator -t "$t" "$services" "$infile" "$outfile" >> "$run_log" 2>&1; then
             tail -20 "$run_log"
             send_report 1
             exit 1
