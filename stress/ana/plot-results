@@ -6,6 +6,10 @@ import os
 
 from optparse import OptionParser
 
+import matplotlib as mpl
+import numpy as np
+
+
 parser = OptionParser(usage="usage: %prog [options] <results.csv>")
 parser.add_option("-s",
                   action="store_true",
@@ -68,12 +72,9 @@ with open(results_file) as f:
         cores.append(num_cores)
         rates.append(rate)
 
-
-import matplotlib as mpl
 if not options.show:
     mpl.use('Agg')
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.pyplot as plt  # noqa: E402
 
 plt.title(title)
 plt.xlabel("Cores")

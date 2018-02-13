@@ -11,9 +11,9 @@ times = {}
 def nonblank_lines(f):
     r = '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}: '
     for line in f.readlines():
-        l = re.sub(r, '', line.strip())
-        if l:
-            yield l
+        line = re.sub(r, '', line.strip())
+        if line:
+            yield line
 
 
 def parse_services(services_file):
@@ -32,11 +32,11 @@ def parse_services(services_file):
 def parse_time(log_file):
     with open(log_file) as f:
         for line in nonblank_lines(f):
-            l = line.split()
-            token = l[0]
+            line = line.split()
+            token = line[0]
             if token in times:
-                t = l[-2]
-                times[token].append(t)
+                time = line[-2]
+                times[token].append(time)
 
 
 def print_results():
@@ -44,13 +44,13 @@ def print_results():
     T = int(len(times['TOTAL']) / N)
     print('Cores;' + ';'.join(tokens))
     for n in range(T):
-        l = '%d' % (n + 1)
+        line = '%d' % (n + 1)
         i = n * N
         for token in tokens:
-            t = [float(v) for v in times[token][i:i+N]]
-            a = sum(t) / N
-            l += ';%.2f' % a
-        print(l)
+            token_times = [float(v) for v in times[token][i:i+N]]
+            token_avg = sum(token_times) / N
+            line += ';%.2f' % token_avg
+        print(line)
 
 
 if __name__ == '__main__':
