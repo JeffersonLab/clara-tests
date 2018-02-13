@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import sys
@@ -63,7 +63,7 @@ with open(results_file) as f:
             continue
         values = line.split(";")
         if len(values) != 4:
-            print 'Bad formatted line: "%s"' % line.strip()
+            print("Bad formatted line: {}".format(line.strip()))
             sys.exit(1)
         num_cores = int(values[0])
         times = [float(i) for i in values[-3:]]
@@ -87,15 +87,15 @@ if options.fit:
     cr = np.corrcoef(cores, rates)[0, 1]
     r2 = cr ** 2
 
-    print "y = %.4fx + %.4f" % (pl[0], pl[1])
-    print "R^2 = %.4f" % r2
-    print
+    print("y = {:.4f}x + {:.4f}".format(pl[0], pl[1]))
+    print("R^2 = {:.4f}".format(r2))
+    print()
 
     polynomial = np.poly1d(pl)
 
     plt.plot(cores, polynomial(cores))
 
-    text = r'$y = %.4fx + %.4f$'"\n"r'$R^2 = %.4f$' % (pl[0], pl[1], r2)
+    text = "$y = {:.4f}x + {:.4f}$\n$R^2 = {:.4f}$".format(pl[0], pl[1], r2)
     plt.text(0.6, 0.3, text, transform=plt.gca().transAxes)
 
 axes = plt.gca()
@@ -110,7 +110,7 @@ axes.set_ylim([0, max_rate])
 
 if not options.no_fig:
     plt.savefig(output_fig)
-    print "Plot saved to", output_fig
+    print("Plot saved to {}".format(output_fig))
 
 if options.show:
     plt.show()

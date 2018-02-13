@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import collections
@@ -73,9 +73,9 @@ class Node:
         self.t_ready = time
 
     def report(self):
-        print self.name
+        print(self.name)
         for n, f in self.files.items():
-            print "  ", n, f.events, f.rec_avg
+            print("  {} {} {}".format(n, f.events, f.rec_avg))
 
 
 class Parser:
@@ -117,11 +117,11 @@ class Parser:
         for k in sorted(self.nodes, key=dpe_key):
             n = self.nodes[k]
             nd = n.t_start.strftime("%H:%M:%S.%f")[:-3]
-            print "[%s]:  %s" % (nd, n.name)
+            print("[{}]:  {}".format(nd, n.name))
             for f in n.files.values():
                 d = f.t_start.strftime("%H:%M:%S.%f")[:-3]
-                fmt = '    [%s]: %s,  total = %5d [ms],  avg = %5.2f [ms]'
-                print fmt % (d, f.name, f.d_total, f.rec_avg)
+                print("    [{}]: {},  total = {:5d} [ms],  avg = {:5.2f} [ms]"
+                      .format(d, f.name, f.d_total, f.rec_avg))
 
     def _parse_start_node(self, line):
         tokens = line.split()
@@ -221,7 +221,7 @@ class Plot:
 if __name__ == '__main__':
 
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('--title', dest="plot_title",
+    argparser.add_argument('--title', dest='plot_title',
                            help='the title of the plot')
     argparser.add_argument('log_file',
                            help='the cloud orchestrator output')
