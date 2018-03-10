@@ -4,14 +4,17 @@ import argparse
 import re
 import yaml
 
+
+LOG_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?:\s+')
+
+
 tokens = []
 times = {}
 
 
 def nonblank_lines(f):
-    r = '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}: '
     for line in f.readlines():
-        line = re.sub(r, '', line.strip())
+        line = LOG_REGEX.sub('', line.strip())
         if line:
             yield line
 
