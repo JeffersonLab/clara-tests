@@ -19,6 +19,10 @@ BENCHMARK_REGEX = re.compile(
     'average event time =\s+(?P<avg_time>\d+\.\d+) ms'
 )
 
+ORCH_AVG_TIME_REGEX = re.compile(
+    r'Average processing time  =\s+(?P<avg_time>\d+\.\d+) ms'
+)
+
 
 times = OrderedDict()
 
@@ -54,6 +58,10 @@ def parse_time(log_file):
                     time = float(match.group('avg_time'))
                     times.setdefault(label, []).append(time)
                     continue
+                match = ORCH_AVG_TIME_REGEX.match(line)
+                if match:
+                    time = float(match.group('avg_time'))
+                    times.setdefault('Orchestrator', []).append(time)
                 benchmark_trial = False
                 benchmark_block = False
 
