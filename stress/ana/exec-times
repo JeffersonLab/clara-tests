@@ -38,6 +38,8 @@ def parse_time(log_file):
             if not benchmark_trial:
                 match = START_REGEX.match(line)
                 if match:
+                    cores = int(match.group('cores'))
+                    times.setdefault('Cores', []).append(cores)
                     benchmark_trial = True
 
             if benchmark_trial and not benchmark_block:
@@ -59,11 +61,13 @@ def parse_time(log_file):
 def print_results():
     N = 3
     T = int(len(times['TOTAL']) / N)
-    print('Cores;' + ';'.join(times.keys()))
+    print(';'.join(times.keys()))
     for n in range(T):
-        line = '%d' % (n + 1)
         i = n * N
+        line = '%d' % times['Cores'][i]
         for label in times.keys():
+            if label == 'Cores':
+                continue
             token_times = [float(v) for v in times[label][i:i+N]]
             token_avg = sum(token_times) / N
             line += ';%.2f' % token_avg
