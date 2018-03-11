@@ -5,6 +5,8 @@ import re
 
 from collections import OrderedDict
 
+import pandas as pd
+
 
 LOG_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?:\s+')
 
@@ -24,7 +26,8 @@ ORCH_AVG_TIME_REGEX = re.compile(
 )
 
 
-times = OrderedDict()
+results_list = []
+results_frame = pd.DataFrame()
 
 
 def nonblank_lines(f):
@@ -42,8 +45,8 @@ def parse_time(log_file):
             if not benchmark_trial:
                 match = START_REGEX.match(line)
                 if match:
-                    cores = int(match.group('cores'))
-                    times.setdefault('Cores', []).append(cores)
+                    data = OrderedDict()
+                    data['Cores'] = int(match.group('cores'))
                     benchmark_trial = True
 
             if benchmark_trial and not benchmark_block:
@@ -55,31 +58,25 @@ def parse_time(log_file):
                 match = BENCHMARK_REGEX.match(line)
                 if match:
                     label = match.group('label')
-                    time = float(match.group('avg_time'))
-                    times.setdefault(label, []).append(time)
+                    data[label] = float(match.group('avg_time'))
                     continue
                 match = ORCH_AVG_TIME_REGEX.match(line)
                 if match:
-                    time = float(match.group('avg_time'))
-                    times.setdefault('Orchestrator', []).append(time)
+                    data['Orchestrator'] = float(match.group('avg_time'))
+                    results_list.append(data)
                 benchmark_trial = False
                 benchmark_block = False
 
+    global results_frame
+    results_frame = pd.DataFrame(results_list)
+    results_frame = results_frame.groupby('Cores').mean().round(decimals=2)
 
-def print_results():
-    N = 3
-    T = int(len(times['TOTAL']) / N)
-    print(';'.join(times.keys()))
-    for n in range(T):
-        i = n * N
-        line = '%d' % times['Cores'][i]
-        for label in times.keys():
-            if label == 'Cores':
-                continue
-            token_times = [float(v) for v in times[label][i:i+N]]
-            token_avg = sum(token_times) / N
-            line += ';%.2f' % token_avg
-        print(line)
+
+def write_results(print_csv=True):
+    csv_data = results_frame.to_csv(float_format='%.2f')
+    csv_data = csv_data.strip()
+    if print_csv:
+        print(csv_data)
 
 
 if __name__ == '__main__':
@@ -89,4 +86,4 @@ if __name__ == '__main__':
     args = argparser.parse_args()
 
     parse_time(args.log_file)
-    print_results()
+    write_results(print_csv=True)
