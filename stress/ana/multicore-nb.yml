@@ -1,0 +1,70 @@
+notebook:
+  cells:
+    - type: code
+      content: |
+        import json
+        from io import StringIO
+
+        import pandas as pd
+        import matplotlib.pyplot as plt
+
+        %matplotlib inline
+
+        plt.rcParams['axes.grid'] = True
+        plt.rcParams['grid.linestyle'] = '--'
+        plt.rcParams['grid.linewidth'] = 0.4
+
+    - type: code
+      content: |
+        params = {
+            'date': '$date',
+            'host': '<host>',
+            'chain': $services,
+            'input_file': '<input_file>',
+            'output_file': '<output_file>',
+            'nevents': '<nevents>',
+            'jvm_options': ''
+        }
+
+        benchmark_data = """\
+        $csv_data"""
+
+        df = pd.read_csv(StringIO(benchmark_data))
+
+    - type: code
+      content: |
+        print(json.dumps(params, indent=4))
+
+    - type: code
+      content: |
+        df['EvRate'] = 1000 / df['Orchestrator']
+
+        df.round(decimals=2)
+
+    - type: code
+      content: |
+        title = 'Scaling test - <version> - <host> - <disk> - <nevents> events'
+        xlim = (0, $xlim)
+        xticks = range(0, $xlim, 4)
+
+    - type: code
+      content: |
+        ax = df.plot(x='Cores', y='EvRate', style='o', legend=False, xlim=xlim, xticks=xticks)
+        ax.set_title(title)
+        ax.set_ylim(bottom=0)
+        ax.set_xlabel('Number of cores')
+        ax.set_ylabel('Event rate [Hz]');
+
+    - type: code
+      content: |
+        _, ax = plt.subplots()
+
+        df.plot(x='Cores', y='TOTAL', ax=ax, label='Total', style='o')
+
+        ax.set_title(title)
+        ax.set_xticks(xticks)
+        ax.set_xlim(xlim)
+        ax.set_ylim(0, $time_lim)
+        ax.set_xlabel('Number of cores')
+        ax.set_ylabel('Avg. execution time [ms]')
+        ax.legend();

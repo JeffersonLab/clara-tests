@@ -1,4 +1,5 @@
 .vagrant/
+.ipynb_checkpoints/
 /acceptance/custom-config.yaml
 /acceptance/services
 /acceptance/log
