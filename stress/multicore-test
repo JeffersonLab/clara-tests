@@ -66,14 +66,13 @@ options:
     -s <cores>                  --  the increase step of the number of cores
                                     (default: 1)
 
-    -e <cores>                  --  final number of cores to be used
+    -t <cores>                  --  final number of cores to be used
                                     (default: $num_cores)
 
-    -r <report_file>            --  output file where results will be saved
-                                    (default: log/results.csv)
+    -e <maxEvents>               -- the maximum number of events to process
 
-    -l <log_file>               --  log file with the orchestrator output
-                                    (default: log/run-local.log)
+    -o <log_dir>                --  output directory where results will be saved
+                                    (default: ./log)
 
     -m                          --  send a mail with the results
 
@@ -88,12 +87,15 @@ cores_first=1
 cores_step=1
 cores_max=$num_cores
 
+max_events=
+
 log_dir=$test_dir/log
 results_file=$log_dir/results.csv
 run_log=$log_dir/run.log
 send_mail=1
 dry_run=1
-while getopts "b:s:e:r:l:ma:nh" OPTION
+
+while getopts "b:s:t:e:ma:nh" OPTION
 do
     case $OPTION in
         h)
@@ -102,12 +104,10 @@ do
             cores_first=$OPTARG ;;
         s)
             cores_step=$OPTARG ;;
-        e)
+        t)
             cores_max=$OPTARG ;;
-        r)
-            results_file=$OPTARG ;;
-        l)
-            run_log=$OPTARG ;;
+        e)
+            max_events=$OPTARG ;;
         m)
             send_mail=0 ;;
         a)
@@ -145,9 +145,15 @@ fi
 
 mkdir -p "$log_dir"
 
+orch_args=()
+test -n "$max_events" && orch_args+=(-e "$max_events")
+orch_args+=("$services")
+orch_args+=("$infile")
+orch_args+=("$outfile")
+
 if [[ $dry_run -eq 1 ]]; then
     echo "Running a warm up reconstruction with all cores"
-    run_orchestrator -t "$cores_max" "$services" "$infile" "$outfile" 2>&1 | tee "$run_log"
+    run_orchestrator -t "$cores_max" "${orch_args[@]}" 2>&1 | tee "$run_log"
     if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
         touch "$results_file"
         send_report 1
@@ -164,7 +170,7 @@ for t in $(generate_cores); do
     [[ $dry_run -eq 0 ]] && continue
 
     for _ in $(seq 1 3); do
-        if ! run_orchestrator -t "$t" "$services" "$infile" "$outfile" >> "$run_log" 2>&1; then
+        if ! run_orchestrator -t "$t" "${orch_args[@]}" >> "$run_log" 2>&1; then
             tail -20 "$run_log"
             send_report 1
             exit 1
