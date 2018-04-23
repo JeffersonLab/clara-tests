@@ -1,5 +1,9 @@
 notebook:
   cells:
+    - type: markdown
+      content: |
+        ## CLARA multicore scaling
+
     - type: code
       content: |
         import json
@@ -14,6 +18,10 @@ notebook:
         plt.rcParams['grid.linestyle'] = '--'
         plt.rcParams['grid.linewidth'] = 0.4
 
+    - type: markdown
+      content: |
+        ### Parameters
+
     - type: code
       content: |
         params = {
@@ -26,6 +34,14 @@ notebook:
             'jvm_options': ''
         }
 
+        print(json.dumps(params, indent=4))
+
+    - type: markdown
+      content: |
+        ### Benchmark
+
+    - type: code
+      content: |
         benchmark_data = """\
         $csv_data"""
 
@@ -33,13 +49,15 @@ notebook:
 
     - type: code
       content: |
-        print(json.dumps(params, indent=4))
-
-    - type: code
-      content: |
         df['EvRate'] = 1000 / df['Orchestrator']
 
-        df.round(decimals=2)
+        pd.options.display.max_columns = None
+        pd.options.display.precision = 2
+        df
+
+    - type: markdown
+      content: |
+        ### Plots
 
     - type: code
       content: |
