@@ -7,6 +7,7 @@
 ##############################################################################
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+clara_version="$("$CLARA_HOME"/bin/j_dpe --version 2>/dev/null | sed 's/CLARA version //')"
 num_cores="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)"
 
 # shellcheck source=/dev/null
@@ -163,6 +164,20 @@ fi
 
 rm -f "$results_file"
 rm -f "$run_log"
+
+cat << EOF > "$run_log"
+==========================================
+            CLARA stress-test
+==========================================
+ CLARA home       = $CLARA_HOME
+ CLARA version    = $clara_version
+ Start time       = $(date +"%Y-%m-%d %H:%M:%S")
+ Host             = $(hostname -s)
+ Services file    = $services
+ Input file       = $infile
+ Output file      = $outfile
+==========================================
+EOF
 
 for t in $(generate_cores); do
     echo "Requesting $t threads"
