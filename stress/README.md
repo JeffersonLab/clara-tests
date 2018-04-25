@@ -104,10 +104,49 @@ looping the number of reconstruction threads from 1 to all available cores.
     $ ./multicore-test <services_file> <input_file> <output_file>
 
 For each number of threads, the reconstruction will run three times.
-The average reconstruction times are stored in CSV format,
-and they can be used to generate a scaling plot.
 For long running stress test, a mail can be sent when the test has finished.
 See the help for a full list of options.
+
+
+## Results
+
+### `multicore-test`
+
+The `multicore-test` creates a `results.csv` file in the log directory with
+the average reconstruction times, that can be used to generate a scaling plot.
+It also saves the full log of all orchestrator runs in the `run.log` file.
+
+To get execution times for all services, and generate a Jupyter notebook,
+the `run.log` file can be parsed using the Python scripts
+distributed in the `ana` directory.
+
+1. Create a Python virtual environment and install the required packages:
+
+        $ pip install -r requirements.txt
+
+2. Get execution times for all services in CSV format:
+
+        $ ./ana/multicore-results <run.log>
+
+3. (Optionally) Use a [Jupyter notebook][jupyter_nb] to analyse data:
+
+    1.  Generate a notebook with the entire data and scaling plots:
+
+            $ ./ana/multicore-results --nb-file <notebook.ipynb> <run.log>
+
+    2.  Start the Jupyter Notebook App:
+    
+            $ jupyter notebook
+
+    3.  Open the generated notebook file and [run all cells][exec_nb]
+        from the menu _Cell -> Run All_.
+
+    An example notebook (without input cells) can be found [here][sample_nb].
+
+[jupyter_nb]: https://jupyter-notebook.readthedocs.io/en/stable/
+[exec_nb]: http://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/execute.html
+[sample_nb]: https://claraweb.jlab.org/results/scaling/coat/clara-scaling-coat-5a.1.3-20180314.html
+
 
 ## Exit
 
