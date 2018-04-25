@@ -8,7 +8,7 @@ all CLARA processes will be automatically killed.
 
 ## Setup
 
-Create a `services.yaml` file describing the application to be tested.
+Create a `services.yml` file describing the application to be tested.
 Each service should be specified with the following key/value pairs:
 
     class: <service_class_name>
@@ -41,7 +41,7 @@ list the data types used by the services.
     mime-types:
       - binary/data-hipo
 
-Use the distributed `services.yaml.sample` file as a template.
+Use the distributed `services.yml.sample` file as a template.
 Note that indentation is important.
 
 ## Start
