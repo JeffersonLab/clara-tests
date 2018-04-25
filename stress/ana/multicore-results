@@ -132,13 +132,13 @@ def write_results(print_csv=True, nb_file=None):
     if nb_file:
         nb = nbf.v4.new_notebook()
 
-        data = {
-            'date': datetime.now().strftime('%Y-%m-%d'),
+        data = dict(meta_data)
+        data.update({
             'services': results_frame.columns[1:-3].tolist(),
             'csv_data': csv_data,
             'xlim': calc_xlim(),
             'time_lim': calc_time_lim(),
-        }
+        })
         new_cell = {
             'code': nbf.v4.new_code_cell,
             'markdown': nbf.v4.new_markdown_cell,

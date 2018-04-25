@@ -26,11 +26,11 @@ notebook:
       content: |
         params = {
             'date': '$date',
-            'host': '<host>',
+            'host': '$host',
             'chain': $services,
-            'input_file': '<input_file>',
-            'output_file': '<output_file>',
-            'nevents': '<nevents>',
+            'input_file': '$input_file',
+            'output_file': '$output_file',
+            'n_events': '$events',
             'jvm_options': ''
         }
 
@@ -61,7 +61,7 @@ notebook:
 
     - type: code
       content: |
-        title = 'Scaling test - <version> - <host> - <disk> - <nevents> events'
+        title = 'Scaling test - CLARA $version - $host - $events events'
         xlim = (0, $xlim)
         xticks = range(0, $xlim, 4)
 
