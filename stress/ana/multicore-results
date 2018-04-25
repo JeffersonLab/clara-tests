@@ -31,6 +31,7 @@ ORCH_AVG_TIME_REGEX = re.compile(
 )
 
 
+meta_data = {}
 results_list = []
 results_frame = pd.DataFrame()
 
@@ -42,16 +43,54 @@ def nonblank_lines(f):
             yield line
 
 
+def parse_global_block(line):
+    global meta_data
+
+    def parse_meta(key, regex, line):
+        match = re.match(regex, line)
+        if match:
+            meta_data[key] = match.group(1)
+
+    if 'version' not in meta_data:
+        parse_meta('version', r'CLARA version += (\S+)', line)
+        return False
+
+    if 'date' not in meta_data:
+        parse_meta('date', r'Start time += (\d{4}-\d{2}-\d{2})', line)
+        return False
+
+    if 'host' not in meta_data:
+        parse_meta('host', r'Host += (.+)', line)
+        return False
+
+    if 'input_file' not in meta_data:
+        parse_meta('input_file', r'Input file += (.+)', line)
+        return False
+
+    if 'output_file' not in meta_data:
+        parse_meta('output_file', r'Output file += (.+)', line)
+        return False
+
+    return True
+
+
 def parse_time(log_file):
     with open(log_file) as f:
+        global_block = True
         benchmark_trial = False
         benchmark_block = False
         for line in nonblank_lines(f):
+            if global_block:
+                if parse_global_block(line):
+                    global_block = False
+                continue
+
             if not benchmark_trial:
                 match = START_REGEX.match(line)
                 if match:
                     data = OrderedDict()
                     data['Cores'] = int(match.group('cores'))
+                    meta_data.setdefault('events', match.group('events'))
                     benchmark_trial = True
 
             if benchmark_trial and not benchmark_block:
