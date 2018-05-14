@@ -96,7 +96,7 @@ run_log=$log_dir/run.log
 send_mail=1
 dry_run=1
 
-while getopts "b:s:t:e:ma:nh" OPTION
+while getopts "b:s:t:e:f:ma:nh" OPTION
 do
     case $OPTION in
         h)
@@ -109,6 +109,8 @@ do
             cores_max=$OPTARG ;;
         e)
             max_events=$OPTARG ;;
+        f)
+            fe_name=$OPTARG ;;
         m)
             send_mail=0 ;;
         a)
@@ -147,6 +149,7 @@ fi
 mkdir -p "$log_dir"
 
 orch_args=()
+test -n "$fe_name" && orch_args+=(-f "$fe_name")
 test -n "$max_events" && orch_args+=(-e "$max_events")
 orch_args+=("$services")
 orch_args+=("$infile")
