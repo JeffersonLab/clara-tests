@@ -72,9 +72,6 @@ options:
 
     -e <maxEvents>               -- the maximum number of events to process
 
-    -o <log_dir>                --  output directory where results will be saved
-                                    (default: ./log)
-
     -m                          --  send a mail with the results
 
     -a <mail_address>           --  where to to send the report email
