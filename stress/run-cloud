@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+log_dir="${CLARA_TEST_LOGDIR:-$test_dir/log}"
 
-mkdir -p "$test_dir/log"
+mkdir -p "$log_dir"
 
 ##############################################################################
 # Launch cloud orchestrator
 ##############################################################################
 
-"$CLARA_HOME"/bin/clara-orchestrator -C "$@" 2>&1 | tee "$test_dir/log/run-cloud.log"
+"$CLARA_HOME"/bin/clara-orchestrator -C "$@" 2>&1 | tee "$log_dir/run-cloud.log"
 
 exit "${PIPESTATUS[0]}"

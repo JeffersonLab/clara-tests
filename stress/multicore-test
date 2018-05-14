@@ -72,6 +72,9 @@ options:
 
     -e <maxEvents>               -- the maximum number of events to process
 
+    -o <log_dir>                --  output directory where results will be saved
+                                    (default: ./log)
+
     -m                          --  send a mail with the results
 
     -a <mail_address>           --  where to to send the report email
@@ -87,13 +90,11 @@ cores_max=$num_cores
 
 max_events=
 
-log_dir=$test_dir/log
-results_file=$log_dir/results.csv
-run_log=$log_dir/run.log
+log_dir=${CLARA_TEST_LOGDIR:-$test_dir/log}
 send_mail=1
 dry_run=1
 
-while getopts "b:s:t:e:f:ma:nh" OPTION
+while getopts "b:s:t:e:f:o:ma:nh" OPTION
 do
     case $OPTION in
         h)
@@ -108,6 +109,8 @@ do
             max_events=$OPTARG ;;
         f)
             fe_name=$OPTARG ;;
+        o)
+            log_dir=$OPTARG ;;
         m)
             send_mail=0 ;;
         a)
@@ -144,6 +147,8 @@ fi
 ##############################################################################
 
 mkdir -p "$log_dir"
+results_file=$log_dir/results.csv
+run_log=$log_dir/run.log
 
 orch_args=()
 test -n "$fe_name" && orch_args+=(-f "$fe_name")

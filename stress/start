@@ -26,8 +26,9 @@ function usage()
 keep_detached=1
 monitor=1
 fe_host="$(get_fe_host)"
+log_dir="${CLARA_TEST_LOGDIR:-$test_dir/log}"
 
-while getopts "hdf:a:m" OPTION
+while getopts "hdf:a:o:m" OPTION
 do
     case $OPTION in
         h)
@@ -40,6 +41,8 @@ do
             nodes_file=$OPTARG ;;
         a)
             fe_host=$OPTARG ;;
+        o)
+            log_dir=$OPTARG ;;
         ?)
             echo; usage; exit 1 ;;
     esac
@@ -102,8 +105,11 @@ echo "---"
 "$test_dir"/quit
 
 cd "$test_dir" || exit
-mkdir -p "$test_dir"/log
-rm -f "$test_dir"/log/*
+mkdir -p "$log_dir"
+rm -f "$log_dir"/*
+
+CLARA_TEST_LOGDIR="$log_dir"
+export CLARA_TEST_LOGDIR
 
 ##############################################################################
 # Start the FE and the DPEs
@@ -133,10 +139,10 @@ function connect_nodes()
 function start_clara()
 {
     $tmux send-keys -R -t "$session:$1.0" \
-            " $test_dir/lib/run-fe $CLARA_HOME $fe_host" "C-m"
+            " $test_dir/lib/run-fe $CLARA_HOME $fe_host $log_dir" "C-m"
     for (( i=1; i<=number_of_nodes; i++ )); do
         $tmux send-keys -R -t "$session:$1.$i" \
-                " $test_dir/lib/run-dpe $CLARA_HOME $fe_host" "C-m"
+                " $test_dir/lib/run-dpe $CLARA_HOME $fe_host $log_dir" "C-m"
     done
 }
 
